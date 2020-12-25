@@ -31,5 +31,6 @@
 *.out
 *.app
 
-.vs
-FBNDP-MLTN\Debug
+.vs/
+FBNDP-MLTN\Debug/
+FBNDP-MLTN\Input
