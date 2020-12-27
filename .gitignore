@@ -32,5 +32,14 @@
 *.app
 
 .vs/
-FBNDP-MLTN\Debug/
-FBNDP-MLTN\Input
+FBNDP-MLTN/Debug/
+FBNDP-MLTN/Input
+.vs/FBNDP-MLTN/v16/.suo
+.vs/FBNDP-MLTN/v16/Browse.VC.db
+*.ipch
+*.log
+*.tlog
+*.idb
+*.pdb
+*.ilk
+Debug/FBNDP-MLTN.exe
