@@ -65,6 +65,7 @@ void CSVReader::CSVReadRow(ifstream& FileStream, char Delim, vector<string>& Out
 				FileStream.get();
 
 			OutRow.push_back(SStream.str());
+			SStream.str("");
 		}
 		else
 		{
