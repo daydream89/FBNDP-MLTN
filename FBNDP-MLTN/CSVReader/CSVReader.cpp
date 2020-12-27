@@ -1,15 +1,18 @@
 #include "CSVReader.h"
 
-void CSVReader::GetFileData()
+FileDataList CSVReader::GetFileData(string FileName)
 {
-	ifstream FileStream("./Input/2_Node.csv");
+	ifstream FileStream(FileName);
 
-	ReadCSVFile(FileStream);
+	FileDataList FileData;
+	ReadCSVFile(FileStream, FileData);
 
 	FileStream.close();
+
+	return FileData;
 }
 
-void CSVReader::ReadCSVFile(ifstream& FileStream)
+void CSVReader::ReadCSVFile(ifstream& FileStream, FileDataList& OutFileData)
 {
 	if (FileStream.fail())
 	{
@@ -17,8 +20,11 @@ void CSVReader::ReadCSVFile(ifstream& FileStream)
 		return;
 	}
 
+	int RowCount = 0;
 	while (FileStream.good())
 	{
+		RowCount++;
+
 		vector<string> Row;
 		CSVReadRow(FileStream, ',', Row);
 		if (Row.size() == 0)
@@ -26,12 +32,18 @@ void CSVReader::ReadCSVFile(ifstream& FileStream)
 			return;
 		}
 
-		if (Row[0].find("#"))	// ignore comment
+		if (RowCount == 1)		// ignore First Row. Not Use in this program.
+		{
+			continue;
+		}
+
+		if (Row[0].find('#') != string::npos)	// ignore comment
 		{
 			continue;
 		}
 
 		// save data
+		OutFileData.emplace_back(Row);
 	}
 }
 
@@ -56,7 +68,7 @@ void CSVReader::CSVReadRow(ifstream& FileStream, char Delim, vector<string>& Out
 		}
 		else if (!Inquotes && Character == Delim)
 		{
-			OutRow.push_back(SStream.str());
+			OutRow.emplace_back(SStream.str());
 			SStream.str("");
 		}
 		else if (!Inquotes && (Character == '\r' || Character == '\n'))
@@ -64,8 +76,9 @@ void CSVReader::CSVReadRow(ifstream& FileStream, char Delim, vector<string>& Out
 			if (FileStream.peek() == '\n')
 				FileStream.get();
 
-			OutRow.push_back(SStream.str());
+			OutRow.emplace_back(SStream.str());
 			SStream.str("");
+			break;
 		}
 		else
 		{

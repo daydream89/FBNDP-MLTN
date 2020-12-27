@@ -9,7 +9,7 @@ using namespace std;
 class DataCenter
 {
 public:
-	DataCenter* GetInstance()
+	static DataCenter* GetInstance()
 	{
 		if (!Instance)
 		{
@@ -19,22 +19,22 @@ public:
 		return Instance;
 	}
 
-	void SetNodeData(const vector<string>& Data);
+	void SetNodeData(const FileDataList& InData);
 	vector<NodeData> GetNodeData() { return NodeDataList; }
 
-	void SetLinkData(const vector<string>& Data);
+	void SetLinkData(const FileDataList& InData);
 	vector<LinkData> GetLinkData() { return LinkDataList; }
 
-	void SetRouteData(const vector<string>& Data);
+	void SetRouteData(const FileDataList& InData);
 	vector<RouteData> GetRouteData() { return RouteDataList; }
 
-	void SetOperatingData(const vector<string>& Data);
+	void SetOperatingData(const FileDataList& InData);
 	vector<OperatingData> GetOperatingData() { return OperatingDataList; }
 
-	void SetTrafficVolumeData(const vector<string>& Data);
+	void SetTrafficVolumeData(const FileDataList& InData);
 	vector<TrafficVolumeData> GetTrafficVolumeData() { return TrafficVolumeDataList; }
 
-	void SetDistanceData(const vector<string>& Data);
+	void SetDistanceData(const FileDataList& InData);
 	vector<DistanceData> GetDistanceData() { return DistanceDataList; }
 
 private:

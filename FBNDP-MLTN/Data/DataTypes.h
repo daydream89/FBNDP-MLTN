@@ -1,8 +1,11 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 using namespace std;
+
+typedef vector<vector<string>> FileDataList;
 
 enum class NodeType
 {
@@ -29,6 +32,16 @@ struct Coordinate
 {
 	uint32_t X;
 	uint32_t Y;
+
+	Coordinate()
+		: X(0)
+		, Y(0)
+	{ }
+
+	Coordinate(uint32_t XCoord, uint32_t YCoord)
+		: X(XCoord)
+		, Y(YCoord)
+	{ }
 };
 
 // 네트워크 노드에 대한 data
@@ -36,7 +49,6 @@ struct NodeData
 {
 	uint32_t Num;			// node 번호
 	Coordinate Coord;		// 2차원 좌표
-	uint32_t U;	// not use
 	float TransferTime;		// 환승 시간
 	NodeType Type;			// node 종류
 };
