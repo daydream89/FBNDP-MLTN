@@ -20,22 +20,22 @@ public:
 	}
 
 	void SetNodeData(const FileDataList& InData);
-	vector<NodeData> GetNodeData() { return NodeDataList; }
+	const vector<NodeData>& GetNodeData() { return NodeDataList; }
 
 	void SetLinkData(const FileDataList& InData);
-	vector<LinkData> GetLinkData() { return LinkDataList; }
+	const vector<LinkData>& GetLinkData() { return LinkDataList; }
 
 	void SetRouteData(const FileDataList& InData);
-	vector<RouteData> GetRouteData() { return RouteDataList; }
+	const vector<RouteData>& GetRouteData() { return RouteDataList; }
 
 	void SetOperatingData(const FileDataList& InData);
-	vector<OperatingData> GetOperatingData() { return OperatingDataList; }
+	const vector<OperatingData>& GetOperatingData() { return OperatingDataList; }
 
 	void SetTrafficVolumeData(const FileDataList& InData);
-	vector<TrafficVolumeData> GetTrafficVolumeData() { return TrafficVolumeDataList; }
+	const vector<TrafficVolumeData>& GetTrafficVolumeData() { return TrafficVolumeDataList; }
 
 	void SetDistanceData(const FileDataList& InData);
-	vector<DistanceData> GetDistanceData() { return DistanceDataList; }
+	const vector<DistanceData>& GetDistanceData() { return DistanceDataList; }
 
 private:
 	DataCenter() {}

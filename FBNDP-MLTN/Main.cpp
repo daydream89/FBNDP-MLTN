@@ -8,6 +8,7 @@ int main(int argc, char* argv[])
 {
 	CSVReader Reader;
 
+	// file read
 	if (auto* DataCenter = DataCenter::GetInstance())
 	{
 		DataCenter->SetLinkData(Reader.GetFileData("./Input/1_Link.csv"));
@@ -17,6 +18,12 @@ int main(int argc, char* argv[])
 		DataCenter->SetTrafficVolumeData(Reader.GetFileData("./Input/5_OD_demand.csv"));
 		DataCenter->SetDistanceData(Reader.GetFileData("./Input/6_Direct_distance.csv"));
 	}
+
+	// Generate initial population
+
+
+	// Calculate fitness
+
 
 	return 0;
 }
