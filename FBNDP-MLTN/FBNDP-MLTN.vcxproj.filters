@@ -22,6 +22,9 @@
     <Filter Include="Source Files\Fitness">
       <UniqueIdentifier>{883afb5e-8c45-422c-90d9-3ed0b744ca80}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Population">
+      <UniqueIdentifier>{ae508ec7-bea9-40e6-98b4-d68237873893}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -36,6 +39,9 @@
     <ClCompile Include="Fitness\FitnessCalculator.cpp">
       <Filter>Source Files\Fitness</Filter>
     </ClCompile>
+    <ClCompile Include="Population\Population.cpp">
+      <Filter>Source Files\Population</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CSVReader\CSVReader.h">
@@ -49,6 +55,9 @@
     </ClInclude>
     <ClInclude Include="Fitness\FitnessCalculator.h">
       <Filter>Source Files\Fitness</Filter>
+    </ClInclude>
+    <ClInclude Include="Population\Population.h">
+      <Filter>Source Files\Population</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

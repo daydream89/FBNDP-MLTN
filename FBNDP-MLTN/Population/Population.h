@@ -4,33 +4,68 @@
 
 using namespace std;
 
-class PopulationMember
+struct NodeSelectPercent
 {
-public:
-	PopulationMember(vector<NodeData> BusNode, vector<NodeData> RailNode);
-	const vector<NodeData>& GetSelectedLink() { return SelectedLink; };
-
-private:
-
-	void SelectRailNode();
-	void SelectBusNode();
-
-	vector<NodeData> LeftBusNode;
-	vector<NodeData> SelectedBusNode;
-	vector<NodeData> RailNode;
-	vector<NodeData> SelectedLink;
+	float Percentage;
+	uint32_t BusNodeNum;
 };
 
 
-class Population
+
+class PopulationMember 
 {
 public:
-	Population(int MemberNum);
-	const vector<PopulationMember>& GetPopulation() { return PopulationMemberList; };
+	PopulationMember(const vector<NodeData>& BusNode, 
+		const vector<NodeData>& RailNode);
+	const vector<LinkData>& GetSelectedLink() { return SelectedLink; };
 
 private:
-	int MemberNum;
-	vector<PopulationMember> PopulationMemberList;
+	void CopyBusNode(const vector<NodeData>& BusNode) 
+	{	
+		LeftBusNode.assign(BusNode.begin(), BusNode.end()); 
+	}
+	void CopyRailNode(const vector<NodeData>& RailNode)
+	{
+		MemberRailNode.assign(RailNode.begin(), RailNode.end());
+	}
+
+	NodeData SelectRailNode();
+
+	vector<NodeSelectPercent> GenRouletteWheelPercent();
+	NodeData SelectBusNode(vector<NodeSelectPercent> NodePercent);
+
+	void AddBusLink();
+	void CalculateNetworkCost();
+	void DeleteBusNode();
+
+	vector<NodeData> LeftBusNode;
+	vector<NodeData> SelectedBusNode;
+	vector<NodeData> MemberRailNode;
+	vector<LinkData> SelectedLink;
+};
+
+#define MAX_POPULATION_MEMBER_NUM 8
+
+class Population	/* Change to Singleton */
+{
+public:
+	static Population* GetInstance()
+	{
+		if (!Instance)
+		{
+			Instance = new Population(MemberNum);
+		}
+		
+		return Instance;
+	}
+
+private:
+	Population(int MemberNum);
+	void SetNodes(void);
+
+	static Population* Instance;
+	static const int MemberNum = MAX_POPULATION_MEMBER_NUM;
+	vector<PopulationMember> PopulationMemberList; 
 	vector<NodeData> BusNode;
 	vector<NodeData> RailNode;
 };
