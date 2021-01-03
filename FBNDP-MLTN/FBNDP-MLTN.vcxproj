@@ -139,10 +139,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CSVReader\CSVReader.cpp" />
+    <ClCompile Include="Data\DataCenter.cpp" />
+    <ClCompile Include="Fitness\FitnessCalculator.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CSVReader\CSVReader.h" />
+    <ClInclude Include="Data\DataCenter.h" />
+    <ClInclude Include="Data\DataTypes.h" />
+    <ClInclude Include="Fitness\FitnessCalculator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
