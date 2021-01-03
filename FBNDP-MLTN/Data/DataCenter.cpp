@@ -19,9 +19,9 @@ void DataCenter::SetNodeData(const FileDataList& InData)
 		// todo. convert enum class to string & compare string
 		Data.Type = NodeType::NodeTypeMax;
 		string TypeString = RowData.at(6);
-		if (TypeString.compare("busstop"))
+		if (TypeString.compare("busstop") == 0)
 			Data.Type = NodeType::BusStop;
-		else if (TypeString.compare("station"))
+		else if (TypeString.compare("station") == 0)
 			Data.Type = NodeType::Station;
 
 		NodeDataList.emplace_back(Data);
