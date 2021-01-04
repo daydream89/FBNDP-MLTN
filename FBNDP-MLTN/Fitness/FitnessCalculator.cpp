@@ -1,5 +1,7 @@
 #include "FitnessCalculator.h"
+
 #include "../Data/DataCenter.h"
+#include "../Util/Utils.h"
 
 void FitnessCalculator::Calculate()
 {
@@ -26,12 +28,13 @@ void FitnessCalculator::PassageAssignment()
 		}
 
 		// find the shortest path based on the OD Matrix from network graph data.
-		vector<uint32_t> K1, K2;
-		FindShortestPath(K1, K2);
+		vector<uint32_t> tempData;
+		vector<vector<LinkData>> ShortestPathList;
+		Util::PathFinder::FindShortestPath(tempData, ShortestPathList);
 
 		// get passage time of shortest path k1, k2.
-		float PassageTimeK1 = CalculatePassageTime(K1);
-		float PassageTimeK2 = CalculatePassageTime(K2);
+		float PassageTimeK1 = CalculatePassageTime(ShortestPathList.at(0));
+		float PassageTimeK2 = CalculatePassageTime(ShortestPathList.at(1));
 
 		// check passage time of k1 and k2
 		bool bDoublePassage = false;
@@ -45,19 +48,16 @@ void FitnessCalculator::PassageAssignment()
 		// add K1 in PassageDataList
 		if (bDoublePassage)
 		{
-			// add K2 in PassageDataList
+			// add K2 in PassageDataList with MNL Model.
+			// P = exp(U) / sum(exp(U'))
+			// U = -0.0176IVTT - 0.0296OVTT - 3.8418CTPI + 3.1469RELI - 0.3896CIRC
 		}
 	}
 
 	CalculateFitness();
 }
 
-void FitnessCalculator::FindShortestPath(vector<uint32_t>& OutShortestPathK1, vector<uint32_t>& OutShortestPathK2)
-{
-
-}
-
-float FitnessCalculator::CalculatePassageTime(const vector<uint32_t>& Path)
+float FitnessCalculator::CalculatePassageTime(const vector<LinkData>& Path)
 {
 	if (Path.size() == 0)
 	{
@@ -65,9 +65,10 @@ float FitnessCalculator::CalculatePassageTime(const vector<uint32_t>& Path)
 	}
 
 	float PassageTime = 0.f;
-	for (vector<uint32_t>::const_iterator CIter = Path.begin(); CIter != Path.end(); ++CIter)
+	for (vector<LinkData>::const_iterator CIter = Path.begin(); CIter != Path.end(); ++CIter)
 	{
-		uint32_t NodeNum = (*CIter);
+		CIter->FromNodeNum;
+		CIter->ToNodeNum;
 		// get next node from path, find time data from DataCenter
 	}
 

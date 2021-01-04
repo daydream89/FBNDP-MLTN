@@ -4,6 +4,8 @@
 
 using namespace std;
 
+struct LinkData;
+
 class FitnessCalculator
 {
 public:
@@ -12,9 +14,7 @@ public:
 private:
 	void PassageAssignment();
 
-	void FindShortestPath(vector<uint32_t>& OutShortestPathK1, vector<uint32_t>& OutShortestPathK2);
-
-	float CalculatePassageTime(const vector<uint32_t>& Path);
+	float CalculatePassageTime(const vector<LinkData>& Path);
 
 	float CalculateFitness();
 };

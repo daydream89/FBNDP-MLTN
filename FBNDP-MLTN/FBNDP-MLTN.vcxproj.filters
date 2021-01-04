@@ -25,6 +25,9 @@
     <Filter Include="Source Files\Population">
       <UniqueIdentifier>{ae508ec7-bea9-40e6-98b4-d68237873893}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Util">
+      <UniqueIdentifier>{4bdbc71e-57d4-40be-9605-3b8fdb28a792}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -42,6 +45,9 @@
     <ClCompile Include="Population\Population.cpp">
       <Filter>Source Files\Population</Filter>
     </ClCompile>
+    <ClCompile Include="Util\Utils.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CSVReader\CSVReader.h">
@@ -50,14 +56,17 @@
     <ClInclude Include="Data\DataCenter.h">
       <Filter>Source Files\Data</Filter>
     </ClInclude>
-    <ClInclude Include="Data\DataTypes.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="Fitness\FitnessCalculator.h">
       <Filter>Source Files\Fitness</Filter>
     </ClInclude>
     <ClInclude Include="Population\Population.h">
       <Filter>Source Files\Population</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\Utils.h">
+      <Filter>Source Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Data\DataTypes.h">
+      <Filter>Source Files\Data</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
