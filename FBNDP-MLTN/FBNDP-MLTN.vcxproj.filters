@@ -28,6 +28,9 @@
     <Filter Include="Source Files\Util">
       <UniqueIdentifier>{4bdbc71e-57d4-40be-9605-3b8fdb28a792}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Chromosome">
+      <UniqueIdentifier>{62ad295f-18dd-43f0-bbc7-c765fb16d1be}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -48,6 +51,9 @@
     <ClCompile Include="Util\Utils.cpp">
       <Filter>Source Files\Util</Filter>
     </ClCompile>
+    <ClCompile Include="Chromosome\Chromosome.cpp">
+      <Filter>Source Files\Chromosome</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CSVReader\CSVReader.h">
@@ -67,6 +73,9 @@
     </ClInclude>
     <ClInclude Include="Data\DataTypes.h">
       <Filter>Source Files\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="Chromosome\Chromosome.h">
+      <Filter>Source Files\Chromosome</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

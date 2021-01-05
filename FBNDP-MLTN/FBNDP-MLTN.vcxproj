@@ -138,6 +138,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Chromosome\Chromosome.cpp" />
     <ClCompile Include="CSVReader\CSVReader.cpp" />
     <ClCompile Include="Data\DataCenter.cpp" />
     <ClCompile Include="Fitness\FitnessCalculator.cpp" />
@@ -146,6 +147,7 @@
     <ClCompile Include="Util\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Chromosome\Chromosome.h" />
     <ClInclude Include="CSVReader\CSVReader.h" />
     <ClInclude Include="Data\DataCenter.h" />
     <ClInclude Include="Data\DataTypes.h" />

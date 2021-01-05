@@ -22,16 +22,6 @@ int main(int argc, char* argv[])
 
 	// Generate initial population
 	
-	/*
-	if (auto* Population = Population::GetInstance())
-	{
-		printf("Initial Population Generated\n");
-	}
-	else
-	{
-		printf("Initial Population Generation fail\n");
-	}
-	*/
 
 	// Calculate fitness
 
