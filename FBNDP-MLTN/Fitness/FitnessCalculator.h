@@ -5,10 +5,13 @@
 using namespace std;
 
 struct LinkData;
+struct NodeData;
 
 class FitnessCalculator
 {
 public:
+	FitnessCalculator(const vector<NodeData>& InGraphData);
+
 	void Calculate();
 
 private:
@@ -17,4 +20,7 @@ private:
 	float CalculatePassageTime(const vector<LinkData>& Path);
 
 	float CalculateFitness();
+
+private:
+	vector<NodeData> GraphData;
 };

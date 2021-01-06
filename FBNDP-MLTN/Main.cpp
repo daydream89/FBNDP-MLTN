@@ -1,6 +1,7 @@
 #include "CSVReader/CSVReader.h"
 #include "Data/DataCenter.h"
 #include "Data/DataTypes.h"
+#include "Fitness/FitnessCalculator.h"
 #include "Population/Population.h"
 
 using namespace std;
@@ -20,11 +21,16 @@ int main(int argc, char* argv[])
 		DataCenter->SetDistanceData(Reader.GetFileData("./Input/6_Direct_distance.csv"));
 	}
 
+	int PopulationNum = 1;
 	// Generate initial population
-	
+	Population InitialPopulation(PopulationNum);
 
 	// Calculate fitness
-
+	for (int i = 0; i < PopulationNum; ++i)
+	{
+		auto ChromosomeData = InitialPopulation.GetChromosome(i);
+		FitnessCalculator Fitness(ChromosomeData.GetChromosome());
+	}
 
 	return 0;
 }

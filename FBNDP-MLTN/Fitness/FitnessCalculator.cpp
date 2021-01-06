@@ -3,6 +3,12 @@
 #include "../Data/DataCenter.h"
 #include "../Util/Utils.h"
 
+FitnessCalculator::FitnessCalculator(const vector<NodeData>& InGraphData)
+	: GraphData(InGraphData)
+{
+	// convert vector<NodeData> to common graph data using link, if need.
+}
+
 void FitnessCalculator::Calculate()
 {
 	PassageAssignment();
@@ -10,8 +16,6 @@ void FitnessCalculator::Calculate()
 
 void FitnessCalculator::PassageAssignment()
 {
-	// get network graph data
-
 	// get OD Matrix
 	vector<TrafficVolumeData> TrafficVolumeDataList;
 	if (auto DataCenterInstance = DataCenter::GetInstance())
