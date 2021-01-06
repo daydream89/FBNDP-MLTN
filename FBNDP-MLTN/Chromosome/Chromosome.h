@@ -17,7 +17,7 @@ class Chromosome
 public:
 	Chromosome(vector<NodeData> RailNode, vector<NodeData> BusNode);
 	uint32_t GetRouteNum(){ return RouteList.size(); }
-	vector<NodeData> GetChromosome() { ChromosomeNodeList; }
+	vector<NodeData> GetChromosome() { return ChromosomeNodeList; }
 	
 private:
 	NodeData SelectRailNode();
