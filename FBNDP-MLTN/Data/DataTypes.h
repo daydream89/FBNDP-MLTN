@@ -95,3 +95,24 @@ struct DistanceData
 	uint32_t ToNodeNum;		// 종료 node
 	float Distance;			// 직선 거리
 };
+
+enum class PathFinderCostType
+{
+	Length = 0,
+	Duration = 1,
+};
+
+struct PathFinderData
+{
+	vector<NodeData> Graph;
+	uint32_t StartNodeNum = 0;
+	uint32_t EndNodeNum = 0;
+	PathFinderCostType CostType = PathFinderCostType::Length;
+
+	PathFinderData(const vector<NodeData>& InGraph, uint32_t InStart, uint32_t InEnd, PathFinderCostType InCostType)
+		: Graph(InGraph)
+		, StartNodeNum(InStart)
+		, EndNodeNum(InEnd)
+		, CostType(InCostType)
+	{ }
+};

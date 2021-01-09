@@ -32,9 +32,9 @@ void FitnessCalculator::PassageAssignment()
 		}
 
 		// find the shortest path based on the OD Matrix from network graph data.
-		vector<uint32_t> tempData;
 		vector<vector<LinkData>> ShortestPathList;
-		Util::PathFinder::FindShortestPath(tempData, ShortestPathList);
+		PathFinderData PathFinder(GraphData, ODData.FromNodeNum, ODData.ToNodeNum, PathFinderCostType::Duration);
+		Util::PathFinder::FindShortestPath(PathFinder, ShortestPathList);
 
 		// get passage time of shortest path k1, k2.
 		float PassageTimeK1 = CalculatePassageTime(ShortestPathList.at(0));
