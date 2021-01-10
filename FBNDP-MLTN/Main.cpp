@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
 	for (int i = 0; i < PopulationNum; ++i)
 	{
 		auto ChromosomeData = InitialPopulation.GetChromosome(i);
-		FitnessCalculator Fitness(ChromosomeData.GetChromosome());
+		FitnessCalculator Fitness(ChromosomeData.GetChromosome(), 2);
 	}
 
 	return 0;

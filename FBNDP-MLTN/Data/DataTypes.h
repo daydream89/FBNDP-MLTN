@@ -47,10 +47,10 @@ struct Coordinate
 // 네트워크 노드에 대한 data
 struct NodeData
 {
-	uint32_t Num;			// node 번호
-	Coordinate Coord;		// 2차원 좌표
-	float TransferTime;		// 환승 시간
-	NodeType Type;			// node 종류
+	uint32_t Num = -1;			// node 번호
+	Coordinate Coord;			// 2차원 좌표
+	float TransferTime = 0.f;	// 환승 시간
+	NodeType Type;				// node 종류
 };
 
 // 네트워크 링크에 대한 data
@@ -108,11 +108,19 @@ struct PathFinderData
 	uint32_t StartNodeNum = 0;
 	uint32_t EndNodeNum = 0;
 	PathFinderCostType CostType = PathFinderCostType::Length;
+	uint32_t NumberOfPath = 1;
 
-	PathFinderData(const vector<NodeData>& InGraph, uint32_t InStart, uint32_t InEnd, PathFinderCostType InCostType)
+	PathFinderData(const vector<NodeData>& InGraph, uint32_t InStart, uint32_t InEnd, PathFinderCostType InCostType, uint32_t InPathNum)
 		: Graph(InGraph)
 		, StartNodeNum(InStart)
 		, EndNodeNum(InEnd)
 		, CostType(InCostType)
+		, NumberOfPath(InPathNum)
 	{ }
+};
+
+struct ShortestPathData
+{
+	vector<NodeData> Path;
+	float Cost;
 };

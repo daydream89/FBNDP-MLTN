@@ -10,12 +10,12 @@ namespace Util
 {
 	namespace PathFinder
 	{
-		size_t FindShortestPath(const PathFinderData& InData, vector<vector<LinkData>>& OutPath);
+		//using Yen's Algorithm (based on Dijkstra Algorithm)
+		size_t FindShortestPath(const PathFinderData& InData, vector<ShortestPathData>& OutPath);
 	}
 
 	namespace Compare
 	{
-		bool CompareLinkDataLength(const LinkData& LValue, const LinkData& RValue);
-		bool CompareLinkDataDuration(const LinkData& LValue, const LinkData& RValue);
+
 	}
 }

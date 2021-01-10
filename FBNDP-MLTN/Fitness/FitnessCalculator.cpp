@@ -3,8 +3,9 @@
 #include "../Data/DataCenter.h"
 #include "../Util/Utils.h"
 
-FitnessCalculator::FitnessCalculator(const vector<NodeData>& InGraphData)
+FitnessCalculator::FitnessCalculator(const vector<NodeData>& InGraphData, uint32_t PathNum)
 	: GraphData(InGraphData)
+	, NumberOfPath(PathNum)
 {
 	// convert vector<NodeData> to common graph data using link, if need.
 }
@@ -32,8 +33,8 @@ void FitnessCalculator::PassageAssignment()
 		}
 
 		// find the shortest path based on the OD Matrix from network graph data.
-		vector<vector<LinkData>> ShortestPathList;
-		PathFinderData PathFinder(GraphData, ODData.FromNodeNum, ODData.ToNodeNum, PathFinderCostType::Duration);
+		vector<ShortestPathData> ShortestPathList;
+		PathFinderData PathFinder(GraphData, ODData.FromNodeNum, ODData.ToNodeNum, PathFinderCostType::Duration, NumberOfPath);
 		Util::PathFinder::FindShortestPath(PathFinder, ShortestPathList);
 
 		// get passage time of shortest path k1, k2.
@@ -61,18 +62,18 @@ void FitnessCalculator::PassageAssignment()
 	CalculateFitness();
 }
 
-float FitnessCalculator::CalculatePassageTime(const vector<LinkData>& Path)
+float FitnessCalculator::CalculatePassageTime(ShortestPathData& PathData)
 {
-	if (Path.size() == 0)
+	if (PathData.Path.size() == 0)
 	{
 		return 0.f;
 	}
 
 	float PassageTime = 0.f;
-	for (vector<LinkData>::const_iterator CIter = Path.begin(); CIter != Path.end(); ++CIter)
+	for (uint32_t i = 0; i < PathData.Path.size() - 1; ++i)
 	{
-		CIter->FromNodeNum;
-		CIter->ToNodeNum;
+		auto FromNode = PathData.Path[i];
+		auto ToNode = PathData.Path[i + 1];
 		// get next node from path, find time data from DataCenter
 	}
 

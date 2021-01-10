@@ -1,6 +1,7 @@
 #include "Utils.h"
 
 #include <algorithm>
+#include <map>
 #include <queue>
 
 #include "../Data/DataTypes.h"
@@ -8,22 +9,34 @@
 
 namespace PathFinderPrivate
 {
-	typedef pair<float, uint32_t> CostNodeNumPair;
-	void DijkstraAlgorithm(const vector<NodeData>& InGraph, uint32_t InStart, uint32_t InEnd, PathFinderCostType InCostType, vector<LinkData>& OutPath)
+	static NodeData TempNodeData;
+	const NodeData& GetNodeData(uint32_t NodeNum, const vector<NodeData>& Graph)
 	{
-		// 추가로 OutPath 채워줘야 함....
+		for (const auto& Node : Graph)
+		{
+			if (Node.Num == NodeNum)
+			{
+				return Node;
+			}
+		}
+
+		return TempNodeData;
+	}
+
+	typedef pair<float, uint32_t> CostNodeNumPair;
+	float DijkstraAlgorithm(const PathFinderData& InData, Coordinate RemovedLink, vector<NodeData>& OutPath)
+	{
 		priority_queue<CostNodeNumPair, vector<CostNodeNumPair>, greater<CostNodeNumPair> > PriorityQueue;
 
-		vector<float> dist(InGraph.size(), INFINITY);
+		vector<float> dist(InData.Graph.size(), INFINITY);
 
-		PriorityQueue.push(make_pair(0.f, InStart));
-		dist[InStart] = 0.f;
+		PriorityQueue.push(make_pair(0.f, InData.StartNodeNum));
+		dist[InData.StartNodeNum] = 0.f;
+		OutPath.emplace_back(GetNodeData(InData.StartNodeNum, InData.Graph));
 
 		vector<LinkData> LinkDataList;
 		if (auto* DataCenterInstance = DataCenter::GetInstance())
-		{
 			LinkDataList = DataCenterInstance->GetLinkData();
-		}
 
 		while (!PriorityQueue.empty())
 		{
@@ -57,9 +70,9 @@ namespace PathFinderPrivate
 				{
 					if (Link.FromNodeNum == NodeNum && Link.ToNodeNum == AdjNodeNum)
 					{
-						if (InCostType == PathFinderCostType::Duration)
+						if (InData.CostType == PathFinderCostType::Duration)
 							Cost = Link.Length / Link.Speed;
-						else if (InCostType == PathFinderCostType::Length)
+						else if (InData.CostType == PathFinderCostType::Length)
 							Cost = Link.Length;
 
 						break;
@@ -70,36 +83,54 @@ namespace PathFinderPrivate
 				{
 					dist[AdjNodeNum] = dist.at(NodeNum) + Cost;
 					PriorityQueue.push(make_pair(dist[AdjNodeNum], AdjNodeNum));
+
+					if (AdjNodeNum == InData.EndNodeNum)
+						OutPath.emplace_back(GetNodeData(NodeNum, InData.Graph));
 				}
 			}
 		}
+
+		return dist[InData.EndNodeNum];
 	}
 }
 
-size_t Util::PathFinder::FindShortestPath(const PathFinderData& InData, vector<vector<LinkData>>& OutPath)
+// todo. need NumberOfPath > 2 case handling
+size_t Util::PathFinder::FindShortestPath(const PathFinderData& InData, vector<ShortestPathData>& OutPath)
 {
-	//using Yen's Algorithm (based on Dijkstra Algorithm)
-
 	// 1. find shortest path with Dijkstra Algorithm.
-	vector<LinkData> ShortestPath;
-	PathFinderPrivate::DijkstraAlgorithm(InData.Graph, InData.StartNodeNum, InData.EndNodeNum, InData.CostType, ShortestPath);
+	Coordinate RemovedLink(InData.StartNodeNum, InData.StartNodeNum);
+	ShortestPathData FirstPathData;
+	FirstPathData.Cost = PathFinderPrivate::DijkstraAlgorithm(InData, RemovedLink, FirstPathData.Path);
+	OutPath.emplace_back(FirstPathData);
+
+	// if function caller wants only one shortest path, don't need to perform Yen's Algorithm.
+	if (InData.NumberOfPath == 1)
+	{
+		return 1;
+	}
 
 	// 2. remove each link of shortest path, find the path between the nodes that have removed links.
 	//	  perform all link in the shortest path.
+	map<float, vector<NodeData>> SecondPathCandidateMap;
+	PathFinderData FinderData(InData);
+	for (uint32_t i = 0; i < FirstPathData.Path.size() - 1; ++i)
+	{
+		FinderData.StartNodeNum = FirstPathData.Path.at(i).Num;
+		FinderData.EndNodeNum = FirstPathData.Path.at(i + 1).Num;
+
+		Coordinate RemovedLink(FinderData.StartNodeNum, FinderData.EndNodeNum);
+		vector<NodeData> Path;
+		float Cost = PathFinderPrivate::DijkstraAlgorithm(FinderData, RemovedLink, Path);
+		SecondPathCandidateMap.emplace(make_pair(Cost, Path));
+	}
 
 	// 3. save above result into map. (total cost & path pair)
-
-	// 4. convert k-th result to vector<vector<LinkData>>.
+	if (SecondPathCandidateMap.begin() != SecondPathCandidateMap.end())
+	{
+		ShortestPathData SecondPathData;
+		SecondPathData.Cost = SecondPathCandidateMap.begin()->first;
+		SecondPathData.Path = SecondPathCandidateMap.begin()->second;
+	}
 
 	return 0;
-}
-
-bool Util::Compare::CompareLinkDataLength(const LinkData& LValue, const LinkData& RValue)
-{
-	return LValue.Length < RValue.Length;
-}
-
-bool Util::Compare::CompareLinkDataDuration(const LinkData& LValue, const LinkData& RValue)
-{
-	return (LValue.Length / LValue.Speed) < (RValue.Length / RValue.Speed);
 }
