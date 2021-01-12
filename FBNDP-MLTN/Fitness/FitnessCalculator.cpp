@@ -37,9 +37,10 @@ void FitnessCalculator::PassageAssignment()
 		PathFinderData PathFinder(GraphData, ODData.FromNodeNum, ODData.ToNodeNum, PathFinderCostType::Duration, NumberOfPath);
 		Util::PathFinder::FindShortestPath(PathFinder, ShortestPathList);
 
+		// 여기서부터는 로직 수정해야함.. 이전 로직으로 되어 있음.
 		// get passage time of shortest path k1, k2.
 		float PassageTimeK1 = CalculatePassageTime(ShortestPathList.at(0));
-		float PassageTimeK2 = CalculatePassageTime(ShortestPathList.at(1));
+		float PassageTimeK2 = CalculatePassageTime(ShortestPathList.at(0));
 
 		// check passage time of k1 and k2
 		bool bDoublePassage = false;

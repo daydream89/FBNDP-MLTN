@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <map>
 #include <queue>
+#include <stack>
 
 #include "../Data/DataTypes.h"
 #include "../Data/DataCenter.h"
@@ -28,11 +29,15 @@ namespace PathFinderPrivate
 	{
 		priority_queue<CostNodeNumPair, vector<CostNodeNumPair>, greater<CostNodeNumPair> > PriorityQueue;
 
-		vector<float> dist(InData.Graph.size(), INFINITY);
+		vector<float> Dist(InData.Graph.size() + 1, INFINITY);
+		vector<uint32_t> Path;
+		for (uint32_t i = 0; i < InData.Graph.size() + 1; ++i)
+		{
+			Path.emplace_back(0);
+		}
 
 		PriorityQueue.push(make_pair(0.f, InData.StartNodeNum));
-		dist[InData.StartNodeNum] = 0.f;
-		OutPath.emplace_back(GetNodeData(InData.StartNodeNum, InData.Graph));
+		Dist.at(InData.StartNodeNum) = 0.f;
 
 		vector<LinkData> LinkDataList;
 		if (auto* DataCenterInstance = DataCenter::GetInstance())
@@ -58,6 +63,9 @@ namespace PathFinderPrivate
 						}
 					}
 
+					if (Path.at(NodeNum) == Link.ToNodeNum)
+						bExist = true;
+
 					if (!bExist)
 						AdjNodeList.emplace_back(Link.ToNodeNum);
 				}
@@ -68,6 +76,9 @@ namespace PathFinderPrivate
 				float Cost = 0.f;
 				for (const auto& Link : LinkDataList)
 				{
+					if (Link.FromNodeNum == RemovedLink.X && Link.ToNodeNum == RemovedLink.Y)
+						continue;
+
 					if (Link.FromNodeNum == NodeNum && Link.ToNodeNum == AdjNodeNum)
 					{
 						if (InData.CostType == PathFinderCostType::Duration)
@@ -79,18 +90,32 @@ namespace PathFinderPrivate
 					}
 				}
 
-				if (dist[AdjNodeNum] > dist.at(NodeNum) + Cost)
+				if (Dist.at(AdjNodeNum) > Dist.at(NodeNum) + Cost)
 				{
-					dist[AdjNodeNum] = dist.at(NodeNum) + Cost;
-					PriorityQueue.push(make_pair(dist[AdjNodeNum], AdjNodeNum));
-
-					if (AdjNodeNum == InData.EndNodeNum)
-						OutPath.emplace_back(GetNodeData(NodeNum, InData.Graph));
+					Dist.at(AdjNodeNum) = Dist.at(NodeNum) + Cost;
+					Path.at(AdjNodeNum) = NodeNum;
+					PriorityQueue.push(make_pair(Dist.at(AdjNodeNum), AdjNodeNum));
 				}
 			}
 		}
 
-		return dist[InData.EndNodeNum];
+		stack<uint32_t> Stack;
+		uint32_t Next = Path.at(InData.EndNodeNum);
+		while (Next != 0)
+		{
+			Stack.push(Next);
+			Next = Path[Next];
+		}
+
+		while (!Stack.empty())
+		{
+			uint32_t NodeNum = Stack.top();
+			OutPath.emplace_back(GetNodeData(NodeNum, InData.Graph));
+			Stack.pop();
+		}
+		OutPath.emplace_back(GetNodeData(InData.EndNodeNum, InData.Graph));
+
+		return Dist.at(InData.EndNodeNum);
 	}
 }
 
