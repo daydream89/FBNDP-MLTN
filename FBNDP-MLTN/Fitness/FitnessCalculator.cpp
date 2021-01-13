@@ -34,29 +34,32 @@ void FitnessCalculator::PassageAssignment()
 
 		// find the shortest path based on the OD Matrix from network graph data.
 		vector<ShortestPathData> ShortestPathList;
-		PathFinderData PathFinder(GraphData, ODData.FromNodeNum, ODData.ToNodeNum, PathFinderCostType::Duration, NumberOfPath);
-		Util::PathFinder::FindShortestPath(PathFinder, ShortestPathList);
+		PathFinderData PathFinder(GraphData, ODData.FromNodeNum, ODData.ToNodeNum, EPathFinderCostType::Duration, NumberOfPath);
+		if (Util::PathFinder::FindShortestPath(PathFinder, ShortestPathList) == 0)
+			continue;	// if not exist ShortestPath, ignore.
 
-		// 여기서부터는 로직 수정해야함.. 이전 로직으로 되어 있음.
 		// get passage time of shortest path k1, k2.
-		float PassageTimeK1 = CalculatePassageTime(ShortestPathList.at(0));
-		float PassageTimeK2 = CalculatePassageTime(ShortestPathList.at(0));
+		vector<float> PassageTimeList;
+		for (auto ShortestPath : ShortestPathList)
+			PassageTimeList.emplace_back(CalculatePassageTime(ShortestPath));
 
-		// check passage time of k1 and k2
-		bool bDoublePassage = false;
-		// 이거 비교하는 함수 따로 만들어서 Util에 넣자. offset도 세팅할 수 있게. ex) CompareFloat(float value1, float value2, float offset)
-		float Compare = PassageTimeK1 - PassageTimeK2;
-		if (-5.f <= Compare && Compare <= 5.f)
+		if (PassageTimeList.size() == 1)
 		{
-			bDoublePassage = true;
+			// set single path
 		}
-
-		// add K1 in PassageDataList
-		if (bDoublePassage)
+		else if (PassageTimeList.size() == 2)
 		{
-			// add K2 in PassageDataList with MNL Model.
-			// P = exp(U) / sum(exp(U'))
-			// U = -0.0176IVTT - 0.0296OVTT - 3.8418CTPI + 3.1469RELI - 0.3896CIRC
+			float Compare = PassageTimeList.at(0) - PassageTimeList.at(1);
+			if (-5.f <= Compare && Compare <= 5.f)		// 단위 맞춰줘야 함..
+			{
+				// add K2 in PassageDataList with MNL Model.
+				// P = exp(U) / sum(exp(U'))
+				// U = -0.0176IVTT - 0.0296OVTT - 3.8418CTPI + 3.1469RELI - 0.3896CIRC
+			}
+		}
+		else
+		{
+			// todo. handling k is greater than 2
 		}
 	}
 

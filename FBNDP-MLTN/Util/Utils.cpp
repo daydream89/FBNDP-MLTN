@@ -73,7 +73,7 @@ namespace PathFinderPrivate
 
 			for (auto AdjNodeNum : AdjNodeList)
 			{
-				float Cost = 0.f;
+				float Cost = -1.f;
 				for (const auto& Link : LinkDataList)
 				{
 					if (Link.FromNodeNum == RemovedLink.X && Link.ToNodeNum == RemovedLink.Y)
@@ -81,14 +81,17 @@ namespace PathFinderPrivate
 
 					if (Link.FromNodeNum == NodeNum && Link.ToNodeNum == AdjNodeNum)
 					{
-						if (InData.CostType == PathFinderCostType::Duration)
+						if (InData.CostType == EPathFinderCostType::Duration)
 							Cost = Link.Length / Link.Speed;
-						else if (InData.CostType == PathFinderCostType::Length)
+						else if (InData.CostType == EPathFinderCostType::Length)
 							Cost = Link.Length;
 
 						break;
 					}
 				}
+
+				if (Cost < 0.f)
+					continue;
 
 				if (Dist.at(AdjNodeNum) > Dist.at(NodeNum) + Cost)
 				{
@@ -136,6 +139,7 @@ size_t Util::PathFinder::FindShortestPath(const PathFinderData& InData, vector<S
 
 	// 2. remove each link of shortest path, find the path between the nodes that have removed links.
 	//	  perform all link in the shortest path.
+	auto LinkDataList = DataCenter::GetInstance()->GetLinkData();
 	map<float, vector<NodeData>> SecondPathCandidateMap;
 	PathFinderData FinderData(InData);
 	for (uint32_t i = 0; i < FirstPathData.Path.size() - 1; ++i)
@@ -144,9 +148,42 @@ size_t Util::PathFinder::FindShortestPath(const PathFinderData& InData, vector<S
 		FinderData.EndNodeNum = FirstPathData.Path.at(i + 1).Num;
 
 		Coordinate RemovedLink(FinderData.StartNodeNum, FinderData.EndNodeNum);
-		vector<NodeData> Path;
-		float Cost = PathFinderPrivate::DijkstraAlgorithm(FinderData, RemovedLink, Path);
-		SecondPathCandidateMap.emplace(make_pair(Cost, Path));
+		vector<NodeData> NewPathList;
+		float NewPathCost = PathFinderPrivate::DijkstraAlgorithm(FinderData, RemovedLink, NewPathList);
+
+		float RemovedLinkCost = 0.f;
+		for (auto Link : LinkDataList)
+		{
+			if (Link.FromNodeNum == FinderData.StartNodeNum && Link.ToNodeNum == FinderData.EndNodeNum)
+			{
+				if (InData.CostType == EPathFinderCostType::Duration)
+					RemovedLinkCost = Link.Length / Link.Speed;
+				else if (InData.CostType == EPathFinderCostType::Length)
+					RemovedLinkCost = Link.Length;
+			}
+		}
+		NewPathCost += (FirstPathData.Cost - RemovedLinkCost);
+		
+		vector<NodeData> CompletePath;
+		for (uint32_t j = 0; j < i; ++j)	// add previous path
+		{
+			CompletePath.emplace_back(FirstPathData.Path.at(j));
+		}
+		
+		for (auto NewPath : NewPathList)	// add new path
+		{
+			CompletePath.emplace_back(NewPath);
+		}
+
+		if (i + 2 < FirstPathData.Path.size())	// add post path
+		{
+			for (uint32_t j = i + 2; j < FirstPathData.Path.size(); ++j)
+			{
+				CompletePath.emplace_back(FirstPathData.Path.at(j));
+			}
+		}
+
+		SecondPathCandidateMap.emplace(make_pair(NewPathCost, CompletePath));
 	}
 
 	// 3. save above result into map. (total cost & path pair)
@@ -155,7 +192,8 @@ size_t Util::PathFinder::FindShortestPath(const PathFinderData& InData, vector<S
 		ShortestPathData SecondPathData;
 		SecondPathData.Cost = SecondPathCandidateMap.begin()->first;
 		SecondPathData.Path = SecondPathCandidateMap.begin()->second;
+		OutPath.emplace_back(SecondPathData);
 	}
 
-	return 0;
+	return OutPath.size();
 }

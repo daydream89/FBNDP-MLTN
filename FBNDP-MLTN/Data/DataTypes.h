@@ -96,7 +96,7 @@ struct DistanceData
 	float Distance;			// 직선 거리
 };
 
-enum class PathFinderCostType
+enum class EPathFinderCostType
 {
 	Length = 0,
 	Duration = 1,
@@ -107,10 +107,10 @@ struct PathFinderData
 	vector<NodeData> Graph;
 	uint32_t StartNodeNum = 0;
 	uint32_t EndNodeNum = 0;
-	PathFinderCostType CostType = PathFinderCostType::Length;
+	EPathFinderCostType CostType = EPathFinderCostType::Length;
 	uint32_t NumberOfPath = 1;
 
-	PathFinderData(const vector<NodeData>& InGraph, uint32_t InStart, uint32_t InEnd, PathFinderCostType InCostType, uint32_t InPathNum)
+	PathFinderData(const vector<NodeData>& InGraph, uint32_t InStart, uint32_t InEnd, EPathFinderCostType InCostType, uint32_t InPathNum)
 		: Graph(InGraph)
 		, StartNodeNum(InStart)
 		, EndNodeNum(InEnd)
