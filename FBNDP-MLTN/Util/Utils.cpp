@@ -24,6 +24,7 @@ namespace PathFinderPrivate
 		return TempNodeData;
 	}
 
+	// todo. when cost calculate, consider OVTT & IVTT
 	typedef pair<float, uint32_t> CostNodeNumPair;
 	float DijkstraAlgorithm(const PathFinderData& InData, Coordinate RemovedLink, vector<NodeData>& OutPath)
 	{
