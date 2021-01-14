@@ -53,6 +53,12 @@ namespace PathFinderPrivate
 			{
 				if (Link.FromNodeNum == NodeNum)
 				{
+					if (GetNodeData(Link.ToNodeNum, InData.Graph).Num == -1)
+						continue;
+
+					if (Path.at(NodeNum) == Link.ToNodeNum)
+						continue;
+
 					bool bExist = false;
 					for (auto Data : AdjNodeList)
 					{
@@ -62,9 +68,6 @@ namespace PathFinderPrivate
 							break;
 						}
 					}
-
-					if (Path.at(NodeNum) == Link.ToNodeNum)
-						bExist = true;
 
 					if (!bExist)
 						AdjNodeList.emplace_back(Link.ToNodeNum);
