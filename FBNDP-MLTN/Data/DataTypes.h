@@ -44,6 +44,15 @@ struct Coordinate
 	{ }
 };
 
+struct MNLCoefficientData
+{
+	float IVTTCoef = -0.0176f;
+	float OVTTCoef = -0.0296f;
+	float CTPICoef = -3.8418f;
+	float RELICoef = 3.1469f;
+	float CIRCCoef = -0.3896f;
+};
+
 // 네트워크 노드에 대한 data
 struct NodeData
 {
@@ -56,44 +65,52 @@ struct NodeData
 // 네트워크 링크에 대한 data
 struct LinkData
 {
-	uint32_t FromNodeNum;	// 시작 node
-	uint32_t ToNodeNum;		// 종료 node
-	float Length;			// 실제 길이 (직선 거리 아님)
-	LinkType Type;			// link 종류
-	float Speed;			// link 속도 (버스가 해당 링크를 통과하는 속도)
+	uint32_t FromNodeNum = 0;					// 시작 node
+	uint32_t ToNodeNum = 0;						// 종료 node
+	float Length = 0.f;							// 실제 길이 (직선 거리 아님)
+	LinkType Type = LinkType::SiGoonDo;			// link 종류
+	float Speed = 0.f;							// link 속도 (버스가 해당 링크를 통과하는 속도)
 };
 
 // 대중교통 노선의 노드 data
 struct RouteData
 {
-	string Name;		// Route, 노선 이름
-	uint32_t Order;		// 노선의 node 순서
-	float CumDistance;	// 누적 거리
-	uint32_t Node;		// node 번호
+	string Name = "";			// Route, 노선 이름
+	uint32_t Order = 0;			// 노선의 node 순서
+	float CumDistance = 0.f;	// 누적 거리
+	uint32_t Node = 0;			// node 번호
 };
 
 // 대중교통 노선의 운영 정보
 struct OperatingData
 {
-	string Name;		// Route, 노선 이름
-	uint32_t Dispatch;	// 배차 간격
-	float Speed;		// 버스 또는 전철이 운영되는 평균속도
+	string Name = "";		// Route, 노선 이름
+	uint32_t Dispatch = 0;	// 배차 간격
+	float Speed = 0.f;		// 버스 또는 전철이 운영되는 평균속도
 };
 
 // 시점 -> 종점 통행량
 struct TrafficVolumeData
 {
-	uint32_t FromNodeNum;	// 시작 node
-	uint32_t ToNodeNum;		// 종료 node
-	uint32_t TrafficVolume;	// 통행량
+	uint32_t FromNodeNum = 0;	// 시작 node
+	uint32_t ToNodeNum = 0;		// 종료 node
+	uint32_t TrafficVolume = 0;	// 통행량
 };
 
 // 노드 간 직선거리
 struct DistanceData
 {
-	uint32_t FromNodeNum;	// 시작 node
-	uint32_t ToNodeNum;		// 종료 node
-	float Distance;			// 직선 거리
+	uint32_t FromNodeNum = 0;	// 시작 node
+	uint32_t ToNodeNum = 0;		// 종료 node
+	float Distance = 0.f;		// 직선 거리
+};
+
+// 프로그램 구동에 필요한 추가 데이터 모음
+struct UserInputData
+{
+	float PassageTimeDiff = 5.f;
+
+	MNLCoefficientData MNLCoefficient;
 };
 
 enum class EPathFinderCostType
@@ -122,5 +139,5 @@ struct PathFinderData
 struct ShortestPathData
 {
 	vector<NodeData> Path;
-	float Cost;
+	float Cost = 0.f;
 };
