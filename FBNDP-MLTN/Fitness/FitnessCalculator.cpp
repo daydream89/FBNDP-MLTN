@@ -1,13 +1,14 @@
 #include "FitnessCalculator.h"
 
-#include "../Data/DataCenter.h"
 #include "../Util/Utils.h"
 
-FitnessCalculator::FitnessCalculator(const vector<NodeData>& InGraphData, uint32_t PathNum)
+#include <math.h>
+
+FitnessCalculator::FitnessCalculator(const vector<NodeData>& InGraphData, uint64_t PathNum)
 	: GraphData(InGraphData)
 	, NumberOfPath(PathNum)
 {
-	// convert vector<NodeData> to common graph data using link, if need.
+	
 }
 
 void FitnessCalculator::Calculate()
@@ -38,55 +39,64 @@ void FitnessCalculator::PassageAssignment()
 		if (Util::PathFinder::FindShortestPath(PathFinder, ShortestPathList) == 0)
 			continue;	// if not exist ShortestPath, ignore.
 
-		// get passage time of shortest path k1, k2.
-		vector<float> PassageTimeList;
-		for (auto ShortestPath : ShortestPathList)
-			PassageTimeList.emplace_back(CalculatePassageTime(ShortestPath));
+		SetPassageAssignmentForMNLModel(ShortestPathList, ODData.TrafficVolume);
+		
+		CalculateCustomerCost();
+	}
 
-		if (PassageTimeList.size() == 1)
+	CalculateNetworkCost();
+}
+
+float FitnessCalculator::SetPassageAssignmentForMNLModel(const vector<ShortestPathData>& PathList, uint64_t TrafficVolume)
+{
+	if (PathList.size() == 1)
+	{
+		// set single path
+	}
+	else if (PathList.size() == 2)
+	{
+		float Compare = PathList.at(0).Cost - PathList.at(1).Cost;
+		if (-PassageTimeDiff <= Compare && Compare <= PassageTimeDiff)		// 단위 확인 후 맞춰줘야 함.. shortest path로부터 도출된 시간이 hour인지 min인지 모름.
 		{
-			// set single path
-		}
-		else if (PassageTimeList.size() == 2)
-		{
-			float Compare = PassageTimeList.at(0) - PassageTimeList.at(1);
-			if (-5.f <= Compare && Compare <= 5.f)		// 단위 맞춰줘야 함..
-			{
-				// add K2 in PassageDataList with MNL Model.
-				// P = exp(U) / sum(exp(U'))
-				// U = -0.0176IVTT - 0.0296OVTT - 3.8418CTPI + 3.1469RELI - 0.3896CIRC
-			}
+			// add K2 in PassageDataList with MNL Model.
+			// P = exp(U) / sum(exp(U'))
+			// U = -0.0176IVTT - 0.0296OVTT - 3.8418CTPI + 3.1469RELI - 0.3896CIRC
 		}
 		else
 		{
-			// todo. handling k is greater than 2
+
 		}
 	}
-
-	CalculateFitness();
-}
-
-float FitnessCalculator::CalculatePassageTime(ShortestPathData& PathData)
-{
-	if (PathData.Path.size() == 0)
+	else
 	{
-		return 0.f;
+		// todo. handling k is greater than 2
 	}
 
-	float PassageTime = 0.f;
-	for (uint32_t i = 0; i < PathData.Path.size() - 1; ++i)
-	{
-		auto FromNode = PathData.Path[i];
-		auto ToNode = PathData.Path[i + 1];
-		// get next node from path, find time data from DataCenter
-	}
+	float TravelTimeInVechicle = 0.f; // IVTT
+	float TravelTimeOutVechicle = 0.f;	// OVTT
+	float CumulativeTransferPanaltyIndex = 0.f;	// CTPI
+	float TrainTravelTimeRatio = 0.f;	// RELI
+	float Curve = 0.f;	// CIRC
+
+	float UnityFunctionValue = (MNLCoefData.IVTTCoef * TravelTimeInVechicle) + (MNLCoefData.OVTTCoef * TravelTimeOutVechicle) + (MNLCoefData.CTPICoef * CumulativeTransferPanaltyIndex)
+								+ (MNLCoefData.RELICoef * TrainTravelTimeRatio) + (MNLCoefData.CIRCCoef * Curve);
+
+	float PassageRate = expf(UnityFunctionValue);// / sum of UnityFunctionValue;
+	float TrafficForPath = static_cast<float>(TrafficVolume) * UnityFunctionValue;
 
 	return 0.f;
 }
 
-float FitnessCalculator::CalculateFitness()
+float FitnessCalculator::CalculateCustomerCost()
 {
 
 
-	return 0;
+	return 0.f;
+}
+
+float FitnessCalculator::CalculateNetworkCost()
+{
+
+
+	return 0.f;
 }

@@ -1,28 +1,31 @@
 #pragma once
 
+#include "../Data/DataCenter.h"
+
 #include <vector>
 
 using namespace std;
 
-struct LinkData;
-struct NodeData;
-struct ShortestPathData;
-
 class FitnessCalculator
 {
 public:
-	FitnessCalculator(const vector<NodeData>& InGraphData, uint32_t PathNum);
+	FitnessCalculator(const vector<NodeData>& InGraphData, uint64_t PathNum);
 
 	void Calculate();
 
 private:
 	void PassageAssignment();
 
-	float CalculatePassageTime(ShortestPathData& Path);
+	float SetPassageAssignmentForMNLModel(const vector<ShortestPathData>& PathList, uint64_t TrafficVolume);
 
-	float CalculateFitness();
+	float CalculateCustomerCost();
+
+	float CalculateNetworkCost();
 
 private:
 	vector<NodeData> GraphData;
-	uint32_t NumberOfPath = 2;
+	uint64_t NumberOfPath = 2;
+	
+	const float PassageTimeDiff = 5.f;	// todo. PassageTimeDiff 사용자 입력 받아야 함.
+	MNLCoefficientData MNLCoefData;
 };
