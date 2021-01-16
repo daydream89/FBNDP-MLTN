@@ -37,6 +37,9 @@ public:
 	void SetDistanceData(const FileDataList& InData);
 	const vector<DistanceData>& GetDistanceData() { return DistanceDataList; }
 
+	void SetUserInputData(const FileDataList& InData);
+	const UserInputData& GetUserInputData() { return UserInput; }
+
 private:
 	DataCenter() {}
 	~DataCenter() {}
@@ -49,4 +52,6 @@ private:
 	vector<OperatingData> OperatingDataList;
 	vector<TrafficVolumeData> TrafficVolumeDataList;
 	vector<DistanceData> DistanceDataList;
+
+	UserInputData UserInput;
 };

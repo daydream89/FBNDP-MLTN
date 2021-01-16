@@ -115,3 +115,40 @@ void DataCenter::SetDistanceData(const FileDataList& InData)
 		DistanceDataList.emplace_back(Data);
 	}
 }
+
+void DataCenter::SetUserInputData(const FileDataList& InData)
+{
+	for (auto RowData : InData)
+	{
+		if (RowData.size() < 2)
+			continue;
+
+		string Name = RowData.at(0);
+		string Value = RowData.at(1);
+
+		if (Name == "PassageTimeDiff")
+		{
+			UserInput.PassageTimeDiff = stof(Value);
+		}
+		else if (Name == "IVTTCoefficient")
+		{
+			UserInput.MNLCoefficient.IVTTCoef = stof(Value);
+		}
+		else if (Name == "OVTTCoefficient")
+		{
+			UserInput.MNLCoefficient.OVTTCoef = stof(Value);
+		}
+		else if (Name == "CTPICoefficient")
+		{
+			UserInput.MNLCoefficient.CTPICoef = stof(Value);
+		}
+		else if (Name == "RELICoefficient")
+		{
+			UserInput.MNLCoefficient.RELICoef = stof(Value);
+		}
+		else if (Name == "CIRCCoefficient")
+		{
+			UserInput.MNLCoefficient.CIRCCoef = stof(Value);
+		}
+	}
+}
