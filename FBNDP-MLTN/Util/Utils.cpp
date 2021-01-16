@@ -30,9 +30,10 @@ namespace PathFinderPrivate
 	{
 		priority_queue<CostNodeNumPair, vector<CostNodeNumPair>, greater<CostNodeNumPair> > PriorityQueue;
 
-		vector<float> Dist(InData.Graph.size() + 1, INFINITY);
+		uint32_t NodeCount = DataCenter::GetInstance() ? DataCenter::GetInstance()->GetNodeData().size() : InData.Graph.size();
+		vector<float> Dist(NodeCount + 1, INFINITY);
 		vector<uint32_t> Path;
-		for (uint32_t i = 0; i < InData.Graph.size() + 1; ++i)
+		for (uint32_t i = 0; i < NodeCount + 1; ++i)
 		{
 			Path.emplace_back(0);
 		}
