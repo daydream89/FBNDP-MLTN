@@ -109,8 +109,8 @@ NodeData Chromosome::SelectRailNode()
 {
 	random_device rd;
 	mt19937 gen(rd());
-	uniform_int_distribution<int> dis(0, RailNode.size()-1);
-	uint32_t RandomNum = dis(gen);
+	uniform_int_distribution<int64_t> dis(0, static_cast<int64_t>(RailNode.size()-1));
+	int64_t RandomNum = dis(gen);
 	/*
 	if (bAllRailStationHaveRoute == false) 
 	{
@@ -137,7 +137,7 @@ SelectedBusNodeData Chromosome::SelectBusNode(const NodeData& SelectedRailNode)
 {
 	/* TODO */
 
-	map<uint32_t, ShortestPathData> FoundBusRouteMap;
+	map<uint64_t, ShortestPathData> FoundBusRouteMap;
 	float TotalRouteLength = 0;
 	for (auto BusNodeIter : CopiedBusNode)
 	{
@@ -163,7 +163,7 @@ SelectedBusNodeData Chromosome::SelectBusNode(const NodeData& SelectedRailNode)
 	float RandomNum = dis(gen);
 
 	float CumulativeProbability = 0.0f;
-	uint32_t SelectedBusNodeNum;
+	uint64_t SelectedBusNodeNum;
 	for (auto BusMapIter : FoundBusRouteMap)
 	{
 		float LowRange = CumulativeProbability;

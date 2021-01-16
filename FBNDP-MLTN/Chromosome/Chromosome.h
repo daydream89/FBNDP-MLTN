@@ -5,11 +5,11 @@
 struct NodeSelectPercent
 {
 	float Percentage;
-	uint32_t BusNodeNum;
+	uint64_t BusNodeNum;
 };
 struct BusRouteData
 {
-	uint32_t BusRouteNum;	//flowchart k
+	uint64_t BusRouteNum;	//flowchart k
 	vector<NodeData> RouteNodes;
 };
 struct SelectedBusNodeData
@@ -22,7 +22,7 @@ class Chromosome
 {
 public:
 	Chromosome(vector<NodeData> RailNode, vector<NodeData> BusNode);
-	uint32_t GetRouteNum(){ return RouteDataList.size(); }
+	uint64_t GetRouteNum(){ return RouteDataList.size(); }
 	vector<NodeData> GetChromosome() { return ChromosomeNodeList; }
 	
 private:
@@ -37,12 +37,12 @@ private:
 	vector<NodeData> BusNode;	//flowchart B
 	vector<NodeData> RailNode;	//Rail Station Nodes
 
-	map<uint32_t, bool> RailStationSelected;
+	map<uint64_t, bool> RailStationSelected;
 	bool bAllRailStationHaveRoute;
 
 	vector<NodeData> CopiedBusNode;	//flowchart B'
 
-	uint32_t BusRouteNum; //flowchart k
+	uint64_t BusRouteNum; //flowchart k
 	vector<ShortestPathData> RouteDataList;
 	vector<NodeData> ChromosomeNodeList;
 };

@@ -11,7 +11,7 @@
 namespace PathFinderPrivate
 {
 	static NodeData TempNodeData;
-	const NodeData& GetNodeData(uint32_t NodeNum, const vector<NodeData>& Graph)
+	const NodeData& GetNodeData(uint64_t NodeNum, const vector<NodeData>& Graph)
 	{
 		for (const auto& Node : Graph)
 		{
@@ -25,15 +25,15 @@ namespace PathFinderPrivate
 	}
 
 	// todo. when cost calculate, consider OVTT & IVTT
-	typedef pair<float, uint32_t> CostNodeNumPair;
+	typedef pair<float, uint64_t> CostNodeNumPair;
 	float DijkstraAlgorithm(const PathFinderData& InData, Coordinate RemovedLink, vector<NodeData>& OutPath)
 	{
 		priority_queue<CostNodeNumPair, vector<CostNodeNumPair>, greater<CostNodeNumPair> > PriorityQueue;
 
-		uint32_t NodeCount = DataCenter::GetInstance() ? DataCenter::GetInstance()->GetNodeData().size() : InData.Graph.size();
+		uint64_t NodeCount = DataCenter::GetInstance() ? DataCenter::GetInstance()->GetNodeData().size() : InData.Graph.size();
 		vector<float> Dist(NodeCount + 1, INFINITY);
-		vector<uint32_t> Path;
-		for (uint32_t i = 0; i < NodeCount + 1; ++i)
+		vector<uint64_t> Path;
+		for (uint64_t i = 0; i < NodeCount + 1; ++i)
 		{
 			Path.emplace_back(0);
 		}
@@ -47,10 +47,10 @@ namespace PathFinderPrivate
 
 		while (!PriorityQueue.empty())
 		{
-			int NodeNum = PriorityQueue.top().second;
+			uint64_t NodeNum = PriorityQueue.top().second;
 			PriorityQueue.pop();
 
-			vector<uint32_t> AdjNodeList;
+			vector<uint64_t> AdjNodeList;
 			for (const auto& Link : LinkDataList)
 			{
 				if (Link.FromNodeNum == NodeNum)
@@ -107,8 +107,8 @@ namespace PathFinderPrivate
 			}
 		}
 
-		stack<uint32_t> Stack;
-		uint32_t Next = Path.at(InData.EndNodeNum);
+		stack<uint64_t> Stack;
+		uint64_t Next = Path.at(InData.EndNodeNum);
 		while (Next != 0)
 		{
 			Stack.push(Next);
@@ -117,7 +117,7 @@ namespace PathFinderPrivate
 
 		while (!Stack.empty())
 		{
-			uint32_t NodeNum = Stack.top();
+			uint64_t NodeNum = Stack.top();
 			OutPath.emplace_back(GetNodeData(NodeNum, InData.Graph));
 			Stack.pop();
 		}
@@ -147,7 +147,7 @@ size_t Util::PathFinder::FindShortestPath(const PathFinderData& InData, vector<S
 	auto LinkDataList = DataCenter::GetInstance()->GetLinkData();
 	map<float, vector<NodeData>> SecondPathCandidateMap;
 	PathFinderData FinderData(InData);
-	for (uint32_t i = 0; i < FirstPathData.Path.size() - 1; ++i)
+	for (uint64_t i = 0; i < FirstPathData.Path.size() - 1; ++i)
 	{
 		FinderData.StartNodeNum = FirstPathData.Path.at(i).Num;
 		FinderData.EndNodeNum = FirstPathData.Path.at(i + 1).Num;
@@ -170,7 +170,7 @@ size_t Util::PathFinder::FindShortestPath(const PathFinderData& InData, vector<S
 		NewPathCost += (FirstPathData.Cost - RemovedLinkCost);
 		
 		vector<NodeData> CompletePath;
-		for (uint32_t j = 0; j < i; ++j)	// add previous path
+		for (uint64_t j = 0; j < i; ++j)	// add previous path
 		{
 			CompletePath.emplace_back(FirstPathData.Path.at(j));
 		}
@@ -182,7 +182,7 @@ size_t Util::PathFinder::FindShortestPath(const PathFinderData& InData, vector<S
 
 		if (i + 2 < FirstPathData.Path.size())	// add post path
 		{
-			for (uint32_t j = i + 2; j < FirstPathData.Path.size(); ++j)
+			for (uint64_t j = i + 2; j < FirstPathData.Path.size(); ++j)
 			{
 				CompletePath.emplace_back(FirstPathData.Path.at(j));
 			}

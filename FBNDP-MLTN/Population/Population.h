@@ -9,9 +9,9 @@ class Population
 {
 public:
 	Population(int MemberNum);
-	uint32_t GetCurrentChromosomeNum() { return ChromosomeArray.size(); }
-	Chromosome GetChromosome(uint32_t ChromosomeNum) { return ChromosomeArray.at(ChromosomeNum); }
-	vector<NodeData> GetChromosomeData(uint32_t ChromosomeNum)	/*ChromosomeNum번째의 ChromosomeData를 얻음*/
+	uint64_t GetCurrentChromosomeNum() { return ChromosomeArray.size(); }
+	Chromosome GetChromosome(uint64_t ChromosomeNum) { return ChromosomeArray.at(ChromosomeNum); }
+	vector<NodeData> GetChromosomeData(uint64_t ChromosomeNum)	/*ChromosomeNum번째의 ChromosomeData를 얻음*/
 	{
 		return ChromosomeArray.at(ChromosomeNum).GetChromosome();
 	}
@@ -22,7 +22,7 @@ public:
 private:
 	void SetNodes(void);
 
-	uint32_t MaxChromosomeNum;
+	uint64_t MaxChromosomeNum;
 	vector<Chromosome> ChromosomeArray;
 	vector<NodeData> BusNode;
 	vector<NodeData> RailNode;

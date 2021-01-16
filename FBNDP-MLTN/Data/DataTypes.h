@@ -30,15 +30,15 @@ enum class LinkType
 
 struct Coordinate
 {
-	uint32_t X;
-	uint32_t Y;
+	uint64_t X;
+	uint64_t Y;
 
 	Coordinate()
 		: X(0)
 		, Y(0)
 	{ }
 
-	Coordinate(uint32_t XCoord, uint32_t YCoord)
+	Coordinate(uint64_t XCoord, uint64_t YCoord)
 		: X(XCoord)
 		, Y(YCoord)
 	{ }
@@ -56,7 +56,7 @@ struct MNLCoefficientData
 // 네트워크 노드에 대한 data
 struct NodeData
 {
-	uint32_t Num = -1;			// node 번호
+	uint64_t Num = -1;			// node 번호
 	Coordinate Coord;			// 2차원 좌표
 	float TransferTime = 0.f;	// 환승 시간
 	NodeType Type;				// node 종류
@@ -65,8 +65,8 @@ struct NodeData
 // 네트워크 링크에 대한 data
 struct LinkData
 {
-	uint32_t FromNodeNum = 0;					// 시작 node
-	uint32_t ToNodeNum = 0;						// 종료 node
+	uint64_t FromNodeNum = 0;					// 시작 node
+	uint64_t ToNodeNum = 0;						// 종료 node
 	float Length = 0.f;							// 실제 길이 (직선 거리 아님)
 	LinkType Type = LinkType::SiGoonDo;			// link 종류
 	float Speed = 0.f;							// link 속도 (버스가 해당 링크를 통과하는 속도)
@@ -76,32 +76,32 @@ struct LinkData
 struct RouteData
 {
 	string Name = "";			// Route, 노선 이름
-	uint32_t Order = 0;			// 노선의 node 순서
+	uint64_t Order = 0;			// 노선의 node 순서
 	float CumDistance = 0.f;	// 누적 거리
-	uint32_t Node = 0;			// node 번호
+	uint64_t Node = 0;			// node 번호
 };
 
 // 대중교통 노선의 운영 정보
 struct OperatingData
 {
 	string Name = "";		// Route, 노선 이름
-	uint32_t Dispatch = 0;	// 배차 간격
+	uint64_t Dispatch = 0;	// 배차 간격
 	float Speed = 0.f;		// 버스 또는 전철이 운영되는 평균속도
 };
 
 // 시점 -> 종점 통행량
 struct TrafficVolumeData
 {
-	uint32_t FromNodeNum = 0;	// 시작 node
-	uint32_t ToNodeNum = 0;		// 종료 node
-	uint32_t TrafficVolume = 0;	// 통행량
+	uint64_t FromNodeNum = 0;	// 시작 node
+	uint64_t ToNodeNum = 0;		// 종료 node
+	uint64_t TrafficVolume = 0;	// 통행량
 };
 
 // 노드 간 직선거리
 struct DistanceData
 {
-	uint32_t FromNodeNum = 0;	// 시작 node
-	uint32_t ToNodeNum = 0;		// 종료 node
+	uint64_t FromNodeNum = 0;	// 시작 node
+	uint64_t ToNodeNum = 0;		// 종료 node
 	float Distance = 0.f;		// 직선 거리
 };
 
@@ -122,12 +122,12 @@ enum class EPathFinderCostType
 struct PathFinderData
 {
 	vector<NodeData> Graph;
-	uint32_t StartNodeNum = 0;
-	uint32_t EndNodeNum = 0;
+	uint64_t StartNodeNum = 0;
+	uint64_t EndNodeNum = 0;
 	EPathFinderCostType CostType = EPathFinderCostType::Length;
-	uint32_t NumberOfPath = 1;
+	uint64_t NumberOfPath = 1;
 
-	PathFinderData(const vector<NodeData>& InGraph, uint32_t InStart, uint32_t InEnd, EPathFinderCostType InCostType, uint32_t InPathNum)
+	PathFinderData(const vector<NodeData>& InGraph, uint64_t InStart, uint64_t InEnd, EPathFinderCostType InCostType, uint64_t InPathNum)
 		: Graph(InGraph)
 		, StartNodeNum(InStart)
 		, EndNodeNum(InEnd)
