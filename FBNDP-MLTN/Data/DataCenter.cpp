@@ -86,11 +86,14 @@ void DataCenter::SetOperatingData(const FileDataList& InData)
 			continue;
 		}
 
-		OperatingData Data;
-		Data.Name = RowData.at(0);
-		Data.Dispatch = static_cast<uint64_t>(stoul(RowData.at(1)));
-		Data.Speed = stof(RowData.at(2));
-		OperatingDataList.emplace_back(Data);
+		string Name = RowData.at(0);
+		if (OperatingDataMap.find(Name) == OperatingDataMap.end())
+		{
+			OperatingData Data;
+			Data.Dispatch = static_cast<uint64_t>(stoul(RowData.at(1)));
+			Data.Speed = stof(RowData.at(2));
+			OperatingDataMap.insert(make_pair(Name, Data));
+		}
 	}
 }
 

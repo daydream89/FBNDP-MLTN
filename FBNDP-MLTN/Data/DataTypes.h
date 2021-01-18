@@ -80,10 +80,10 @@ struct RouteData
 	uint64_t Node = 0;			// node 번호
 };
 
-// 대중교통 노선의 운영 정보
+/* 대중교통 노선의 운영 정보.
+	Name은 DataCenter에 map으로 구성 */
 struct OperatingData
 {
-	string Name = "";		// Route, 노선 이름
 	uint64_t Dispatch = 0;	// 배차 간격
 	float Speed = 0.f;		// 버스 또는 전철이 운영되는 평균속도
 };
