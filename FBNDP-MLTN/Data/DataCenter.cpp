@@ -56,12 +56,24 @@ void DataCenter::SetRouteData(const FileDataList& InData)
 			continue;
 		}
 
+		string Name = RowData.at(0);
+		uint64_t Order = static_cast<uint64_t>(stoul(RowData.at(1)));
+
 		RouteData Data;
-		Data.Name = RowData.at(0);
-		Data.Order = static_cast<uint64_t>(stoul(RowData.at(1)));
 		Data.CumDistance = stof(RowData.at(2));
 		Data.Node = static_cast<uint64_t>(stoul(RowData.at(3)));
-		RouteDataList.emplace_back(Data);
+
+		if (RouteDataMap.find(Name) == RouteDataMap.end())
+		{
+			map<uint64_t, RouteData> RouteMap;
+			RouteMap.insert(make_pair(Order, Data));
+			RouteDataMap.insert(make_pair(Name, RouteMap));
+		}
+		else
+		{
+			auto RouteDataPair = RouteDataMap.find(Name);
+			RouteDataPair->second.insert(make_pair(Order, Data));
+		}
 	}
 }
 

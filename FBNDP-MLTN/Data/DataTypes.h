@@ -72,11 +72,10 @@ struct LinkData
 	float Speed = 0.f;							// link 속도 (버스가 해당 링크를 통과하는 속도)
 };
 
-// 대중교통 노선의 노드 data
+/* 대중교통 노선의 노드 data.
+	Name과 Order는 DataCenter에 이중map으로 구성 */
 struct RouteData
 {
-	string Name = "";			// Route, 노선 이름
-	uint64_t Order = 0;			// 노선의 node 순서
 	float CumDistance = 0.f;	// 누적 거리
 	uint64_t Node = 0;			// node 번호
 };
