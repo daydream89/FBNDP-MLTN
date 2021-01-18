@@ -154,7 +154,7 @@ SelectedBusNodeData Chromosome::SelectBusNode(const NodeData& SelectedRailNode)
 		}
 		TotalRouteLength += ShortestRoute.at(0).Cost;
 		FoundBusRouteMap.insert(make_pair(BusNodeIter.Num, ShortestRoute.at(0)));
-		printf("From %d to %d, Shortest Path Length : %f\n", BusNodeIter.Num, SelectedRailNode.Num, ShortestRoute.at(0).Cost);
+		printf("From %llu to %llu, Shortest Path Length : %f\n", BusNodeIter.Num, SelectedRailNode.Num, ShortestRoute.at(0).Cost);
 	}
 
 	random_device rd;
@@ -187,7 +187,7 @@ SelectedBusNodeData Chromosome::SelectBusNode(const NodeData& SelectedRailNode)
 	}
 
 	SelectedData.BusRouteData = FoundBusRouteMap.find(SelectedBusNodeNum)->second;
-	printf("Selected Bus Node Num: %d\n", SelectedBusNodeNum);
+	printf("Selected Bus Node Num: %llu\n", SelectedBusNodeNum);
 
 	return SelectedData;
 }
