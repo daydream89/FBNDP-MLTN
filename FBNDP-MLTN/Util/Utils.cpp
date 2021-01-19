@@ -24,56 +24,6 @@ namespace PathFinderPrivate
 		return TempNodeData;
 	}
 
-	float CalculateTravelTime(const LinkData& Link)
-	{
-		float TravelTime = Link.Length / Link.Speed;
-		if (auto DataCenterInst = DataCenter::GetInstance())
-		{
-			string RouteName = "";
-			auto RouteDataMap = DataCenterInst->GetRouteData();
-			for (auto RoutePair : RouteDataMap)
-			{
-				float PreCumDistance = -1.f, PostCumDistance = -1.f;
-				for (auto RouteOrderPair : RoutePair.second)
-				{
-					if (RouteOrderPair.second.Node == Link.FromNodeNum)
-					{
-						RouteName = RoutePair.first;
-						PreCumDistance = RouteOrderPair.second.CumDistance;
-					}
-					else
-					{
-						if (!RouteName.empty() && RouteOrderPair.second.Node == Link.ToNodeNum)
-						{
-							PostCumDistance = RouteOrderPair.second.CumDistance;
-							break;
-						}
-						else
-						{
-							RouteName = "";
-							PreCumDistance = -1.f;
-						}
-					}
-				}
-
-				if (0.f <= PreCumDistance && 0.f <= PostCumDistance)
-				{
-					TravelTime = PostCumDistance - PreCumDistance;
-					break;
-				}
-			}
-
-			auto OperatingDataMap = DataCenterInst->GetOperatingData();
-			auto FoundData = OperatingDataMap.find(RouteName);
-			if (FoundData != OperatingDataMap.end())
-				TravelTime /= FoundData->second.Speed;
-			else if(!RouteName.empty())
-				TravelTime /= Link.Speed;
-		}
-
-		return TravelTime;
-	}
-
 	// todo. when cost calculate, consider OVTT & IVTT
 	typedef pair<float, uint64_t> CostNodeNumPair;
 	float DijkstraAlgorithm(const PathFinderData& InData, Coordinate RemovedLink, vector<NodeData>& OutPath)
@@ -137,7 +87,7 @@ namespace PathFinderPrivate
 					if (Link.FromNodeNum == NodeNum && Link.ToNodeNum == AdjNodeNum)
 					{
 						if (InData.CostType == EPathFinderCostType::Duration)
-							Cost = CalculateTravelTime(Link);
+							Cost = Link.Length / Link.Speed;
 						else if (InData.CostType == EPathFinderCostType::Length)
 							Cost = Link.Length;
 
@@ -212,7 +162,7 @@ size_t Util::PathFinder::FindShortestPath(const PathFinderData& InData, vector<S
 			if (Link.FromNodeNum == FinderData.StartNodeNum && Link.ToNodeNum == FinderData.EndNodeNum)
 			{
 				if (InData.CostType == EPathFinderCostType::Duration)
-					RemovedLinkCost = PathFinderPrivate::CalculateTravelTime(Link);
+					RemovedLinkCost = Link.Length / Link.Speed;
 				else if (InData.CostType == EPathFinderCostType::Length)
 					RemovedLinkCost = Link.Length;
 			}
