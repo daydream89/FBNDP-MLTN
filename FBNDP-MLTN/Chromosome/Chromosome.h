@@ -27,7 +27,7 @@ public:
 	
 private:
 	NodeData SelectRailNode();
-	SelectedBusNodeData SelectBusNode(const NodeData& SelectedRailNode);
+	bool SelectBusNode(const NodeData& SelectedRailNode, SelectedBusNodeData& OutputData);
 
 
 	void CalculateNetworkCost();

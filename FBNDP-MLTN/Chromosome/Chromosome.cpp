@@ -11,94 +11,130 @@ Chromosome::Chromosome(vector<NodeData> RailNode, vector<NodeData> BusNode):bAll
 		RailStationSelected[CheckRailNode.Num] = false;
 
 #if 0
-	while (CopiedBusNode.size() > 0) {
+	while (CopiedBusNode.size() > 0) 
+	{
 		NodeData SelectedRailNode = SelectRailNode();
 		/* TODO */
-		SelectedBusNodeData SelectedBus = SelectBusNode(SelectedRailNode);
-		if (!bAllRailStationHaveRoute)
+		SelectedBusNodeData SelectedBus;
+		bool bIsBusSelected = SelectBusNode(SelectedRailNode, SelectedBus);
+		if (bIsBusSelected)
 		{
-			if (bAllRailStationHaveRoute == false)
+			if (!bAllRailStationHaveRoute)
 			{
-				bool StationCheckFlag = true;
-				if (RailStationSelected.find(SelectedRailNode.Num)->second == false)
-					RailStationSelected[SelectedRailNode.Num] = true;
-				for (auto StationSelectedCheck : RailStationSelected)
+				if (bAllRailStationHaveRoute == false)
 				{
-					if (StationSelectedCheck.second == false)
+					bool StationCheckFlag = true;
+					if (RailStationSelected.find(SelectedRailNode.Num)->second == false)
+						RailStationSelected[SelectedRailNode.Num] = true;
+					for (auto StationSelectedCheck : RailStationSelected)
 					{
-						StationCheckFlag = false;
-						break;
+						if (StationSelectedCheck.second == false)
+						{
+							StationCheckFlag = false;
+							break;
+						}
 					}
+					if (StationCheckFlag)
+						bAllRailStationHaveRoute = true;
 				}
-				if (StationCheckFlag)
-					bAllRailStationHaveRoute = true;
-			}
-			++BusRouteNum; //k = k+1
-			ShortestPathData RoutePathData;
-			RoutePathData.Path.assign(SelectedBus.BusRouteData.Path.begin(), SelectedBus.BusRouteData.Path.end());
-			RoutePathData.Cost = SelectedBus.BusRouteData.Cost;
-			RouteDataList.emplace_back(RoutePathData);
-		}
-		else
-		{
-			/*TODO : Find Shortest Path Routes...*/
-			ShortestPathData FoundedShortestRoute;
-			ShortestPathData ExistRoute;
-			for (auto RouteDataIter : RouteDataList)
-			{
-				float MinRouteLength = INFINITY;
-				printf("Route Node Data Num: %d\n", RouteDataIter.Path.end()->Num);
-				if (RouteDataIter.Path.end()->Num == SelectedRailNode.Num) //Current Selected Rail Node Routes...
-				{
-					float RouteLength = 0;
-					vector<NodeData> InputGraph;
-					vector<ShortestPathData> ShortestRoute;
-					InputGraph.assign(CopiedBusNode.begin(), CopiedBusNode.end());
-					PathFinderData ShortestPathData(InputGraph, SelectedBus.SelectedBusNode.Num, RouteDataIter.Path.begin()->Num, EPathFinderCostType::Length, 1);
-					Util::PathFinder::FindShortestPath(ShortestPathData, ShortestRoute);
-					RouteLength = ShortestRoute.at(0).Cost;
-					if (RouteLength < MinRouteLength)
-					{
-						MinRouteLength = RouteLength;
-						FoundedShortestRoute.Path.clear();
-						FoundedShortestRoute.Path.assign(ShortestRoute.begin()->Path.begin(), ShortestRoute.begin()->Path.end());
-						FoundedShortestRoute.Cost = RouteLength + RouteDataIter.Cost;
-						ExistRoute = RouteDataIter;
-					}
-				}
-			}
-			/*TODO: SelectedBus.BusRouteData.Cost vs Shortest Cost include exist route */
-			if (FoundedShortestRoute.Cost < SelectedBus.BusRouteData.Cost) /* Find Lesat Cost Path */
-			{
-				for (auto RouteIter : RouteDataList)
-				{
-					if (RouteIter.Path.begin()->Num == ExistRoute.Path.begin()->Num)
-					{
-						RouteIter.Path.insert(RouteIter.Path.begin(), FoundedShortestRoute.Path.begin(), FoundedShortestRoute.Path.end());
-					}
-				}
-			}
-			else
-			{
 				++BusRouteNum; //k = k+1
 				ShortestPathData RoutePathData;
 				RoutePathData.Path.assign(SelectedBus.BusRouteData.Path.begin(), SelectedBus.BusRouteData.Path.end());
 				RoutePathData.Cost = SelectedBus.BusRouteData.Cost;
 				RouteDataList.emplace_back(RoutePathData);
 			}
-			
-		}
-
-		for (vector<NodeData>::const_iterator NodeIter = CopiedBusNode.begin(); NodeIter != CopiedBusNode.end();) //B' = \i
-		{
-			if (NodeIter->Num == SelectedBus.SelectedBusNode.Num)
-			{
-				CopiedBusNode.erase(NodeIter);
-				break;
-			}
 			else
 			{
-				++NodeIter;
+				/*TODO : Find Shortest Path Routes...*/
+				ShortestPathData FoundedShortestRoute;
+				ShortestPathData ExistRoute;
+				float MinRouteLength = INFINITY;
+				for (auto RouteDataIter : RouteDataList)
+				{
+					printf("Route Node Data Num: %ld\n", RouteDataIter.Path.at(RouteDataIter.Path.size() - 1).Num);
+					if (RouteDataIter.Path.at(RouteDataIter.Path.size() - 1).Num == SelectedRailNode.Num) //Current Selected Rail Node Routes...
+					{
+						float RouteLength = 0;
+						vector<NodeData> InputGraph;
+						vector<ShortestPathData> ShortestRoute;
+						InputGraph.assign(CopiedBusNode.begin(), CopiedBusNode.end());
+						InputGraph.emplace_back(RouteDataIter.Path.at(0));
+						PathFinderData ShortestPathData(InputGraph, SelectedBus.SelectedBusNode.Num, RouteDataIter.Path.begin()->Num, EPathFinderCostType::Length, 1);
+						Util::PathFinder::FindShortestPath(ShortestPathData, ShortestRoute);
+						RouteLength = ShortestRoute.at(0).Cost;
+						if (RouteLength <= MinRouteLength)
+						{
+							MinRouteLength = RouteLength;
+							FoundedShortestRoute.Path.clear();
+							FoundedShortestRoute.Path.assign(ShortestRoute.begin()->Path.begin(), ShortestRoute.begin()->Path.end());
+							FoundedShortestRoute.Cost = RouteLength + RouteDataIter.Cost;
+							ExistRoute = RouteDataIter;
+						}
+					}
+				}
+				/*TODO: SelectedBus.BusRouteData.Cost vs Shortest Cost include exist route */
+				if (FoundedShortestRoute.Cost < SelectedBus.BusRouteData.Cost) /* Find Lesat Cost Path */
+				{
+					for (auto RouteIter : RouteDataList)
+					{
+						if (RouteIter.Path.begin()->Num == ExistRoute.Path.begin()->Num)
+						{
+							RouteIter.Path.insert(RouteIter.Path.begin(), FoundedShortestRoute.Path.begin(), FoundedShortestRoute.Path.end());
+						}
+					}
+				}
+				else
+				{
+					++BusRouteNum; //k = k+1
+					ShortestPathData RoutePathData;
+					RoutePathData.Path.assign(SelectedBus.BusRouteData.Path.begin(), SelectedBus.BusRouteData.Path.end());
+					RoutePathData.Cost = SelectedBus.BusRouteData.Cost;
+					RouteDataList.emplace_back(RoutePathData);
+				}
+
+			}
+		}
+		else /* Find Shortest Path from Selected Rail Node to CopiedBusNode(Left)*/
+		{
+			ShortestPathData FoundedShortestRoute;
+			ShortestPathData ExistRoute;
+			float MinRouteLength = INFINITY;
+			for (auto CopiedBusNodeIter : CopiedBusNode)
+			{
+				float RouteLength = 0;
+				printf("CopiedBusNode Iter Num: %ld\n", CopiedBusNodeIter.Num);
+				vector<NodeData> InputGraph;
+				vector<ShortestPathData> ShortestRoute;
+				InputGraph.assign(CopiedBusNode.begin(), CopiedBusNode.end());
+				PathFinderData ShortestPathData(InputGraph, SelectedBus.SelectedBusNode.Num, CopiedBusNodeIter.Num, EPathFinderCostType::Length, 1);
+				Util::PathFinder::FindShortestPath(ShortestPathData, ShortestRoute);
+				RouteLength = ShortestRoute.at(0).Cost;
+				/*Find Shortest Path From Selected Bus From CopiedBusIter*/
+				if (RouteLength <= MinRouteLength)
+				{
+					MinRouteLength = RouteLength;
+					FoundedShortestRoute.Path.clear();
+					FoundedShortestRoute.Path.assign(ShortestRoute.begin()->Path.begin(), ShortestRoute.begin()->Path.end());
+					FoundedShortestRoute.Cost = RouteLength + RouteDataIter.Cost;
+					ExistRoute = RouteDataIter;
+				}
+			}
+			/*add Find Route to Route start from CopiedBusNode to SelectedRailNode*/
+		}
+
+		for (auto BusRouteNodeNum : SelectedBus.BusRouteData.Path)
+		{
+			for (vector<NodeData>::const_iterator NodeIter = CopiedBusNode.begin(); NodeIter != CopiedBusNode.end();) //B' = \i
+			{
+				if (NodeIter->Num == BusRouteNodeNum.Num)
+				{
+					CopiedBusNode.erase(NodeIter);
+					break;
+				}
+				else
+				{
+					++NodeIter;
+				}
 			}
 		}
 	}
@@ -133,12 +169,13 @@ NodeData Chromosome::SelectRailNode()
 }
 
 #if 1
-SelectedBusNodeData Chromosome::SelectBusNode(const NodeData& SelectedRailNode)
+bool Chromosome::SelectBusNode(const NodeData& SelectedRailNode, SelectedBusNodeData& OutputData)
 {
 	/* TODO */
 
 	map<uint64_t, ShortestPathData> FoundBusRouteMap;
 	float TotalRouteLength = 0;
+	int NoRouteCount = 0;
 	for (auto BusNodeIter : CopiedBusNode)
 	{
 		vector<NodeData> InputGraph;
@@ -147,14 +184,20 @@ SelectedBusNodeData Chromosome::SelectBusNode(const NodeData& SelectedRailNode)
 		InputGraph.emplace_back(SelectedRailNode);
 		PathFinderData ShortestPathData(InputGraph, BusNodeIter.Num, SelectedRailNode.Num, EPathFinderCostType::Length, 1);
 		Util::PathFinder::FindShortestPath(ShortestPathData, ShortestRoute);
-		if (ShortestRoute.begin()->Cost == INFINITY)
+		if (ShortestRoute.at(0).Cost >= INFINITY)
 		{
-			printf("INF Route\n");
+			printf("No Route\n");
+			++NoRouteCount;
+			if (NoRouteCount == CopiedBusNode.size())
+			{
+				OutputData.SelectedBusNode = CopiedBusNode.at(0);
+				return false;
+			}
 			continue;
 		}
 		TotalRouteLength += ShortestRoute.at(0).Cost;
 		FoundBusRouteMap.insert(make_pair(BusNodeIter.Num, ShortestRoute.at(0)));
-		printf("From %d to %d, Shortest Path Length : %f\n", BusNodeIter.Num, SelectedRailNode.Num, ShortestRoute.at(0).Cost);
+		printf("From %lu to %lu, Shortest Path Length : %lf\n", BusNodeIter.Num, SelectedRailNode.Num, ShortestRoute.at(0).Cost);
 	}
 
 	random_device rd;
@@ -164,6 +207,7 @@ SelectedBusNodeData Chromosome::SelectBusNode(const NodeData& SelectedRailNode)
 
 	float CumulativeProbability = 0.0f;
 	uint64_t SelectedBusNodeNum;
+	bool bBusSelected = false;
 	for (auto BusMapIter : FoundBusRouteMap)
 	{
 		float LowRange = CumulativeProbability;
@@ -171,24 +215,28 @@ SelectedBusNodeData Chromosome::SelectBusNode(const NodeData& SelectedRailNode)
 		if  (RandomNum >= LowRange && RandomNum <HighRange)
 		{
 			SelectedBusNodeNum = BusMapIter.first;
+			bBusSelected = true;
 			break;
 		}
 		CumulativeProbability += (BusMapIter.second.Cost/TotalRouteLength);
 	}
 
 	SelectedBusNodeData SelectedData;
-	for (auto BusNodeIter : CopiedBusNode)
+	if (bBusSelected)
 	{
-		if (BusNodeIter.Num == SelectedBusNodeNum) 
+		for (auto BusNodeIter : CopiedBusNode)
 		{
-			SelectedData.SelectedBusNode = BusNodeIter;
-			break;
+			if (BusNodeIter.Num == SelectedBusNodeNum)
+			{
+				OutputData.SelectedBusNode = BusNodeIter;
+				break;
+			}
 		}
+
+		OutputData.BusRouteData = FoundBusRouteMap.find(SelectedBusNodeNum)->second;
+
 	}
-
-	SelectedData.BusRouteData = FoundBusRouteMap.find(SelectedBusNodeNum)->second;
-	printf("Selected Bus Node Num: %d\n", SelectedBusNodeNum);
-
-	return SelectedData;
+		printf("Selected Bus Node Num: %d\n", SelectedBusNodeNum);
+		return true;
 }
 #endif
