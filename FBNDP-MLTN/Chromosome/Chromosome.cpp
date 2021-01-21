@@ -197,7 +197,7 @@ bool Chromosome::SelectBusNode(const NodeData& SelectedRailNode, SelectedBusNode
 		}
 		TotalRouteLength += ShortestRoute.at(0).Cost;
 		FoundBusRouteMap.insert(make_pair(BusNodeIter.Num, ShortestRoute.at(0)));
-		printf("From %lu to %lu, Shortest Path Length : %lf\n", BusNodeIter.Num, SelectedRailNode.Num, ShortestRoute.at(0).Cost);
+		printf("From %llu to %llu, Shortest Path Length : %lf\n", BusNodeIter.Num, SelectedRailNode.Num, ShortestRoute.at(0).Cost);
 	}
 
 	random_device rd;
@@ -206,7 +206,7 @@ bool Chromosome::SelectBusNode(const NodeData& SelectedRailNode, SelectedBusNode
 	float RandomNum = dis(gen);
 
 	float CumulativeProbability = 0.0f;
-	uint64_t SelectedBusNodeNum;
+	uint64_t SelectedBusNodeNum = 0;
 	bool bBusSelected = false;
 	for (auto BusMapIter : FoundBusRouteMap)
 	{
@@ -236,7 +236,7 @@ bool Chromosome::SelectBusNode(const NodeData& SelectedRailNode, SelectedBusNode
 		OutputData.BusRouteData = FoundBusRouteMap.find(SelectedBusNodeNum)->second;
 
 	}
-		printf("Selected Bus Node Num: %d\n", SelectedBusNodeNum);
+		printf("Selected Bus Node Num: %llu\n", SelectedBusNodeNum);
 		return true;
 }
 #endif
