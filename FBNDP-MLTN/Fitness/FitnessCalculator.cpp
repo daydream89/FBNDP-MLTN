@@ -8,7 +8,11 @@ FitnessCalculator::FitnessCalculator(const vector<NodeData>& InGraphData, uint64
 	: GraphData(InGraphData)
 	, NumberOfPath(PathNum)
 {
-	
+	if (auto DataCenterInstance = DataCenter::GetInstance())
+	{
+		PassageTimeDiff = DataCenterInstance->GetUserInputData().PassageTimeDiff;
+		PassageTimeDiff = Util::Converter::ConvertMinuteToHour(PassageTimeDiff);
+	}
 }
 
 void FitnessCalculator::Calculate()
@@ -56,7 +60,7 @@ float FitnessCalculator::SetPassageAssignmentForMNLModel(const vector<ShortestPa
 	else if (PathList.size() == 2)
 	{
 		float Compare = PathList.at(0).Cost - PathList.at(1).Cost;
-		if (-PassageTimeDiff <= Compare && Compare <= PassageTimeDiff)		// 단위 확인 후 맞춰줘야 함.. shortest path로부터 도출된 시간이 hour인지 min인지 모름.
+		if (-PassageTimeDiff <= Compare && Compare <= PassageTimeDiff)
 		{
 			// add K2 in PassageDataList with MNL Model.
 			// P = exp(U) / sum(exp(U'))

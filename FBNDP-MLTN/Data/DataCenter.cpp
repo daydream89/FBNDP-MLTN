@@ -165,5 +165,13 @@ void DataCenter::SetUserInputData(const FileDataList& InData)
 		{
 			UserInput.MNLCoefficient.CIRCCoef = stof(Value);
 		}
+		else if (Name == "BusDispatchesPerHour")
+		{
+			UserInput.BusDispatchesPerHour = static_cast<uint64_t>(stoul(Value));
+		}
+		else if (Name == "TrainDispatchesPerHour")
+		{
+			UserInput.TrainDispatchesPerHour = static_cast<uint64_t>(stoul(Value));
+		}
 	}
 }

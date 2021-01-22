@@ -24,9 +24,27 @@ namespace PathFinderPrivate
 		return TempNodeData;
 	}
 
-	float CalculateTravelTime(const LinkData& Link)
+	void GetRouteNameFromNodesNum(const RouteMap& InRouteDataMap, uint64_t InFromNodeNum, uint64_t InToNodeNum, string& OutRouteName)
 	{
-		float TravelTime = Link.Length / Link.Speed;
+		for (auto RoutePair : InRouteDataMap)
+		{
+			for (auto RouteOrderPair : RoutePair.second)
+			{
+				auto NextOrderPair = RoutePair.second.find(RouteOrderPair.first + 1);
+				if (NextOrderPair == RoutePair.second.end())
+					break;
+
+				if (RouteOrderPair.second.Node == InFromNodeNum && NextOrderPair->second.Node == InToNodeNum)
+				{
+					OutRouteName = RoutePair.first;
+				}
+			}
+		}
+	}
+
+	float CalculateIVTT(const LinkData& Link)
+	{
+		float IVTT = Link.Length / Link.Speed;
 		if (auto DataCenterInst = DataCenter::GetInstance())
 		{
 			string RouteName = "";
@@ -58,7 +76,7 @@ namespace PathFinderPrivate
 
 				if (0.f <= PreCumDistance && 0.f <= PostCumDistance)
 				{
-					TravelTime = PostCumDistance - PreCumDistance;
+					IVTT = PostCumDistance - PreCumDistance;
 					break;
 				}
 			}
@@ -66,15 +84,59 @@ namespace PathFinderPrivate
 			auto OperatingDataMap = DataCenterInst->GetOperatingData();
 			auto FoundData = OperatingDataMap.find(RouteName);
 			if (FoundData != OperatingDataMap.end())
-				TravelTime /= FoundData->second.Speed;
+			{
+				IVTT /= FoundData->second.Speed;
+			}
 			else if(!RouteName.empty())
-				TravelTime /= Link.Speed;
+				IVTT /= Link.Speed;
 		}
 
-		return TravelTime;
+		return IVTT;
 	}
 
-	// todo. when cost calculate, consider OVTT & IVTT
+	float CalculateOVTT(const vector<NodeData>& OutPath)
+	{
+		auto DataCenterInst = DataCenter::GetInstance();
+		if (!DataCenterInst)
+		{
+			return 0.f;
+		}
+
+		float OVTT = 0.f;
+		if (1 < OutPath.size())	// add first wait time
+		{
+			if (OutPath.at(0).Type == NodeType::BusStop)
+				OVTT = Util::Converter::ConvertMinuteToHour(1.f / static_cast<float>(DataCenterInst->GetUserInputData().BusDispatchesPerHour));
+			else if (OutPath.at(0).Type == NodeType::Station)
+				OVTT = Util::Converter::ConvertMinuteToHour(1.f / static_cast<float>(DataCenterInst->GetUserInputData().TrainDispatchesPerHour));
+		}
+
+		string PreRouteName = "";
+		string CurRouteName = "";
+		for (int i = 1; i < OutPath.size() - 1; ++i)
+		{
+			uint64_t CurNodeNum = OutPath.at(i).Num;
+			uint64_t NextNodeNum = OutPath.at(i + 1).Num;
+			GetRouteNameFromNodesNum(DataCenterInst->GetRouteData(), CurNodeNum, NextNodeNum, CurRouteName);
+			if (PreRouteName == "")
+				PreRouteName = CurRouteName;
+
+			if (PreRouteName != CurRouteName)	// route changed!
+			{
+				float WaitTime = 0.f;
+				if (OutPath.at(i).Type == NodeType::BusStop)
+					WaitTime = Util::Converter::ConvertMinuteToHour(1.f / static_cast<float>(DataCenterInst->GetUserInputData().BusDispatchesPerHour));
+				else if (OutPath.at(i).Type == NodeType::Station)
+					WaitTime = Util::Converter::ConvertMinuteToHour(1.f / static_cast<float>(DataCenterInst->GetUserInputData().TrainDispatchesPerHour));
+
+				OVTT += WaitTime + OutPath.at(i).TransferTime;
+			}
+		}
+
+		return OVTT;
+	}
+
+	// todo. when cost calculate, consider OVTT
 	typedef pair<float, uint64_t> CostNodeNumPair;
 	float DijkstraAlgorithm(const PathFinderData& InData, Coordinate RemovedLink, vector<NodeData>& OutPath)
 	{
@@ -137,7 +199,7 @@ namespace PathFinderPrivate
 					if (Link.FromNodeNum == NodeNum && Link.ToNodeNum == AdjNodeNum)
 					{
 						if (InData.CostType == EPathFinderCostType::Duration)
-							Cost = CalculateTravelTime(Link);
+							Cost = CalculateIVTT(Link);
 						else if (InData.CostType == EPathFinderCostType::Length)
 							Cost = Link.Length;
 
@@ -172,6 +234,9 @@ namespace PathFinderPrivate
 			Stack.pop();
 		}
 		OutPath.emplace_back(GetNodeData(InData.EndNodeNum, InData.Graph));
+
+		if (InData.CostType == EPathFinderCostType::Duration)
+			return Dist.at(InData.EndNodeNum) + CalculateOVTT(OutPath);
 
 		return Dist.at(InData.EndNodeNum);
 	}
@@ -212,7 +277,7 @@ size_t Util::PathFinder::FindShortestPath(const PathFinderData& InData, vector<S
 			if (Link.FromNodeNum == FinderData.StartNodeNum && Link.ToNodeNum == FinderData.EndNodeNum)
 			{
 				if (InData.CostType == EPathFinderCostType::Duration)
-					RemovedLinkCost = PathFinderPrivate::CalculateTravelTime(Link);
+					RemovedLinkCost = PathFinderPrivate::CalculateIVTT(Link);
 				else if (InData.CostType == EPathFinderCostType::Length)
 					RemovedLinkCost = Link.Length;
 			}
@@ -251,4 +316,9 @@ size_t Util::PathFinder::FindShortestPath(const PathFinderData& InData, vector<S
 	}
 
 	return OutPath.size();
+}
+
+float Util::Converter::ConvertMinuteToHour(float Minute)
+{
+	return Minute / 60.f;
 }

@@ -26,6 +26,6 @@ private:
 	vector<NodeData> GraphData;
 	uint64_t NumberOfPath = 2;
 	
-	const float PassageTimeDiff = 5.f;	// todo. PassageTimeDiff 사용자 입력 받아야 함.
+	float PassageTimeDiff = 5.f;
 	MNLCoefficientData MNLCoefData;
 };

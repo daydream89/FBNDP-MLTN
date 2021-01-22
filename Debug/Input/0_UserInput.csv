@@ -5,3 +5,5 @@ OVTTCoefficient,-0.0296
 CTPICoefficient,-3.8418
 RELICoefficient,3.1469
 CIRCCoefficient,-0.3896
+BusDispatchesPerHour,5
+TrainDispatchesPerHour,4

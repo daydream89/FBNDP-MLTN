@@ -1,8 +1,5 @@
 #pragma once
 
-#include <vector>
-#include <map>
-
 #include "DataTypes.h"
 
 using namespace std;
@@ -27,7 +24,7 @@ public:
 	const vector<LinkData>& GetLinkData() { return LinkDataList; }
 
 	void SetRouteData(const FileDataList& InData);
-	const map<string, map<uint64_t, RouteData>>& GetRouteData() { return RouteDataMap; }
+	const RouteMap& GetRouteData() { return RouteDataMap; }
 
 	void SetOperatingData(const FileDataList& InData);
 	const map<string, OperatingData>& GetOperatingData() { return OperatingDataMap; }
@@ -49,7 +46,7 @@ private:
 
 	vector<NodeData> NodeDataList;
 	vector<LinkData> LinkDataList;
-	map<string, map<uint64_t, RouteData>> RouteDataMap;
+	RouteMap RouteDataMap;
 	map<string, OperatingData> OperatingDataMap;
 	vector<TrafficVolumeData> TrafficVolumeDataList;
 	vector<DistanceData> DistanceDataList;

@@ -2,10 +2,9 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 using namespace std;
-
-typedef vector<vector<string>> FileDataList;
 
 enum class NodeType
 {
@@ -107,9 +106,10 @@ struct DistanceData
 // 프로그램 구동에 필요한 추가 데이터 모음
 struct UserInputData
 {
-	float PassageTimeDiff = 5.f;
-
-	MNLCoefficientData MNLCoefficient;
+	float PassageTimeDiff = 5.f;		// 적합도 계산 시의 통행 시간 차이
+	MNLCoefficientData MNLCoefficient;	// 적합도 계산의 MNL Model에서 사용하는 계수 모음
+	uint64_t BusDispatchesPerHour = 5;	// 적합도 계산의 버스 배차 횟수
+	uint64_t TrainDispatchesPerHour = 4;// 적합도 계산의 전철 배차 횟수
 };
 
 enum class EPathFinderCostType
@@ -140,3 +140,6 @@ struct ShortestPathData
 	vector<NodeData> Path;
 	float Cost = 0.f;
 };
+
+typedef vector<vector<string>> FileDataList;
+typedef map<string, map<uint64_t, RouteData>> RouteMap;

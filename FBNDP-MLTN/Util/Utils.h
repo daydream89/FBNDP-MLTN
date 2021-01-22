@@ -18,4 +18,9 @@ namespace Util
 	{
 
 	}
+
+	namespace Converter
+	{
+		float ConvertMinuteToHour(float Minute);
+	}
 }
