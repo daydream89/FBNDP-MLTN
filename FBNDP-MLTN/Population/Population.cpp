@@ -11,6 +11,7 @@ Population::Population(int MemberNum)
 		ChromosomeArray.emplace_back(Chromosome(RailNode, BusNode));
 	}
 	assert(GetCurrentChromosomeNum() == MemberNum);
+	printf("All Initial Population Created\n");
 }
 
 void Population::SetNodes()

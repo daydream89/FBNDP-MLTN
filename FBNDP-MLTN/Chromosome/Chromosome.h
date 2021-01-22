@@ -21,13 +21,13 @@ struct SelectedBusNodeData
 class Chromosome
 {
 public:
-	Chromosome(vector<NodeData> RailNode, vector<NodeData> BusNode);
+	Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>& BusNode);
 	uint64_t GetRouteNum(){ return RouteDataList.size(); }
 	vector<NodeData> GetChromosome() { return ChromosomeNodeList; }
 	
 private:
 	NodeData SelectRailNode();
-	bool SelectBusNode(const NodeData& SelectedRailNode, SelectedBusNodeData& OutputData);
+	SelectedBusNodeData SelectBusNode(const NodeData& SelectedRailNode);
 
 
 	void CalculateNetworkCost();
