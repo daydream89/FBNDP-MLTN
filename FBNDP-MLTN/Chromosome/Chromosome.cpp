@@ -74,11 +74,11 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 			/*TODO: SelectedBus.BusRouteData.Cost vs Shortest Cost include exist route */
 			if (FoundedShortestRoute.Cost > SelectedBus.BusRouteData.Cost || FoundedShortestRoute.Cost >= INFINITY) /* Find Lesat Cost Path */
 			{
-				for (auto RouteIter : RouteDataList)
+				for (auto& RouteIter : RouteDataList)
 				{
 					if (RouteIter.Path.begin()->Num == ExistRoute.Path.begin()->Num)
 					{
-						RouteIter.Path.insert(RouteIter.Path.begin(), FoundedShortestRoute.Path.begin(), FoundedShortestRoute.Path.end());
+						RouteIter.Path.insert(RouteIter.Path.begin(), FoundedShortestRoute.Path.begin(), FoundedShortestRoute.Path.end()-1);
 					}
 				}
 			}
