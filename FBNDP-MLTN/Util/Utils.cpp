@@ -138,7 +138,7 @@ namespace PathFinderPrivate
 
 	// todo. when cost calculate, consider OVTT
 	typedef pair<float, uint64_t> CostNodeNumPair;
-	float DijkstraAlgorithm(const PathFinderData& InData, Coordinate RemovedLink, vector<NodeData>& OutPath)
+	float DijkstraAlgorithm(const PathFinderData& InData, Coordinate RemovedLink, vector<NodeData>& OutPath)	// OutPath를 structure로 변경하고 IVTT, OVTT 포함하자.
 	{
 		priority_queue<CostNodeNumPair, vector<CostNodeNumPair>, greater<CostNodeNumPair> > PriorityQueue;
 
@@ -249,6 +249,11 @@ size_t Util::PathFinder::FindShortestPath(const PathFinderData& InData, vector<S
 	Coordinate RemovedLink(InData.StartNodeNum, InData.StartNodeNum);
 	ShortestPathData FirstPathData;
 	FirstPathData.Cost = PathFinderPrivate::DijkstraAlgorithm(InData, RemovedLink, FirstPathData.Path);
+	if (INFINITY <= FirstPathData.Cost)
+	{
+		return 0;
+	}
+
 	OutPath.emplace_back(FirstPathData);
 
 	// if function caller wants only one shortest path, don't need to perform Yen's Algorithm.

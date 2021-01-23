@@ -59,15 +59,17 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 					InputGraph.assign(CopiedBusNode.begin(), CopiedBusNode.end());
 					InputGraph.emplace_back(RouteDataIter.Path.at(0));
 					PathFinderData ShortestPathData(InputGraph, SelectedBus.SelectedBusNode.Num, RouteDataIter.Path.begin()->Num, EPathFinderCostType::Length, 1);
-					Util::PathFinder::FindShortestPath(ShortestPathData, ShortestRoute);
-					RouteLength = ShortestRoute.at(0).Cost;
-					if (RouteLength <= MinRouteLength)
+					if (Util::PathFinder::FindShortestPath(ShortestPathData, ShortestRoute) != 0)
 					{
-						MinRouteLength = RouteLength;
-						FoundedShortestRoute.Path.clear();
-						FoundedShortestRoute.Path.assign(ShortestRoute.begin()->Path.begin(), ShortestRoute.begin()->Path.end());
-						FoundedShortestRoute.Cost = RouteLength + RouteDataIter.Cost;
-						ExistRoute = RouteDataIter;
+						RouteLength = ShortestRoute.at(0).Cost;
+						if (RouteLength <= MinRouteLength)
+						{
+							MinRouteLength = RouteLength;
+							FoundedShortestRoute.Path.clear();
+							FoundedShortestRoute.Path.assign(ShortestRoute.begin()->Path.begin(), ShortestRoute.begin()->Path.end());
+							FoundedShortestRoute.Cost = RouteLength + RouteDataIter.Cost;
+							ExistRoute = RouteDataIter;
+						}
 					}
 				}
 			}
@@ -162,8 +164,7 @@ SelectedBusNodeData Chromosome::SelectBusNode(const NodeData& SelectedRailNode)
 		InputGraph.assign(BusNode.begin(), BusNode.end());
 		InputGraph.emplace_back(SelectedRailNode);
 		PathFinderData ShortestPathData(InputGraph, BusNodeIter.Num, SelectedRailNode.Num, EPathFinderCostType::Length, 1);
-		Util::PathFinder::FindShortestPath(ShortestPathData, ShortestRoute);
-		if (ShortestRoute.at(0).Cost >= INFINITY)
+		if(Util::PathFinder::FindShortestPath(ShortestPathData, ShortestRoute) == 0)
 		{
 			printf("No Route\n");
 			continue;
