@@ -138,7 +138,10 @@ struct PathFinderData
 struct ShortestPathData
 {
 	vector<NodeData> Path;
-	float Cost = 0.f;
+	float Cost = 0.f;	// IVTT + OVTT
+	float IVTT = 0.f;
+	float OVTT = 0.f;
+	uint16_t CTPI = 0;
 };
 
 typedef vector<vector<string>> FileDataList;

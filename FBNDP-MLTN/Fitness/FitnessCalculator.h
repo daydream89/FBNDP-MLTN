@@ -16,7 +16,7 @@ public:
 private:
 	void PassageAssignment();
 
-	float SetPassageAssignmentForMNLModel(const vector<ShortestPathData>& PathList, uint64_t TrafficVolume);
+	float SetPassageAssignmentForMNLModel(const vector<ShortestPathData>& InPathList, const vector<LinkData>& InLinkList, uint64_t SelectedPathNum, uint64_t TrafficVolume);
 
 	float CalculateCustomerCost();
 

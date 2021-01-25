@@ -22,14 +22,15 @@ void FitnessCalculator::Calculate()
 
 void FitnessCalculator::PassageAssignment()
 {
-	// get OD Matrix
+	// get OD Matrix & Link Data List
+	vector<LinkData> LinkDataList;
 	vector<TrafficVolumeData> TrafficVolumeDataList;
 	if (auto DataCenterInstance = DataCenter::GetInstance())
 	{
 		TrafficVolumeDataList = DataCenterInstance->GetTrafficVolumeData();
+		LinkDataList = DataCenterInstance->GetLinkData();
 	}
 
-	//vector<PassageData> PassageDataList;
 	for (const TrafficVolumeData& ODData : TrafficVolumeDataList)
 	{
 		if (ODData.FromNodeNum == ODData.ToNodeNum)
@@ -43,7 +44,8 @@ void FitnessCalculator::PassageAssignment()
 		if (Util::PathFinder::FindShortestPath(PathFinder, ShortestPathList) == 0)
 			continue;	// if not exist ShortestPath, ignore.
 
-		SetPassageAssignmentForMNLModel(ShortestPathList, ODData.TrafficVolume);
+		SetPassageAssignmentForMNLModel(ShortestPathList, LinkDataList, 0, ODData.TrafficVolume);
+		SetPassageAssignmentForMNLModel(ShortestPathList, LinkDataList, 1, ODData.TrafficVolume);
 		
 		CalculateCustomerCost();
 	}
@@ -51,20 +53,47 @@ void FitnessCalculator::PassageAssignment()
 	CalculateNetworkCost();
 }
 
-float FitnessCalculator::SetPassageAssignmentForMNLModel(const vector<ShortestPathData>& PathList, uint64_t TrafficVolume)
+float FitnessCalculator::SetPassageAssignmentForMNLModel(const vector<ShortestPathData>& InPathList, const vector<LinkData>& InLinkList, uint64_t SelectedPathNum, uint64_t TrafficVolume)
 {
-	if (PathList.size() == 1)
+	if (InPathList.size() == 1)
 	{
 		// set single path
 	}
-	else if (PathList.size() == 2)
+	else if (InPathList.size() == 2)
 	{
-		float Compare = PathList.at(0).Cost - PathList.at(1).Cost;
+		float Compare = InPathList.at(0).Cost - InPathList.at(1).Cost;
 		if (-PassageTimeDiff <= Compare && Compare <= PassageTimeDiff)
 		{
-			// add K2 in PassageDataList with MNL Model.
-			// P = exp(U) / sum(exp(U'))
-			// U = -0.0176IVTT - 0.0296OVTT - 3.8418CTPI + 3.1469RELI - 0.3896CIRC
+			vector<float> UnityFunctionValue;
+			for (const ShortestPathData& PathData : InPathList)
+			{
+				float TrainTravelTime = 0.f;
+				for (uint64_t i = 0; i < PathData.Path.size() - 1; ++i)
+				{
+					NodeData CurNodeData = PathData.Path.at(i);
+					NodeData NextNodeData = PathData.Path.at(i + 1);
+					if (CurNodeData.Type == NodeType::Station)
+						for (const auto& Link : InLinkList)
+							if (Link.FromNodeNum == CurNodeData.Num && Link.ToNodeNum == NextNodeData.Num)
+								TrainTravelTime += Util::Calculator::CalculateIVTT(Link);
+				}
+
+				float TravelTimeInVechicle = PathData.IVTT;		// IVTT
+				float TravelTimeOutVechicle = PathData.OVTT;	// OVTT
+				float CumulativeTransferPanaltyIndex = 1.f - expf(-static_cast<float>(PathData.CTPI));	// CTPI
+				float TrainTravelTimeRatio = TrainTravelTime / PathData.IVTT;	// RELI
+				float Curve = 0.f;	// CIRC
+
+				UnityFunctionValue.emplace_back((MNLCoefData.IVTTCoef * TravelTimeInVechicle) + (MNLCoefData.OVTTCoef * TravelTimeOutVechicle) + (MNLCoefData.CTPICoef * CumulativeTransferPanaltyIndex)
+					+ (MNLCoefData.RELICoef * TrainTravelTimeRatio) + (MNLCoefData.CIRCCoef * Curve));
+			}
+
+			float SumOfUnityFunctionValue = 0.f;
+			for (auto Value : UnityFunctionValue)
+				SumOfUnityFunctionValue += Value;
+
+			float PassageRate = expf(UnityFunctionValue[SelectedPathNum]) / SumOfUnityFunctionValue;
+			float TrafficForPath1 = static_cast<float>(TrafficVolume) * UnityFunctionValue[SelectedPathNum];
 		}
 		else
 		{
@@ -75,18 +104,6 @@ float FitnessCalculator::SetPassageAssignmentForMNLModel(const vector<ShortestPa
 	{
 		// todo. handling k is greater than 2
 	}
-
-	float TravelTimeInVechicle = 0.f; // IVTT
-	float TravelTimeOutVechicle = 0.f;	// OVTT
-	float CumulativeTransferPanaltyIndex = 0.f;	// CTPI
-	float TrainTravelTimeRatio = 0.f;	// RELI
-	float Curve = 0.f;	// CIRC
-
-	float UnityFunctionValue = (MNLCoefData.IVTTCoef * TravelTimeInVechicle) + (MNLCoefData.OVTTCoef * TravelTimeOutVechicle) + (MNLCoefData.CTPICoef * CumulativeTransferPanaltyIndex)
-								+ (MNLCoefData.RELICoef * TrainTravelTimeRatio) + (MNLCoefData.CIRCCoef * Curve);
-
-	float PassageRate = expf(UnityFunctionValue);// / sum of UnityFunctionValue;
-	float TrafficForPath = static_cast<float>(TrafficVolume) * UnityFunctionValue;
 
 	return 0.f;
 }

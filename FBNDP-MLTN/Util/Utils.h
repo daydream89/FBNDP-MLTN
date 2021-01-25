@@ -14,9 +14,15 @@ namespace Util
 		size_t FindShortestPath(const PathFinderData& InData, vector<ShortestPathData>& OutPath);
 	}
 
+	namespace Calculator
+	{
+		float CalculateIVTT(const LinkData& Link);
+		float CalculateOVTT(const vector<NodeData>& InPath, uint16_t& OutTransferCount);
+	}
+
 	namespace Compare
 	{
-
+		bool IsFloatEqual(float Value1, float Value2);
 	}
 
 	namespace Converter
