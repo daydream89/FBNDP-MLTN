@@ -142,6 +142,7 @@ struct ShortestPathData
 	float IVTT = 0.f;
 	float OVTT = 0.f;
 	uint16_t CTPI = 0;
+	uint32_t TrafficVolumeForPath = 0;
 };
 
 typedef vector<vector<string>> FileDataList;

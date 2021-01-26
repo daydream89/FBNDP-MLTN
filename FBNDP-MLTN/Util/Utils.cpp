@@ -103,8 +103,9 @@ namespace PathFinderPrivate
 
 					if (Link.FromNodeNum == NodeNum && Link.ToNodeNum == AdjNodeNum)
 					{
+						float Distance = 0.f; // not use;
 						if (InData.CostType == EPathFinderCostType::Duration)
-							Cost = Util::Calculator::CalculateIVTT(Link);
+							Cost = Util::Calculator::CalculateIVTT(Link, Distance);
 						else if (InData.CostType == EPathFinderCostType::Length)
 							Cost = Link.Length;
 
@@ -190,8 +191,9 @@ size_t Util::PathFinder::FindShortestPath(const PathFinderData& InData, vector<S
 		{
 			if (Link.FromNodeNum == FinderData.StartNodeNum && Link.ToNodeNum == FinderData.EndNodeNum)
 			{
+				float Distance = 0.f; // not use;
 				if (InData.CostType == EPathFinderCostType::Duration)
-					RemovedLinkCost = Calculator::CalculateIVTT(Link);
+					RemovedLinkCost = Calculator::CalculateIVTT(Link, Distance);
 				else if (InData.CostType == EPathFinderCostType::Length)
 					RemovedLinkCost = Link.Length;
 			}
@@ -234,7 +236,7 @@ size_t Util::PathFinder::FindShortestPath(const PathFinderData& InData, vector<S
 	return OutPath.size();
 }
 
-float Util::Calculator::CalculateIVTT(const LinkData& Link)
+float Util::Calculator::CalculateIVTT(const LinkData& Link, float& OutDistance)
 {
 	float IVTT = Link.Length / Link.Speed;
 	if (auto DataCenterInst = DataCenter::GetInstance())
@@ -277,6 +279,7 @@ float Util::Calculator::CalculateIVTT(const LinkData& Link)
 		auto FoundData = OperatingDataMap.find(RouteName);
 		if (FoundData != OperatingDataMap.end())
 		{
+			OutDistance = IVTT;
 			IVTT /= FoundData->second.Speed;
 		}
 		else if (!RouteName.empty())

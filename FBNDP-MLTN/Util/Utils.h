@@ -16,7 +16,7 @@ namespace Util
 
 	namespace Calculator
 	{
-		float CalculateIVTT(const LinkData& Link);
+		float CalculateIVTT(const LinkData& InLink, float& OutDistance);
 		float CalculateOVTT(const vector<NodeData>& InPath, uint16_t& OutTransferCount);
 	}
 
