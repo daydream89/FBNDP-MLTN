@@ -21,9 +21,10 @@ int main(int argc, char* argv[])
 		DataCenter->SetUserInputData(Reader.GetFileData("./Input/0_UserInput.csv"));
 	}
 
-	int PopulationNum = 1;
+	int PopulationNum = 8;
 	// Generate initial population
 	Population InitialPopulation(PopulationNum);
+	InitialPopulation.Selection();
 
 	// Calculate fitness
 	for (int i = 0; i < PopulationNum; ++i)

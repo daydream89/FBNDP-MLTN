@@ -50,7 +50,7 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 			for (auto RouteDataIter : RouteDataList)
 			{
 				static float MinRouteLength = INFINITY;
-				//printf("Rail Node Num: %ld\n", (int)RouteDataIter.Path.at(RouteDataIter.Path.size() - 1).Num);
+				//printf("Rail Node Num: %llu\n", RouteDataIter.Path.at(RouteDataIter.Path.size() - 1).Num);
 				if (RouteDataIter.Path.at(RouteDataIter.Path.size() - 1).Num == SelectedRailNode.Num) //Current Selected Rail Node Routes...
 				{
 					float RouteLength = 0;
@@ -252,7 +252,7 @@ SelectedBusNodeData Chromosome::SelectBusNode(const NodeData& SelectedRailNode)
 		TotalRouteLength += ShortestRoute.at(0).Cost;
 		FoundBusRouteMap.insert(make_pair(BusNodeIter.Num, ShortestRoute.at(0)));
 		CalculatePercentMap.insert(make_pair(BusNodeIter.Num, ShortestRoute.at(0).Cost));
-		printf("From %lu to %lu, Shortest Path Length : %lf\n", (int)BusNodeIter.Num, (int)SelectedRailNode.Num, ShortestRoute.at(0).Cost);
+		printf("From %llu to %llu, Shortest Path Length : %lf\n", BusNodeIter.Num, SelectedRailNode.Num, ShortestRoute.at(0).Cost);
 	}
 	printf("Max Route Length: %lf\n", MaxRouteLength);
 	printf("Min Route Length: %lf\n", MinRouteLength);
@@ -272,7 +272,7 @@ SelectedBusNodeData Chromosome::SelectBusNode(const NodeData& SelectedRailNode)
 	printf("Created Random Num(0.0 ~ 1.0): %f\n", RandomNum);
 
 	float CumulativeProbability = 0.0f;
-	uint64_t SelectedBusNodeNum = INFINITY;
+	uint64_t SelectedBusNodeNum = UINT64_MAX;
 	bool bBusSelected = false;
 	for (const auto& PercentMapIter : CalculatePercentMap)
 	{
@@ -304,7 +304,7 @@ SelectedBusNodeData Chromosome::SelectBusNode(const NodeData& SelectedRailNode)
 		}
 	}
 	SelectedData.BusRouteData = FoundBusRouteMap.find(SelectedBusNodeNum)->second;
-	printf("Selected Bus Node Num: %d\n", (int)SelectedBusNodeNum);
+	printf("Selected Bus Node Num: %llu\n", SelectedBusNodeNum);
 	return SelectedData;
 }
 #endif

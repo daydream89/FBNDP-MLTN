@@ -1,7 +1,7 @@
 #include "Population.h"
 #include "../Data/DataCenter.h"
 #include <cassert>
-
+#include <random>
 #include <fstream>
 
 Population::Population(int MemberNum)
@@ -18,11 +18,29 @@ Population::Population(int MemberNum)
 }
 void Population::Selection()
 {
-	CopiedChromosomeArray.clear();
-	CopiedChromosomeArray.assign(ChromosomeArray.begin(), ChromosomeArray.end());
-	/* TODO - select two another Chromosomes and make pair */
+	random_device rd;
+	mt19937 gen(rd());
+	vector<bool> PairCheck;
+	PairCheck.assign(ChromosomeArray.size(), false);
+	uniform_int_distribution<int64_t> dis(0, static_cast<int64_t>(ChromosomeArray.size() - 1));
 
 	SelectionCompair.clear();
+	int i = 0;
+	for (const auto& ChromosomeIter : ChromosomeArray)
+	{
+		while (1)
+		{
+			int64_t RandomNum = dis(gen);
+			if (RandomNum != i && PairCheck.at(RandomNum) != true)
+			{
+				PairCheck.at(RandomNum) = true;
+				SelectionCompair.emplace_back(make_pair(ChromosomeIter, ChromosomeArray.at(RandomNum)));
+				break;
+			}
+		}
+		++i;
+	}
+
 }
 
 void Population::SetNodes()

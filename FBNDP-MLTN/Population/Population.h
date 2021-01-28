@@ -26,7 +26,6 @@ private:
 
 	uint64_t MaxChromosomeNum;
 	vector<Chromosome> ChromosomeArray;
-	vector<Chromosome> CopiedChromosomeArray;
 	vector<pair<Chromosome, Chromosome>> SelectionCompair;
 	vector<NodeData> BusNode;
 	vector<NodeData> RailNode;
