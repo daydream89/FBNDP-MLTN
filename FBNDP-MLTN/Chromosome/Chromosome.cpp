@@ -111,6 +111,8 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 			}
 		}
 	}
+
+	RemoveOverlapedRoute();
 	
 	for (const auto& RouteIter : RouteDataList)
 	{
@@ -120,6 +122,82 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 #endif
 
 }
+
+void Chromosome::RemoveOverlapedRoute(void)
+{
+	vector<ShortestPathData> OverlapRemovedRoute;
+
+	for (const auto& CheckOverlapRoute : RouteDataList)
+	{
+		static int Count1 = 0;
+		static int Count2 = 0;
+		bool RouteInputFlag = true;
+		++Count1;
+		map<uint64_t, bool> NodeCheckMap;
+		NodeCheckMap.clear();
+		for (const auto& MapInsert : CheckOverlapRoute.Path)
+		{
+			NodeCheckMap.insert(make_pair(MapInsert.Num, false));
+		}
+		for (const auto& CurrentCheckRoute : RouteDataList)
+		{
+			Count2++;
+			if (Count1 == Count2)
+			{
+				//printf("same Route\n");
+				continue;
+			}
+			else if (CheckOverlapRoute.Cost > CurrentCheckRoute.Cost)
+			{
+				//printf("Current Route is shorter than CheckOverlapRoute\n");
+				continue;
+			}
+			else if (CheckOverlapRoute.Path.at(CheckOverlapRoute.Path.size() - 1).Num != CurrentCheckRoute.Path.at(CurrentCheckRoute.Path.size() - 1).Num)
+			{
+				//printf("Route's Rail Station is not same - no overlap\n");
+				continue;
+			}
+			/* check Overlapped Path...*/
+			for (auto& PathIter : CurrentCheckRoute.Path)
+			{
+				map<uint64_t, bool>::iterator it;
+				it = NodeCheckMap.find(PathIter.Num);
+				if (it != NodeCheckMap.end())
+				{
+					//printf("NodeNum is founded: %d\n", it->first);
+					it->second = true;
+				}
+			}
+			bool AllNodeInFlag = true;
+			for (const auto& MapIter : NodeCheckMap)
+			{
+				if (MapIter.second == false)
+				{
+					AllNodeInFlag = false;
+					break;
+				}
+			}
+			if (AllNodeInFlag) //Exist Route..Not insert to vector
+			{
+				RouteInputFlag = false;
+				break;
+			}
+
+		}
+		Count2 = 0;
+		if (RouteInputFlag)
+		{
+			OverlapRemovedRoute.emplace_back(CheckOverlapRoute);
+		}
+	}
+
+	RouteDataList.clear();
+	RouteDataList.assign(OverlapRemovedRoute.begin(), OverlapRemovedRoute.end());
+	BusRouteNum = RouteDataList.size();
+
+}
+
+
 NodeData Chromosome::SelectRailNode()
 {
 	random_device rd;
