@@ -127,10 +127,10 @@ void Chromosome::RemoveOverlapedRoute(void)
 {
 	vector<ShortestPathData> OverlapRemovedRoute;
 
+	int Count1 = 0;
+	int Count2 = 0;
 	for (const auto& CheckOverlapRoute : RouteDataList)
 	{
-		static int Count1 = 0;
-		static int Count2 = 0;
 		bool RouteInputFlag = true;
 		++Count1;
 		map<uint64_t, bool> NodeCheckMap;

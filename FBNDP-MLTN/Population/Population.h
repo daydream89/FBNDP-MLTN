@@ -16,6 +16,8 @@ public:
 		return ChromosomeArray.at(ChromosomeNum).GetChromosome();
 	}
 
+	void Selection(void);
+
 	/*TODO
 	* Selection, Crossover, Mutation
 	*/
@@ -24,7 +26,10 @@ private:
 
 	uint64_t MaxChromosomeNum;
 	vector<Chromosome> ChromosomeArray;
+	vector<Chromosome> CopiedChromosomeArray;
+	vector<pair<Chromosome, Chromosome>> SelectionCompair;
 	vector<NodeData> BusNode;
 	vector<NodeData> RailNode;
 
+	void PrintCurrentPopulationData();
 };
