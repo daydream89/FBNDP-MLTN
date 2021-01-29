@@ -173,5 +173,33 @@ void DataCenter::SetUserInputData(const FileDataList& InData)
 		{
 			UserInput.TrainDispatchesPerHour = static_cast<uint64_t>(stoul(Value));
 		}
+		else if (Name == "TownBusTimeCost")
+		{
+			UserInput.TownBusTimeCost = stof(Value);
+		}
+		else if (Name == "BusTimeCost")
+		{
+			UserInput.BusTimeCost = stof(Value);
+		}
+		else if (Name == "TrainTimeCost")
+		{
+			UserInput.TrainTimeCost = stof(Value);
+		}
+		else if (Name == "WaitTimeCost")
+		{
+			UserInput.WaitTimeCost = stof(Value);
+		}
+		else if (Name == "TownBusSpeed")
+		{
+			UserInput.TownBusSpeed = stof(Value);
+		}
+		else if (Name == "TownBusOperationCost")
+		{
+			UserInput.TownBusOperationCost = stof(Value);
+		}
+		else if (Name == "TownBusDispatchesPerHour")
+		{
+			UserInput.TownBusDispatchesPerHour = static_cast<uint64_t>(stoul(Value));
+		}
 	}
 }

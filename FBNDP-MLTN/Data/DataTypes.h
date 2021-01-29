@@ -106,10 +106,17 @@ struct DistanceData
 // 프로그램 구동에 필요한 추가 데이터 모음
 struct UserInputData
 {
-	float PassageTimeDiff = 5.f;		// 적합도 계산 시의 통행 시간 차이
-	MNLCoefficientData MNLCoefficient;	// 적합도 계산의 MNL Model에서 사용하는 계수 모음
-	uint64_t BusDispatchesPerHour = 5;	// 적합도 계산의 버스 배차 횟수
-	uint64_t TrainDispatchesPerHour = 4;// 적합도 계산의 전철 배차 횟수
+	float PassageTimeDiff = 5.f;			// 적합도 계산 시의 통행 시간 차이
+	MNLCoefficientData MNLCoefficient;		// MNL Model에서 사용하는 계수 모음
+	uint64_t BusDispatchesPerHour = 5;		// 버스 배차 횟수 (회/hour)
+	uint64_t TrainDispatchesPerHour = 4;	// 전철 배차 횟수 (회/hour)
+	float TownBusTimeCost = 10000.f;		// 마을버스 탑승 시간 비용 (원/인*시간)
+	float BusTimeCost = 10000.f;			// 버스 탑승 시간 비용 (원/인*시간)
+	float TrainTimeCost = 10000.f;			// 전철 탑승 시간 비용 (원/인*시간)
+	float WaitTimeCost = 10000.f;			// 대기 시간 비용 (원/인*시간)
+	float TownBusSpeed = 30.f;				// 마을버스 운영 속도 (km/h)
+	float TownBusOperationCost = 1600.f;	// 마을버스 운영 비용 (원/대*km)
+	uint64_t TownBusDispatchesPerHour = 12;	// 마을버스 배차 횟수 (회/hour)
 };
 
 enum class EPathFinderCostType
