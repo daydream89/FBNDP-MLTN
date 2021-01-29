@@ -8,7 +8,7 @@ using namespace std;
 class Population
 {
 public:
-	Population(int MemberNum);
+	Population(uint64_t MemberNum);
 	uint64_t GetCurrentChromosomeNum() { return ChromosomeArray.size(); }
 	Chromosome GetChromosome(uint64_t ChromosomeNum) { return ChromosomeArray.at(ChromosomeNum); }
 	vector<NodeData> GetChromosomeData(uint64_t ChromosomeNum)	/*ChromosomeNum번째의 ChromosomeData를 얻음*/

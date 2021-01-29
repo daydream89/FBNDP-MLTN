@@ -3,12 +3,13 @@
 #include <cassert>
 #include <random>
 #include <fstream>
+#include <list>
 
-Population::Population(int MemberNum)
+Population::Population(uint64_t MemberNum)
 {
 	MaxChromosomeNum = MemberNum;
 	SetNodes();
-	for (int i = 0; i < MemberNum; ++i)
+	for (uint64_t i = 0; i < MemberNum; ++i)
 	{
 		ChromosomeArray.emplace_back(Chromosome(RailNode, BusNode));
 	}
@@ -20,27 +21,34 @@ void Population::Selection()
 {
 	random_device rd;
 	mt19937 gen(rd());
-	vector<bool> PairCheck;
-	PairCheck.assign(ChromosomeArray.size(), false);
-	uniform_int_distribution<int64_t> dis(0, static_cast<int64_t>(ChromosomeArray.size() - 1));
 
-	SelectionCompair.clear();
-	int i = 0;
-	for (const auto& ChromosomeIter : ChromosomeArray)
+	vector<uint64_t> RandomOrder;
+	for (uint64_t i = 0; i < ChromosomeArray.size(); ++i)
 	{
-		while (1)
-		{
-			int64_t RandomNum = dis(gen);
-			if (RandomNum != i && PairCheck.at(RandomNum) != true)
-			{
-				PairCheck.at(RandomNum) = true;
-				SelectionCompair.emplace_back(make_pair(ChromosomeIter, ChromosomeArray.at(RandomNum)));
-				break;
-			}
-		}
-		++i;
+		RandomOrder.emplace_back(i);
 	}
 
+	/* Make Random Order By Swapping vector*/
+	uint64_t CurrentPos = 0;
+	uint64_t LastMemberSwappedPosition;
+	for (uint64_t i = 0; i < RandomOrder.size()-1; ++i)
+	{
+		uniform_int_distribution<int64_t> dis(CurrentPos + 1, static_cast<int64_t>(RandomOrder.size() - 1));
+		int64_t RandomNum = dis(gen);
+		if (RandomNum == RandomOrder.size() - 1)
+			LastMemberSwappedPosition = i;
+		uint64_t TempNum = RandomOrder.at(RandomNum);
+		RandomOrder.at(RandomNum) = RandomOrder.at(i);
+		RandomOrder.at(i) = TempNum;
+		++CurrentPos;
+	}
+
+	SelectionCompair.clear();
+	/*Make Chromosome Pair(Selection)*/
+	for (uint64_t i = 0; i < ChromosomeArray.size(); ++i)
+	{
+		SelectionCompair.emplace_back(make_pair(ChromosomeArray.at(i), ChromosomeArray.at(RandomOrder.at(i))));
+	}
 }
 
 void Population::SetNodes()
@@ -66,9 +74,9 @@ void Population::PrintCurrentPopulationData()
 	ofstream WriteFile(FilePath.data());
 	if (WriteFile.is_open())
 	{
+		uint64_t i = 0;
 		for (auto& ChromosomeArrayIter : ChromosomeArray)
 		{
-			static int i = 0;
 			WriteFile << ++i << "th Chromosome: ";
 			for (const auto& NodeArrayIter : ChromosomeArrayIter.GetChromosome())
 			{
