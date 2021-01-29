@@ -4,6 +4,8 @@
 #include <map>
 #include <cassert>
 
+#define DEBUG_MODE 0
+
 Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>& BusNode):bAllRailStationHaveRoute(false),BusRouteNum(0)
 {
 	this->RailNode.assign(RailNode.begin(), RailNode.end());
@@ -12,11 +14,9 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 	for (const auto& CheckRailNode : RailNode)
 		RailStationSelected[CheckRailNode.Num] = false;
 
-#if 1
 	while (CopiedBusNode.size() > 0) 
 	{
 		NodeData SelectedRailNode = SelectRailNode();
-		/* TODO */
 		SelectedBusNodeData SelectedBus = SelectBusNode(SelectedRailNode);
 		if (!bAllRailStationHaveRoute)
 		{
@@ -44,13 +44,14 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 		}
 		else
 		{
-			/*TODO : Find Shortest Path Routes...*/
 			ShortestPathData FoundedShortestRoute;
 			ShortestPathData ExistRoute;
 			for (auto RouteDataIter : RouteDataList)
 			{
 				static float MinRouteLength = INFINITY;
-				//printf("Rail Node Num: %llu\n", RouteDataIter.Path.at(RouteDataIter.Path.size() - 1).Num);
+#if DEBUG_MODE
+				printf("Rail Node Num: %llu\n", RouteDataIter.Path.at(RouteDataIter.Path.size() - 1).Num);
+#endif
 				if (RouteDataIter.Path.at(RouteDataIter.Path.size() - 1).Num == SelectedRailNode.Num) //Current Selected Rail Node Routes...
 				{
 					float RouteLength = 0;
@@ -73,7 +74,7 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 					}
 				}
 			}
-			/*TODO: SelectedBus.BusRouteData.Cost vs Shortest Cost include exist route */
+			/* SelectedBus.BusRouteData.Cost vs Shortest Cost include exist route */
 			if (FoundedShortestRoute.Cost > SelectedBus.BusRouteData.Cost || FoundedShortestRoute.Cost >= INFINITY) /* Find Lesat Cost Path */
 			{
 				for (auto RouteIter : RouteDataList)
@@ -118,9 +119,6 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 	{
 		ChromosomeNodeList.insert(ChromosomeNodeList.end(), RouteIter.Path.begin(), RouteIter.Path.end());
 	}
-	
-#endif
-
 }
 
 void Chromosome::RemoveOverlapedRoute(void)
@@ -144,27 +142,35 @@ void Chromosome::RemoveOverlapedRoute(void)
 			Count2++;
 			if (Count1 == Count2)
 			{
-				//printf("same Route\n");
+#if DEBUG_MODE
+				printf("same Route\n");
+#endif
 				continue;
 			}
 			else if (CheckOverlapRoute.Cost > CurrentCheckRoute.Cost)
 			{
-				//printf("Current Route is shorter than CheckOverlapRoute\n");
+#if DEBUG_MODE
+				printf("Current Route is shorter than CheckOverlapRoute\n");
+#endif
 				continue;
 			}
 			else if (CheckOverlapRoute.Path.at(CheckOverlapRoute.Path.size() - 1).Num != CurrentCheckRoute.Path.at(CurrentCheckRoute.Path.size() - 1).Num)
 			{
-				//printf("Route's Rail Station is not same - no overlap\n");
+#if DEBUG_MODE
+				printf("Route's Rail Station is not same - no overlap\n");
+#endif
 				continue;
 			}
 			/* check Overlapped Path...*/
-			for (auto& PathIter : CurrentCheckRoute.Path)
+			for (const auto& PathIter : CurrentCheckRoute.Path)
 			{
 				map<uint64_t, bool>::iterator it;
 				it = NodeCheckMap.find(PathIter.Num);
 				if (it != NodeCheckMap.end())
 				{
-					//printf("NodeNum is founded: %d\n", it->first);
+#if DEBUG_MODE
+					printf("NodeNum is founded: %d\n", it->first);
+#endif
 					it->second = true;
 				}
 			}
@@ -204,32 +210,13 @@ NodeData Chromosome::SelectRailNode()
 	mt19937 gen(rd());
 	uniform_int_distribution<int64_t> dis(0, static_cast<int64_t>(RailNode.size()-1));
 	int64_t RandomNum = dis(gen);
-	/*
-	if (bAllRailStationHaveRoute == false) 
-	{
-		bool StationCheckFlag = true;
-		if (RailStationSelected.at(RandomNum) == false)
-			RailStationSelected.at(RandomNum) = true;
-		for (auto StationSelectedCheck : RailStationSelected)
-		{
-			if (StationSelectedCheck == false)
-			{
-				StationCheckFlag = false;
-				break;
-			}
-		}
-		if (StationCheckFlag)
-			bAllRailStationHaveRoute = true;
-	}
-	*/
+
 	return RailNode.at(RandomNum);
 }
 
 #if 1
 SelectedBusNodeData Chromosome::SelectBusNode(const NodeData& SelectedRailNode)
 {
-	/* TODO */
-
 	map<uint64_t, ShortestPathData> FoundBusRouteMap;
 	map<uint64_t, float> CalculatePercentMap;
 	float TotalRouteLength = 0.0f;
@@ -244,7 +231,9 @@ SelectedBusNodeData Chromosome::SelectBusNode(const NodeData& SelectedRailNode)
 		PathFinderData ShortestPathData(InputGraph, BusNodeIter.Num, SelectedRailNode.Num, EPathFinderCostType::Length, 1);
 		if(Util::PathFinder::FindShortestPath(ShortestPathData, ShortestRoute) == 0)
 		{
+#if DEBUG_MODE
 			printf("No Route\n");
+#endif
 			continue;
 		}
 		MaxRouteLength = max(MaxRouteLength, ShortestRoute.at(0).Cost);
@@ -252,10 +241,14 @@ SelectedBusNodeData Chromosome::SelectBusNode(const NodeData& SelectedRailNode)
 		TotalRouteLength += ShortestRoute.at(0).Cost;
 		FoundBusRouteMap.insert(make_pair(BusNodeIter.Num, ShortestRoute.at(0)));
 		CalculatePercentMap.insert(make_pair(BusNodeIter.Num, ShortestRoute.at(0).Cost));
+#if DEBUG_MODE
 		printf("From %llu to %llu, Shortest Path Length : %lf\n", BusNodeIter.Num, SelectedRailNode.Num, ShortestRoute.at(0).Cost);
+#endif
 	}
+#if DEBUG_MODE
 	printf("Max Route Length: %lf\n", MaxRouteLength);
 	printf("Min Route Length: %lf\n", MinRouteLength);
+#endif
 	float MaxPlusMinLength = MaxRouteLength + MinRouteLength;
 
 	float TotalLengthDiff = 0.0f;
@@ -269,7 +262,9 @@ SelectedBusNodeData Chromosome::SelectBusNode(const NodeData& SelectedRailNode)
 	mt19937 gen(rd());
 	uniform_real_distribution<float> dis(0.0f, 1.0f);
 	float RandomNum = dis(gen);
+#if DEBUG_MODE
 	printf("Created Random Num(0.0 ~ 1.0): %f\n", RandomNum);
+#endif
 
 	float CumulativeProbability = 0.0f;
 	uint64_t SelectedBusNodeNum = UINT64_MAX;
@@ -290,7 +285,9 @@ SelectedBusNodeData Chromosome::SelectBusNode(const NodeData& SelectedRailNode)
 	assert(bBusSelected == true);
 
 	if (bBusSelected == false) {
+#if DEBUG_MODE
 		printf("Bus doesn't selected..error\n");
+#endif
 
 	}
 
@@ -304,7 +301,9 @@ SelectedBusNodeData Chromosome::SelectBusNode(const NodeData& SelectedRailNode)
 		}
 	}
 	SelectedData.BusRouteData = FoundBusRouteMap.find(SelectedBusNodeNum)->second;
+#if DEBUG_MODE
 	printf("Selected Bus Node Num: %llu\n", SelectedBusNodeNum);
+#endif
 	return SelectedData;
 }
 #endif

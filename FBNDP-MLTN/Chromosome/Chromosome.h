@@ -2,11 +2,6 @@
 #include "../Data/DataTypes.h"
 #include <map>
 
-struct NodeSelectPercent
-{
-	float Percentage;
-	uint64_t BusNodeNum;
-};
 struct BusRouteData
 {
 	uint64_t BusRouteNum;	//flowchart k

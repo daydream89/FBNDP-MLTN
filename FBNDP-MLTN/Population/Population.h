@@ -19,13 +19,14 @@ public:
 	void Selection(void);
 
 	/*TODO
-	* Selection, Crossover, Mutation
+	*  Crossover, Mutation, GetNextGeneration - TODO: Selection, Crossover and Mutation should be private. Ther are used in GetNextGeneration.
 	*/
 private:
 	void SetNodes(void);
 
 	uint64_t MaxChromosomeNum;
 	vector<Chromosome> ChromosomeArray;
+	vector<Chromosome> ChildChromosomeArray; /* for Crossover..?*/
 	vector<pair<Chromosome, Chromosome>> SelectionCompair;
 	vector<NodeData> BusNode;
 	vector<NodeData> RailNode;
