@@ -17,6 +17,8 @@ public:
 	}
 
 	void Selection(void);
+	pair<Chromosome, Chromosome> GetSelectedChromosomePair(int n) { return SelectionCompair.at(n); }
+	void Crossover(pair<Chromosome, Chromosome> Parents);
 
 	/*TODO
 	*  Crossover, Mutation, GetNextGeneration - TODO: Selection, Crossover and Mutation should be private. Ther are used in GetNextGeneration.
@@ -31,5 +33,6 @@ private:
 	vector<NodeData> BusNode;
 	vector<NodeData> RailNode;
 
+	vector<uint64_t> GetOverlappedNodeNum(Chromosome Parent);
 	void PrintCurrentPopulationData();
 };

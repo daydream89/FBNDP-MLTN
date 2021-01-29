@@ -51,6 +51,102 @@ void Population::Selection()
 	}
 }
 
+
+vector<uint64_t> Population::GetOverlappedNodeNum(Chromosome Parent)
+{
+	map<uint64_t, uint64_t> NodeCountMap;
+	vector<uint64_t> OverlappedNodeNum;
+
+	for (const auto& ChromosomeNodeIter : Parent.GetChromosome())
+	{
+		map<uint64_t, uint64_t>::iterator it;
+		it = NodeCountMap.find(ChromosomeNodeIter.Num);
+		if (it == NodeCountMap.end())
+		{
+			/*First Node Num - (not founded)*/
+			NodeCountMap.insert(make_pair(ChromosomeNodeIter.Num, 1));
+		}
+		else
+		{
+			/*Alread Exist Node Num */
+			++(it->second);
+		}
+	}
+	for (const auto& ChromosomeNodeIter : Parent.GetChromosome())
+	{
+		uint64_t CurrentNodeNum = ChromosomeNodeIter.Num;
+		map<uint64_t, uint64_t>::iterator it;
+		it = NodeCountMap.find(CurrentNodeNum);
+		if (it == NodeCountMap.end())
+		{
+			/*Node Num not exist - error*/
+			assert(0);
+		}
+		else
+		{
+			OverlappedNodeNum.emplace_back(it->second);
+		}
+	}
+
+	return OverlappedNodeNum;
+}
+void Population::Crossover(pair<Chromosome, Chromosome> Parents)
+{
+	struct CrossoverData {
+		Chromosome ChromosomeData;
+		vector<uint64_t> OverlappedNodeNum;
+		CrossoverData(Chromosome Parent, vector<uint64_t> Overlapped) : ChromosomeData(Parent), OverlappedNodeNum(Overlapped) {};
+	};
+
+	Chromosome P1 = Parents.first;
+	Chromosome P2 = Parents.second;
+
+	vector<uint64_t> P1OverlappedNodeNum = GetOverlappedNodeNum(P1);
+	vector<uint64_t> P2OverlappedNodeNum = GetOverlappedNodeNum(P2);
+
+	uint64_t P1RouteNum = P1.GetRouteNum();
+	uint64_t P2RouteNum = P2.GetRouteNum();
+
+	vector<ShortestPathData> P1Routes = P1.GetRoute();
+	vector<ShortestPathData> P2Routes = P2.GetRoute();
+
+	CrossoverData C1(P1, P1OverlappedNodeNum);
+	CrossoverData C2(P2, P2OverlappedNodeNum);
+
+	uint64_t CurrentPosition = 0; // flowchart o
+	while (P1RouteNum != 0)
+	{
+		NodeData FirstNode = C1.ChromosomeData.GetChromosome().at(CurrentPosition);
+		if (FirstNode.Type == NodeType::Station)
+		{
+			P1.GetChromosome().erase(C1.ChromosomeData.GetChromosome().begin() + CurrentPosition);
+			continue;
+		}
+		else
+		{
+			float MinRouteLength = INFINITY;
+			ShortestPathData ShortestPath;
+			for (const auto& PathDataIter : P1Routes)
+			{
+				for (const auto& NodeIter : PathDataIter.Path)
+				{
+					if (NodeIter.Num == FirstNode.Num)
+					{
+						if (MinRouteLength > PathDataIter.Cost)
+						{
+							/*Find Route Include First Node*/
+							MinRouteLength = PathDataIter.Cost;
+							ShortestPath = PathDataIter;
+						}
+					}
+				}
+			}
+		}
+
+	}
+
+}
+
 void Population::SetNodes()
 {
 	if (auto* DataCenter = DataCenter::GetInstance())

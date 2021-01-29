@@ -18,6 +18,7 @@ class Chromosome
 public:
 	Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>& BusNode);
 	uint64_t GetRouteNum(){ return RouteDataList.size(); }
+	vector<ShortestPathData> GetRoute(){ return RouteDataList; }
 	vector<NodeData> GetChromosome() { return ChromosomeNodeList; }
 	void RemoveOverlapedRoute(void);
 	

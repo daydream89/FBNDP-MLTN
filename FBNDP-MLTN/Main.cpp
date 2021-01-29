@@ -25,6 +25,7 @@ int main(int argc, char* argv[])
 	// Generate initial population
 	Population InitialPopulation(PopulationNum);
 	InitialPopulation.Selection();
+	//InitialPopulation.Crossover(InitialPopulation.GetSelectedChromosomePair(0));
 
 	// Calculate fitness
 	for (int i = 0; i < PopulationNum; ++i)
