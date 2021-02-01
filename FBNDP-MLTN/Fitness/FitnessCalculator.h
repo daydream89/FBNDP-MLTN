@@ -11,19 +11,24 @@ class FitnessCalculator
 public:
 	FitnessCalculator(const vector<NodeData>& InGraphData, uint64_t PathNum);
 
-	void Calculate();
+	float Calculate();	// returns result of Fitness Function
 
 private:
-	void PassageAssignment();
-
+	float PassageAssignment();
 	void SetPassageAssignmentForMNLModel(vector<ShortestPathData>& InOutPathList, uint64_t TrafficVolume);
 
-	float CalculateCustomerCost();
+	void CalculateCustomerCost(const vector<ShortestPathData>& InPathList, float& OutCostSum);
+	float CalculateNetworkCost(float SumofCustomerCost);
+	float CalculateFitness(float NetworkCost);
 
-	float CalculateNetworkCost();
+	bool FindNodeNumberFromGraphData(uint64_t FromNodeNum, uint64_t ToNodeNum);
+
+	void AddRouteDataMapFromGraphData();
+	void AddGraphDataFromRouteDataMap(const RouteMap& RouteDataMap, const vector<NodeData>& FullGraphData);
 
 private:
 	vector<NodeData> GraphData;
+	RouteMap RouteDataMap;
 	uint64_t NumberOfPath = 2;
 	
 	float PassageTimeDiff = 5.f;

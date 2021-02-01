@@ -117,6 +117,7 @@ struct UserInputData
 	float TownBusSpeed = 30.f;				// 마을버스 운영 속도 (km/h)
 	float TownBusOperationCost = 1600.f;	// 마을버스 운영 비용 (원/대*km)
 	uint64_t TownBusDispatchesPerHour = 12;	// 마을버스 배차 횟수 (회/hour)
+	float PanaltyFactor = 0.0001f;			// 적합도 함수에서 사용하는 값
 };
 
 enum class EPathFinderCostType

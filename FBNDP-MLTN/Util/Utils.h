@@ -12,6 +12,8 @@ namespace Util
 	{
 		//using Yen's Algorithm (based on Dijkstra Algorithm)
 		size_t FindShortestPath(const PathFinderData& InData, vector<ShortestPathData>& OutPath);
+
+		const NodeData& GetNodeData(uint64_t NodeNum, const vector<NodeData>& Graph);
 	}
 
 	namespace Calculator

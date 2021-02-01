@@ -10,20 +10,6 @@
 
 namespace PathFinderPrivate
 {
-	static NodeData TempNodeData;
-	const NodeData& GetNodeData(uint64_t NodeNum, const vector<NodeData>& Graph)
-	{
-		for (const auto& Node : Graph)
-		{
-			if (Node.Num == NodeNum)
-			{
-				return Node;
-			}
-		}
-
-		return TempNodeData;
-	}
-
 	void GetRouteNameFromNodesNum(const RouteMap& InRouteDataMap, uint64_t InFromNodeNum, uint64_t InToNodeNum, string& OutRouteName)
 	{
 		for (auto RoutePair : InRouteDataMap)
@@ -72,7 +58,7 @@ namespace PathFinderPrivate
 			{
 				if (Link.FromNodeNum == NodeNum)
 				{
-					if (GetNodeData(Link.ToNodeNum, InData.Graph).Num == -1)
+					if (Util::PathFinder::GetNodeData(Link.ToNodeNum, InData.Graph).Num == -1)
 						continue;
 
 					if (Path.at(NodeNum) == Link.ToNodeNum)
@@ -136,10 +122,10 @@ namespace PathFinderPrivate
 		while (!Stack.empty())
 		{
 			uint64_t NodeNum = Stack.top();
-			OutPathData.Path.emplace_back(GetNodeData(NodeNum, InData.Graph));
+			OutPathData.Path.emplace_back(Util::PathFinder::GetNodeData(NodeNum, InData.Graph));
 			Stack.pop();
 		}
-		OutPathData.Path.emplace_back(GetNodeData(InData.EndNodeNum, InData.Graph));
+		OutPathData.Path.emplace_back(Util::PathFinder::GetNodeData(InData.EndNodeNum, InData.Graph));
 
 		if (InData.CostType == EPathFinderCostType::Duration)
 		{
@@ -234,6 +220,20 @@ size_t Util::PathFinder::FindShortestPath(const PathFinderData& InData, vector<S
 	}
 
 	return OutPath.size();
+}
+
+static NodeData TempNodeData;
+const NodeData& Util::PathFinder::GetNodeData(uint64_t NodeNum, const vector<NodeData>& Graph)
+{
+	for (const auto& Node : Graph)
+	{
+		if (Node.Num == NodeNum)
+		{
+			return Node;
+		}
+	}
+
+	return TempNodeData;
 }
 
 float Util::Calculator::CalculateIVTT(const LinkData& Link, float& OutDistance)
