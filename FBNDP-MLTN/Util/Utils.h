@@ -11,15 +11,15 @@ namespace Util
 	namespace PathFinder
 	{
 		//using Yen's Algorithm (based on Dijkstra Algorithm)
-		size_t FindShortestPath(const PathFinderData& InData, vector<ShortestPathData>& OutPath);
+		size_t FindShortestPath(PathFinderData& InData, vector<ShortestPathData>& OutPath);
 
 		const NodeData& GetNodeData(uint64_t NodeNum, const vector<NodeData>& Graph);
 	}
 
 	namespace Calculator
 	{
-		float CalculateIVTT(const LinkData& InLink, float& OutDistance);
-		float CalculateOVTT(const vector<NodeData>& InPath, uint16_t& OutTransferCount);
+		float CalculateIVTT(const LinkData& InLink, const RouteMap& InRouteMap, float& OutDistance);
+		float CalculateOVTT(const vector<NodeData>& InPath, const RouteMap& InRouteMap, uint16_t& OutTransferCount);
 	}
 
 	namespace Compare

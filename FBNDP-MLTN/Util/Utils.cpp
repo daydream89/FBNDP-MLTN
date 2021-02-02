@@ -44,17 +44,13 @@ namespace PathFinderPrivate
 		PriorityQueue.push(make_pair(0.f, InData.StartNodeNum));
 		Dist.at(InData.StartNodeNum) = 0.f;
 
-		vector<LinkData> LinkDataList;
-		if (auto* DataCenterInstance = DataCenter::GetInstance())
-			LinkDataList = DataCenterInstance->GetLinkData();
-
 		while (!PriorityQueue.empty())
 		{
 			uint64_t NodeNum = PriorityQueue.top().second;
 			PriorityQueue.pop();
 
 			vector<uint64_t> AdjNodeList;
-			for (const auto& Link : LinkDataList)
+			for (const auto& Link : InData.GraphLink)
 			{
 				if (Link.FromNodeNum == NodeNum)
 				{
@@ -82,7 +78,7 @@ namespace PathFinderPrivate
 			for (auto AdjNodeNum : AdjNodeList)
 			{
 				float Cost = -1.f;
-				for (const auto& Link : LinkDataList)
+				for (const auto& Link : InData.GraphLink)
 				{
 					if (Link.FromNodeNum == RemovedLink.X && Link.ToNodeNum == RemovedLink.Y)
 						continue;
@@ -91,7 +87,7 @@ namespace PathFinderPrivate
 					{
 						float Distance = 0.f; // not use;
 						if (InData.CostType == EPathFinderCostType::Duration)
-							Cost = Util::Calculator::CalculateIVTT(Link, Distance);
+							Cost = Util::Calculator::CalculateIVTT(Link, InData.RouteDataMap, Distance);
 						else if (InData.CostType == EPathFinderCostType::Length)
 							Cost = Link.Length;
 
@@ -130,7 +126,7 @@ namespace PathFinderPrivate
 		if (InData.CostType == EPathFinderCostType::Duration)
 		{
 			OutPathData.IVTT = Dist.at(InData.EndNodeNum);
-			OutPathData.OVTT = Util::Calculator::CalculateOVTT(OutPathData.Path, OutPathData.CTPI);
+			OutPathData.OVTT = Util::Calculator::CalculateOVTT(OutPathData.Path, InData.RouteDataMap, OutPathData.CTPI);
 			return OutPathData.IVTT + OutPathData.OVTT;
 		}
 
@@ -139,8 +135,14 @@ namespace PathFinderPrivate
 }
 
 // todo. need NumberOfPath > 2 case handling
-size_t Util::PathFinder::FindShortestPath(const PathFinderData& InData, vector<ShortestPathData>& OutPath)
+size_t Util::PathFinder::FindShortestPath(PathFinderData& InData, vector<ShortestPathData>& OutPath)
 {
+	if (InData.GraphLink.size() == 0)
+	{
+		if (auto DataCenterInstance = DataCenter::GetInstance())
+			InData.GraphLink = DataCenterInstance->GetLinkData();
+	}
+
 	// 1. find shortest path with Dijkstra Algorithm.
 	Coordinate RemovedLink(InData.StartNodeNum, InData.StartNodeNum);
 	ShortestPathData FirstPathData;
@@ -179,7 +181,7 @@ size_t Util::PathFinder::FindShortestPath(const PathFinderData& InData, vector<S
 			{
 				float Distance = 0.f; // not use;
 				if (InData.CostType == EPathFinderCostType::Duration)
-					RemovedLinkCost = Calculator::CalculateIVTT(Link, Distance);
+					RemovedLinkCost = Calculator::CalculateIVTT(Link, InData.RouteDataMap, Distance);
 				else if (InData.CostType == EPathFinderCostType::Length)
 					RemovedLinkCost = Link.Length;
 			}
@@ -236,45 +238,44 @@ const NodeData& Util::PathFinder::GetNodeData(uint64_t NodeNum, const vector<Nod
 	return TempNodeData;
 }
 
-float Util::Calculator::CalculateIVTT(const LinkData& Link, float& OutDistance)
+float Util::Calculator::CalculateIVTT(const LinkData& InLink, const RouteMap& InRouteMap, float& OutDistance)
 {
-	float IVTT = Link.Length / Link.Speed;
-	if (auto DataCenterInst = DataCenter::GetInstance())
+	float IVTT = InLink.Length / InLink.Speed;
+	string RouteName = "";
+	for (auto RoutePair : InRouteMap)
 	{
-		string RouteName = "";
-		auto RouteDataMap = DataCenterInst->GetRouteData();
-		for (auto RoutePair : RouteDataMap)
+		float PreCumDistance = -1.f, PostCumDistance = -1.f;
+		for (auto RouteOrderPair : RoutePair.second)
 		{
-			float PreCumDistance = -1.f, PostCumDistance = -1.f;
-			for (auto RouteOrderPair : RoutePair.second)
+			if (RouteOrderPair.second.Node == InLink.FromNodeNum)
 			{
-				if (RouteOrderPair.second.Node == Link.FromNodeNum)
+				RouteName = RoutePair.first;
+				PreCumDistance = RouteOrderPair.second.CumDistance;
+			}
+			else
+			{
+				if (!RouteName.empty() && RouteOrderPair.second.Node == InLink.ToNodeNum)
 				{
-					RouteName = RoutePair.first;
-					PreCumDistance = RouteOrderPair.second.CumDistance;
+					PostCumDistance = RouteOrderPair.second.CumDistance;
+					break;
 				}
 				else
 				{
-					if (!RouteName.empty() && RouteOrderPair.second.Node == Link.ToNodeNum)
-					{
-						PostCumDistance = RouteOrderPair.second.CumDistance;
-						break;
-					}
-					else
-					{
-						RouteName = "";
-						PreCumDistance = -1.f;
-					}
+					RouteName = "";
+					PreCumDistance = -1.f;
 				}
-			}
-
-			if (0.f <= PreCumDistance && 0.f <= PostCumDistance)
-			{
-				IVTT = PostCumDistance - PreCumDistance;
-				break;
 			}
 		}
 
+		if (0.f <= PreCumDistance && 0.f <= PostCumDistance)
+		{
+			IVTT = PostCumDistance - PreCumDistance;
+			break;
+		}
+	}
+
+	if (auto DataCenterInst = DataCenter::GetInstance())
+	{
 		auto OperatingDataMap = DataCenterInst->GetOperatingData();
 		auto FoundData = OperatingDataMap.find(RouteName);
 		if (FoundData != OperatingDataMap.end())
@@ -283,13 +284,13 @@ float Util::Calculator::CalculateIVTT(const LinkData& Link, float& OutDistance)
 			IVTT /= FoundData->second.Speed;
 		}
 		else if (!RouteName.empty())
-			IVTT /= Link.Speed;
+			IVTT /= InLink.Speed;
 	}
 
 	return IVTT;
 }
 
-float Util::Calculator::CalculateOVTT(const vector<NodeData>& InPath, uint16_t& OutTransferCount)
+float Util::Calculator::CalculateOVTT(const vector<NodeData>& InPath, const RouteMap& InRouteMap, uint16_t& OutTransferCount)
 {
 	auto DataCenterInst = DataCenter::GetInstance();
 	if (!DataCenterInst)

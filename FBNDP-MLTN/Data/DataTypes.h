@@ -120,6 +120,9 @@ struct UserInputData
 	float PanaltyFactor = 0.0001f;			// 적합도 함수에서 사용하는 값
 };
 
+typedef vector<vector<string>> FileDataList;
+typedef map<string, map<uint64_t, RouteData>> RouteMap;
+
 enum class EPathFinderCostType
 {
 	Length = 0,
@@ -129,10 +132,23 @@ enum class EPathFinderCostType
 struct PathFinderData
 {
 	vector<NodeData> Graph;
+	vector<LinkData> GraphLink;
+	RouteMap RouteDataMap;
 	uint64_t StartNodeNum = 0;
 	uint64_t EndNodeNum = 0;
 	EPathFinderCostType CostType = EPathFinderCostType::Length;
 	uint64_t NumberOfPath = 1;
+
+	PathFinderData(const vector<NodeData>& InGraph, const vector<LinkData>& InLinkList, const RouteMap& InRouteMap, 
+					uint64_t InStart, uint64_t InEnd, EPathFinderCostType InCostType, uint64_t InPathNum)
+		: Graph(InGraph)
+		, GraphLink(InLinkList)
+		, RouteDataMap(InRouteMap)
+		, StartNodeNum(InStart)
+		, EndNodeNum(InEnd)
+		, CostType(InCostType)
+		, NumberOfPath(InPathNum)
+	{ }
 
 	PathFinderData(const vector<NodeData>& InGraph, uint64_t InStart, uint64_t InEnd, EPathFinderCostType InCostType, uint64_t InPathNum)
 		: Graph(InGraph)
@@ -152,6 +168,3 @@ struct ShortestPathData
 	uint16_t CTPI = 0;
 	uint32_t TrafficVolumeForPath = 0;
 };
-
-typedef vector<vector<string>> FileDataList;
-typedef map<string, map<uint64_t, RouteData>> RouteMap;

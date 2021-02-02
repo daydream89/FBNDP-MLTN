@@ -26,8 +26,11 @@ private:
 	void AddGraphDataToRouteDataMap();
 	void AddRouteDataMapToGraphData(const RouteMap& RouteDataMap, const vector<NodeData>& FullGraphData);
 
+	void SetLinkDataList(const vector<LinkData>& InFullLinkDataList);
+
 private:
 	vector<NodeData> GraphData;
+	vector<LinkData> LinkDataList;
 	RouteMap RouteDataMap;
 	uint64_t NumberOfPath = 2;
 	

@@ -17,6 +17,8 @@ FitnessCalculator::FitnessCalculator(const vector<NodeData>& InGraphData, uint64
 		AddGraphDataToRouteDataMap();
 		
 		AddRouteDataMapToGraphData(DataCenterInstance->GetRouteData(), DataCenterInstance->GetNodeData());
+
+		SetLinkDataList(DataCenterInstance->GetLinkData());
 	}
 }
 
@@ -45,7 +47,7 @@ float FitnessCalculator::PassageAssignment()
 
 		// find the shortest path based on the OD Matrix from network graph data.
 		vector<ShortestPathData> ShortestPathList;
-		PathFinderData PathFinder(GraphData, ODData.FromNodeNum, ODData.ToNodeNum, EPathFinderCostType::Duration, NumberOfPath);
+		PathFinderData PathFinder(GraphData, LinkDataList, RouteDataMap, ODData.FromNodeNum, ODData.ToNodeNum, EPathFinderCostType::Duration, NumberOfPath);
 		if (Util::PathFinder::FindShortestPath(PathFinder, ShortestPathList) == 0)
 			continue;	// if not exist ShortestPath, ignore.
 
@@ -94,7 +96,7 @@ void FitnessCalculator::SetPassageAssignmentForMNLModel(vector<ShortestPathData>
 					if (Link.FromNodeNum == CurNodeData.Num && Link.ToNodeNum == NextNodeData.Num)
 					{
 						float Distance = 0.f;
-						TrainTravelTime += Util::Calculator::CalculateIVTT(Link, Distance);
+						TrainTravelTime += Util::Calculator::CalculateIVTT(Link, RouteDataMap, Distance);
 						ActualDistance += Distance;
 						break;
 					}
@@ -266,6 +268,24 @@ void FitnessCalculator::AddRouteDataMapToGraphData(const RouteMap& RouteDataMap,
 			GraphData.push_back(Util::PathFinder::GetNodeData(RoutePair.second.Node, FullGraphData));
 			if (RouteOneWayCount < ++CurCount)
 				break;
+		}
+	}
+}
+
+void FitnessCalculator::SetLinkDataList(const vector<LinkData>& InFullLinkDataList)
+{
+	for (const auto& FullLinkData : InFullLinkDataList)
+	{
+		for (int i = 1; i < GraphData.size() - 1; ++i)
+		{
+			uint64_t CurNodeNum = GraphData.at(i).Num;
+			uint64_t NextNodeNum = GraphData.at(i + 1).Num;
+
+			if (FullLinkData.FromNodeNum == CurNodeNum && FullLinkData.ToNodeNum == NextNodeNum)
+			{
+				LinkDataList.emplace_back(FullLinkData);
+				break;
+			}
 		}
 	}
 }
