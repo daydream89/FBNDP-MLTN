@@ -14,11 +14,9 @@ FitnessCalculator::FitnessCalculator(const vector<NodeData>& InGraphData, uint64
 		PassageTimeDiff = Util::Converter::ConvertMinuteToHour(PassageTimeDiff);
 
 		RouteDataMap = DataCenterInstance->GetRouteData();
-		// RouteData에 GraphData에 있는 노드 추가 필요.
-		AddRouteDataMapFromGraphData();
+		AddGraphDataToRouteDataMap();
 		
-		// GraphData에 RouteData에 있는 노선 추가 필요.
-		AddGraphDataFromRouteDataMap(DataCenterInstance->GetRouteData(), DataCenterInstance->GetNodeData());
+		AddRouteDataMapToGraphData(DataCenterInstance->GetRouteData(), DataCenterInstance->GetNodeData());
 	}
 }
 
@@ -216,7 +214,7 @@ bool FitnessCalculator::FindNodeNumberFromGraphData(uint64_t FromNodeNum, uint64
 	return bExistFromNodeNum && bExistToNodeNum;
 }
 
-void FitnessCalculator::AddRouteDataMapFromGraphData()
+void FitnessCalculator::AddGraphDataToRouteDataMap()
 {
 	int RouteCount = 1;
 	vector<NodeData> NewRouteList;
@@ -257,7 +255,7 @@ void FitnessCalculator::AddRouteDataMapFromGraphData()
 	}
 }
 
-void FitnessCalculator::AddGraphDataFromRouteDataMap(const RouteMap& RouteDataMap, const vector<NodeData>& FullGraphData)
+void FitnessCalculator::AddRouteDataMapToGraphData(const RouteMap& RouteDataMap, const vector<NodeData>& FullGraphData)
 {
 	for (const auto& RouteMapPair : RouteDataMap)
 	{

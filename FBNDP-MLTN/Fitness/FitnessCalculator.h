@@ -23,8 +23,8 @@ private:
 
 	bool FindNodeNumberFromGraphData(uint64_t FromNodeNum, uint64_t ToNodeNum);
 
-	void AddRouteDataMapFromGraphData();
-	void AddGraphDataFromRouteDataMap(const RouteMap& RouteDataMap, const vector<NodeData>& FullGraphData);
+	void AddGraphDataToRouteDataMap();
+	void AddRouteDataMapToGraphData(const RouteMap& RouteDataMap, const vector<NodeData>& FullGraphData);
 
 private:
 	vector<NodeData> GraphData;
