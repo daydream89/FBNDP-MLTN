@@ -43,3 +43,6 @@ FBNDP-MLTN/Input
 *.pdb
 *.ilk
 Debug/FBNDP-MLTN.exe
+FBNDP-MLTN/x64/Debug/utils.obj.enc
+FBNDP-MLTN/x64/Debug/FBNDP-MLTN.exe.recipe
+FBNDP-MLTN/PopulationData.txt
