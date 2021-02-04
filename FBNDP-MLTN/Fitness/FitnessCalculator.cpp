@@ -14,7 +14,7 @@ FitnessCalculator::FitnessCalculator(const vector<NodeData>& InGraphData, uint64
 		PassageTimeDiff = Util::Converter::ConvertMinuteToHour(PassageTimeDiff);
 
 		RouteDataMap = DataCenterInstance->GetRouteData();
-		AddGraphDataToRouteDataMap();
+		AddGraphDataToRouteDataMap(DataCenterInstance->GetLinkData());
 		
 		AddRouteDataMapToGraphData(DataCenterInstance->GetRouteData(), DataCenterInstance->GetNodeData());
 
@@ -61,9 +61,11 @@ float FitnessCalculator::PassageAssignment()
 
 void FitnessCalculator::SetPassageAssignmentForMNLModel(vector<ShortestPathData>& InOutPathList, uint64_t TrafficVolume)
 {
+	vector<float> UnityFunctionValue;
 	if (InOutPathList.size() == 1)
 	{
 		InOutPathList.at(0).TrafficVolumeForPath = static_cast<uint32_t>(TrafficVolume);
+		return;
 	}
 	else if (InOutPathList.size() == 2)
 	{
@@ -82,24 +84,22 @@ void FitnessCalculator::SetPassageAssignmentForMNLModel(vector<ShortestPathData>
 		}
 
 		auto PathData = InOutPathList.at(0);
-		vector<float> UnityFunctionValue;
 		float ActualDistance = 0.f, DirectDistance = 0.f;
 		float TrainTravelTime = 0.f;
 		for (uint64_t i = 0; i < PathData.Path.size() - 1; ++i)
 		{
 			NodeData CurNodeData = PathData.Path.at(i);
 			NodeData NextNodeData = PathData.Path.at(i + 1);
-			if (CurNodeData.Type == NodeType::Station)
+			for (const auto& Link : LinkDataList)
 			{
-				for (const auto& Link : LinkDataList)
+				if (Link.FromNodeNum == CurNodeData.Num && Link.ToNodeNum == NextNodeData.Num)
 				{
-					if (Link.FromNodeNum == CurNodeData.Num && Link.ToNodeNum == NextNodeData.Num)
-					{
-						float Distance = 0.f;
-						TrainTravelTime += Util::Calculator::CalculateIVTT(Link, RouteDataMap, Distance);
-						ActualDistance += Distance;
-						break;
-					}
+					float Distance = 0.f;
+					float TravelTime = Util::Calculator::CalculateIVTT(Link, RouteDataMap, Distance);
+					ActualDistance += Distance;
+					if (CurNodeData.Type == NodeType::Station)
+						TrainTravelTime += TravelTime;
+					break;
 				}
 			}
 
@@ -121,19 +121,19 @@ void FitnessCalculator::SetPassageAssignmentForMNLModel(vector<ShortestPathData>
 
 		UnityFunctionValue.emplace_back((MNLCoefData.IVTTCoef * TravelTimeInVechicle) + (MNLCoefData.OVTTCoef * TravelTimeOutVechicle) + (MNLCoefData.CTPICoef * CumulativeTransferPanaltyIndex)
 			+ (MNLCoefData.RELICoef * TrainTravelTimeRatio) + (MNLCoefData.CIRCCoef * Curve));
-
-		float SumOfUnityFunctionValue = 0.f;
-		for (auto Value : UnityFunctionValue)
-			SumOfUnityFunctionValue += Value;
-
-		float PassageRate = expf(UnityFunctionValue[0]) / SumOfUnityFunctionValue;
-		InOutPathList.at(0).TrafficVolumeForPath = static_cast<uint32_t>(TrafficVolume * PassageRate);
-		InOutPathList.at(1).TrafficVolumeForPath = static_cast<uint32_t>(TrafficVolume) - InOutPathList.at(0).TrafficVolumeForPath;
 	}
 	else
 	{
 		// todo. handling k is greater than 2
 	}
+
+	float SumOfUnityFunctionValue = 0.f;
+	for (auto Value : UnityFunctionValue)
+		SumOfUnityFunctionValue += expf(Value);
+
+	float PassageRate = expf(UnityFunctionValue[0]) / SumOfUnityFunctionValue;
+	InOutPathList.at(0).TrafficVolumeForPath = static_cast<uint32_t>(TrafficVolume * PassageRate);
+	InOutPathList.at(1).TrafficVolumeForPath = static_cast<uint32_t>(TrafficVolume) - InOutPathList.at(0).TrafficVolumeForPath;
 }
 
 void FitnessCalculator::CalculateCustomerCost(const vector<ShortestPathData>& InPathList, float& OutCostSum)
@@ -216,8 +216,9 @@ bool FitnessCalculator::FindNodeNumberFromGraphData(uint64_t FromNodeNum, uint64
 	return bExistFromNodeNum && bExistToNodeNum;
 }
 
-void FitnessCalculator::AddGraphDataToRouteDataMap()
+void FitnessCalculator::AddGraphDataToRouteDataMap(const vector<LinkData>& InFullLinkDataList)
 {
+	// 이거 생성된 데이터가 이상한데...? 다시 확인해봐야 할것 같음.
 	int RouteCount = 1;
 	vector<NodeData> NewRouteList;
 	for (const auto& Node : GraphData)
@@ -228,29 +229,33 @@ void FitnessCalculator::AddGraphDataToRouteDataMap()
 			map<uint64_t, RouteData> NewRouteMap;
 			for (vector<NodeData>::iterator Iter = NewRouteList.begin(); Iter != NewRouteList.end(); ++Iter)
 			{
+				uint64_t PrevNodeNum = NewRouteMap.find(Order) != NewRouteMap.end() ? NewRouteMap.find(Order)->second.Node : Iter->Num;
+				float PrevCumDistance = NewRouteMap.find(Order) != NewRouteMap.end() ? NewRouteMap.find(Order)->second.CumDistance : 0.f;
+
 				RouteData Route;
 				Route.Node = Iter->Num;
-				Route.CumDistance = 0.f;
+				Route.CumDistance = PrevCumDistance + FindLinkLength(InFullLinkDataList, PrevNodeNum, Iter->Num);
 				NewRouteMap.insert(make_pair(++Order, Route));
 			}
 
+			// add station data
 			RouteData Route;
 			Route.Node = Node.Num;
-			Route.CumDistance = 0.f;
+			Route.CumDistance = NewRouteMap.find(Order)->second.CumDistance + FindLinkLength(InFullLinkDataList, NewRouteMap.find(Order)->second.Node, Node.Num);
 			NewRouteMap.insert(make_pair(++Order, Route));
 
 			for (vector<NodeData>::reverse_iterator RIter = NewRouteList.rbegin(); RIter != NewRouteList.rend(); ++RIter)
 			{
 				RouteData Route;
 				Route.Node = RIter->Num;
-				Route.CumDistance = 0.f;
+				Route.CumDistance = NewRouteMap.find(Order)->second.CumDistance + FindLinkLength(InFullLinkDataList, NewRouteMap.find(Order)->second.Node, RIter->Num);
 				NewRouteMap.insert(make_pair(++Order, Route));
 			}
 
 			string RouteName = "TownBus";
 			RouteName.append(to_string(RouteCount++));
 			RouteDataMap.insert(make_pair(RouteName, NewRouteMap));
-			NewRouteMap.clear();
+			NewRouteList.clear();
 		}
 		else
 			NewRouteList.emplace_back(Node);
@@ -276,7 +281,7 @@ void FitnessCalculator::SetLinkDataList(const vector<LinkData>& InFullLinkDataLi
 {
 	for (const auto& FullLinkData : InFullLinkDataList)
 	{
-		for (int i = 1; i < GraphData.size() - 1; ++i)
+		for (size_t i = 1; i < GraphData.size() - 1; ++i)
 		{
 			uint64_t CurNodeNum = GraphData.at(i).Num;
 			uint64_t NextNodeNum = GraphData.at(i + 1).Num;
@@ -288,4 +293,13 @@ void FitnessCalculator::SetLinkDataList(const vector<LinkData>& InFullLinkDataLi
 			}
 		}
 	}
+}
+
+float FitnessCalculator::FindLinkLength(const vector<LinkData>& InFullLinkDataList, uint64_t FromNodeNum, uint64_t ToNodeNum)
+{
+	for (const auto& Link : InFullLinkDataList)
+		if (Link.FromNodeNum == FromNodeNum && Link.ToNodeNum == ToNodeNum)
+			return Link.Length;
+
+	return 0.f;
 }

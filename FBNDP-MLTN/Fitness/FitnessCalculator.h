@@ -23,10 +23,11 @@ private:
 
 	bool FindNodeNumberFromGraphData(uint64_t FromNodeNum, uint64_t ToNodeNum);
 
-	void AddGraphDataToRouteDataMap();
+	void AddGraphDataToRouteDataMap(const vector<LinkData>& InFullLinkDataList);
 	void AddRouteDataMapToGraphData(const RouteMap& RouteDataMap, const vector<NodeData>& FullGraphData);
 
 	void SetLinkDataList(const vector<LinkData>& InFullLinkDataList);
+	float FindLinkLength(const vector<LinkData>& InFullLinkDataList, uint64_t FromNodeNum, uint64_t ToNodeNum);
 
 private:
 	vector<NodeData> GraphData;
