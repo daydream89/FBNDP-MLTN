@@ -114,10 +114,13 @@ struct UserInputData
 	float BusTimeCost = 10000.f;			// 버스 탑승 시간 비용 (원/인*시간)
 	float TrainTimeCost = 10000.f;			// 전철 탑승 시간 비용 (원/인*시간)
 	float WaitTimeCost = 10000.f;			// 대기 시간 비용 (원/인*시간)
+	float TransferTimeCost = 10000.f;		// 환승 시간 비용 (원/인*시간)
 	float TownBusSpeed = 30.f;				// 마을버스 운영 속도 (km/h)
 	float TownBusOperationCost = 1600.f;	// 마을버스 운영 비용 (원/대*km)
 	uint64_t TownBusDispatchesPerHour = 12;	// 마을버스 배차 횟수 (회/hour)
 	float PanaltyFactor = 0.0001f;			// 적합도 함수에서 사용하는 값
+	uint64_t NumberOfBusesGiven = 50;		// 주어진 버스 대수
+	float OperatingHoursPerDay = 10.f;		// 하루 운영 시간
 };
 
 typedef vector<vector<string>> FileDataList;
@@ -159,12 +162,31 @@ struct PathFinderData
 	{ }
 };
 
+enum class ETransportationType
+{
+	Bus = 0,
+	Train = 1,
+	TownBus = 2,
+};
+
+struct TransferData
+{
+	float InitialDispatchesPerHour = 0.f;
+	vector<pair<ETransportationType, float>> TransferTimeList;
+	float OVTT = 0.f;
+	uint16_t CTPI = 0;
+};
+
 struct ShortestPathData
 {
 	vector<NodeData> Path;
 	float Cost = 0.f;	// IVTT + OVTT
 	float IVTT = 0.f;
-	float OVTT = 0.f;
-	uint16_t CTPI = 0;
+	float TrainIVTT = 0.f;
+	float BusIVTT = 0.f;
+	float TownBusIVTT = 0.f;
+	TransferData Transfer;
+	//float OVTT = 0.f;
+	//uint16_t CTPI = 0;
 	uint32_t TrafficVolumeForPath = 0;
 };

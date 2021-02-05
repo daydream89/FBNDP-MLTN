@@ -14,7 +14,7 @@ namespace PathFinderPrivate
 	{
 		for (auto RoutePair : InRouteDataMap)
 		{
-			for (auto RouteOrderPair : RoutePair.second)
+			for (const auto& RouteOrderPair : RoutePair.second)
 			{
 				auto NextOrderPair = RoutePair.second.find(RouteOrderPair.first + 1);
 				if (NextOrderPair == RoutePair.second.end())
@@ -85,9 +85,9 @@ namespace PathFinderPrivate
 
 					if (Link.FromNodeNum == NodeNum && Link.ToNodeNum == AdjNodeNum)
 					{
-						float Distance = 0.f; // not use;
+						float Distance = 0.f; string RouteName = "";// not use;
 						if (InData.CostType == EPathFinderCostType::Duration)
-							Cost = Util::Calculator::CalculateIVTT(Link, InData.RouteDataMap, Distance);
+							Cost = Util::Calculator::CalcIVTT(Link, InData.RouteDataMap, Distance, RouteName);
 						else if (InData.CostType == EPathFinderCostType::Length)
 							Cost = Link.Length;
 
@@ -126,8 +126,8 @@ namespace PathFinderPrivate
 		if (InData.CostType == EPathFinderCostType::Duration)
 		{
 			OutPathData.IVTT = Dist.at(InData.EndNodeNum);
-			OutPathData.OVTT = Util::Calculator::CalculateOVTT(OutPathData.Path, InData.RouteDataMap, OutPathData.CTPI);
-			return OutPathData.IVTT + OutPathData.OVTT;
+			OutPathData.Transfer = Util::Calculator::CalcTransferData(OutPathData.Path, InData.RouteDataMap);
+			return OutPathData.IVTT + OutPathData.Transfer.OVTT;
 		}
 
 		return Dist.at(InData.EndNodeNum);
@@ -162,7 +162,7 @@ size_t Util::PathFinder::FindShortestPath(PathFinderData& InData, vector<Shortes
 
 	// 2. remove each link of shortest path, find the path between the nodes that have removed links.
 	//	  perform all link in the shortest path.
-	map<float, vector<NodeData>> SecondPathCandidateMap;
+	map<float, ShortestPathData> SecondPathCandidateMap;
 	PathFinderData FinderData(InData);
 	for (uint64_t i = 0; i < FirstPathData.Path.size() - 1; ++i)
 	{
@@ -174,13 +174,13 @@ size_t Util::PathFinder::FindShortestPath(PathFinderData& InData, vector<Shortes
 		float NewPathCost = PathFinderPrivate::DijkstraAlgorithm(FinderData, RemovedLink, NewPathData);
 
 		float RemovedLinkCost = 0.f;
-		for (auto Link : InData.GraphLink)
+		for (const auto& Link : InData.GraphLink)
 		{
 			if (Link.FromNodeNum == FinderData.StartNodeNum && Link.ToNodeNum == FinderData.EndNodeNum)
 			{
-				float Distance = 0.f; // not use;
+				float Distance = 0.f; string RouteName = ""; // not use;
 				if (InData.CostType == EPathFinderCostType::Duration)
-					RemovedLinkCost = Calculator::CalculateIVTT(Link, InData.RouteDataMap, Distance);
+					RemovedLinkCost = Calculator::CalcIVTT(Link, InData.RouteDataMap, Distance, RouteName);
 				else if (InData.CostType == EPathFinderCostType::Length)
 					RemovedLinkCost = Link.Length;
 
@@ -212,16 +212,14 @@ size_t Util::PathFinder::FindShortestPath(PathFinderData& InData, vector<Shortes
 
 		// todo. NewPathCost 재계산 필요함.. 기존 Cost에 RemovedCost를 빼는 방식은 OVTT로 인해 문제 생길 가능성이 존재함.
 		// 그냥 CompletePath를 기준으로 재계산 하는것이 정확함.
-		SecondPathCandidateMap.emplace(make_pair(NewPathCost, CompletePath));
+		NewPathData.Path = CompletePath;
+		SecondPathCandidateMap.emplace(make_pair(NewPathCost, NewPathData));
 	}
 
 	// 3. save above result into map. (total cost & path pair)
 	if (SecondPathCandidateMap.begin() != SecondPathCandidateMap.end())
 	{
-		ShortestPathData SecondPathData;
-		SecondPathData.Cost = SecondPathCandidateMap.begin()->first;
-		SecondPathData.Path = SecondPathCandidateMap.begin()->second;
-		OutPath.emplace_back(SecondPathData);
+		OutPath.emplace_back(SecondPathCandidateMap.begin()->second);
 	}
 
 	return OutPath.size();
@@ -241,7 +239,7 @@ const NodeData& Util::PathFinder::GetNodeData(uint64_t NodeNum, const vector<Nod
 	return TempNodeData;
 }
 
-float Util::Calculator::CalculateIVTT(const LinkData& InLink, const RouteMap& InRouteMap, float& OutDistance)
+float Util::Calculator::CalcIVTT(const LinkData& InLink, const RouteMap& InRouteMap, float& OutDistance, string& OutRouteName)
 {
 	float IVTT = InLink.Length;
 	string RouteName = "";
@@ -277,6 +275,7 @@ float Util::Calculator::CalculateIVTT(const LinkData& InLink, const RouteMap& In
 		}
 	}
 
+	OutRouteName = RouteName;
 	OutDistance = IVTT;
 	if (auto DataCenterInst = DataCenter::GetInstance())
 	{
@@ -293,30 +292,39 @@ float Util::Calculator::CalculateIVTT(const LinkData& InLink, const RouteMap& In
 	return IVTT;
 }
 
-float Util::Calculator::CalculateOVTT(const vector<NodeData>& InPath, const RouteMap& InRouteMap, uint16_t& OutTransferCount)
+TransferData Util::Calculator::CalcTransferData(const vector<NodeData>& InPath, const RouteMap& InRouteMap)
 {
+	TransferData ReturnData;
+
 	auto DataCenterInst = DataCenter::GetInstance();
 	if (!DataCenterInst)
 	{
-		return 0.f;
+		return ReturnData;
 	}
 
-	float OVTT = 0.f;
 	if (1 <= InPath.size())	// add first wait time
 	{
 		if (InPath.at(0).Type == NodeType::BusStop)
-			OVTT = Util::Converter::ConvertMinuteToHour(1.f / static_cast<float>(DataCenterInst->GetUserInputData().BusDispatchesPerHour));
+			ReturnData.InitialDispatchesPerHour = static_cast<float>(DataCenterInst->GetUserInputData().BusDispatchesPerHour);
 		else if (InPath.at(0).Type == NodeType::Station)
-			OVTT = Util::Converter::ConvertMinuteToHour(1.f / static_cast<float>(DataCenterInst->GetUserInputData().TrainDispatchesPerHour));
+			ReturnData.InitialDispatchesPerHour = static_cast<float>(DataCenterInst->GetUserInputData().TrainDispatchesPerHour);
+
+		ReturnData.OVTT = Util::Converter::ConvertMinuteToHour(1.f / ReturnData.InitialDispatchesPerHour);
+	}
+
+	if (InPath.size() < 2)
+	{
+		return ReturnData;
 	}
 
 	string PreRouteName = "";
 	string CurRouteName = "";
+	PathFinderPrivate::GetRouteNameFromNodesNum(InRouteMap, InPath.at(0).Num, InPath.at(1).Num, PreRouteName);
 	for (int i = 1; i < InPath.size() - 1; ++i)
 	{
 		uint64_t CurNodeNum = InPath.at(i).Num;
 		uint64_t NextNodeNum = InPath.at(i + 1).Num;
-		PathFinderPrivate::GetRouteNameFromNodesNum(DataCenterInst->GetRouteData(), CurNodeNum, NextNodeNum, CurRouteName);
+		PathFinderPrivate::GetRouteNameFromNodesNum(InRouteMap, CurNodeNum, NextNodeNum, CurRouteName);
 		if (PreRouteName == "")
 			PreRouteName = CurRouteName;
 
@@ -324,16 +332,30 @@ float Util::Calculator::CalculateOVTT(const vector<NodeData>& InPath, const Rout
 		{
 			float WaitTime = 0.f;
 			if (InPath.at(i).Type == NodeType::BusStop)
-				WaitTime = Util::Converter::ConvertMinuteToHour(1.f / static_cast<float>(DataCenterInst->GetUserInputData().BusDispatchesPerHour));
+			{
+				if (CurRouteName.substr(0, 7) == "TownBus")
+				{
+					WaitTime = Util::Converter::ConvertMinuteToHour(1.f / static_cast<float>(DataCenterInst->GetUserInputData().TownBusDispatchesPerHour));
+					ReturnData.TransferTimeList.emplace_back(make_pair(ETransportationType::TownBus, InPath.at(i).TransferTime));
+				}
+				else
+				{
+					WaitTime = Util::Converter::ConvertMinuteToHour(1.f / static_cast<float>(DataCenterInst->GetUserInputData().BusDispatchesPerHour));
+					ReturnData.TransferTimeList.emplace_back(make_pair(ETransportationType::Bus, InPath.at(i).TransferTime));
+				}
+			}
 			else if (InPath.at(i).Type == NodeType::Station)
+			{
 				WaitTime = Util::Converter::ConvertMinuteToHour(1.f / static_cast<float>(DataCenterInst->GetUserInputData().TrainDispatchesPerHour));
+				ReturnData.TransferTimeList.emplace_back(make_pair(ETransportationType::Train, InPath.at(i).TransferTime));
+			}
 
-			OVTT += WaitTime + InPath.at(i).TransferTime;
-			++OutTransferCount;
+			ReturnData.OVTT += WaitTime + InPath.at(i).TransferTime;
+			++ReturnData.CTPI;
 		}
 	}
 
-	return OVTT;
+	return ReturnData;
 }
 
 bool Util::Compare::IsFloatEqual(float Value1, float Value2)

@@ -5,6 +5,7 @@
 using namespace std;
 
 struct NodeData;
+struct TransferData;
 
 namespace Util
 {
@@ -18,8 +19,8 @@ namespace Util
 
 	namespace Calculator
 	{
-		float CalculateIVTT(const LinkData& InLink, const RouteMap& InRouteMap, float& OutDistance);
-		float CalculateOVTT(const vector<NodeData>& InPath, const RouteMap& InRouteMap, uint16_t& OutTransferCount);
+		float CalcIVTT(const LinkData& InLink, const RouteMap& InRouteMap, float& OutDistance, string& OutRouteName);
+		TransferData CalcTransferData(const vector<NodeData>& InPath, const RouteMap& InRouteMap);
 	}
 
 	namespace Compare

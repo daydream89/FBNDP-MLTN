@@ -26,7 +26,7 @@ float FitnessCalculator::Calculate()
 {
 	float NetworkCost = PassageAssignment();
 
-	return CalculateFitness(NetworkCost);
+	return CalcFitness(NetworkCost);
 }
 
 float FitnessCalculator::PassageAssignment()
@@ -53,10 +53,10 @@ float FitnessCalculator::PassageAssignment()
 
 		SetPassageAssignmentForMNLModel(ShortestPathList, ODData.TrafficVolume);
 		
-		CalculateCustomerCost(ShortestPathList, SumofCustomerCost);
+		CalcCustomerCost(ShortestPathList, SumofCustomerCost);
 	}
 
-	return CalculateNetworkCost(SumofCustomerCost);
+	return CalcNetworkCost(SumofCustomerCost);
 }
 
 void FitnessCalculator::SetPassageAssignmentForMNLModel(vector<ShortestPathData>& InOutPathList, uint64_t TrafficVolume)
@@ -65,6 +65,7 @@ void FitnessCalculator::SetPassageAssignmentForMNLModel(vector<ShortestPathData>
 	if (InOutPathList.size() == 1)
 	{
 		InOutPathList.at(0).TrafficVolumeForPath = static_cast<uint32_t>(TrafficVolume);
+		CalcCurveNTransportationIVTT(InOutPathList.at(0));
 		return;
 	}
 	else if (InOutPathList.size() == 2)
@@ -72,10 +73,7 @@ void FitnessCalculator::SetPassageAssignmentForMNLModel(vector<ShortestPathData>
 		vector<LinkData> LinkDataList;
 		vector<DistanceData> DistanceDataList;
 		if (auto DataCenterInstance = DataCenter::GetInstance())
-		{
 			LinkDataList = DataCenterInstance->GetLinkData();
-			DistanceDataList = DataCenterInstance->GetDistanceData();
-		}
 
 		float Compare = InOutPathList.at(0).Cost - InOutPathList.at(1).Cost;
 		if (PassageTimeDiff < fabsf(Compare))
@@ -83,41 +81,13 @@ void FitnessCalculator::SetPassageAssignmentForMNLModel(vector<ShortestPathData>
 			InOutPathList.at(0).TrafficVolumeForPath = static_cast<uint32_t>(TrafficVolume);
 		}
 
-		auto PathData = InOutPathList.at(0);
-		float ActualDistance = 0.f, DirectDistance = 0.f;
-		float TrainTravelTime = 0.f;
-		for (uint64_t i = 0; i < PathData.Path.size() - 1; ++i)
-		{
-			NodeData CurNodeData = PathData.Path.at(i);
-			NodeData NextNodeData = PathData.Path.at(i + 1);
-			for (const auto& Link : LinkDataList)
-			{
-				if (Link.FromNodeNum == CurNodeData.Num && Link.ToNodeNum == NextNodeData.Num)
-				{
-					float Distance = 0.f;
-					float TravelTime = Util::Calculator::CalculateIVTT(Link, RouteDataMap, Distance);
-					ActualDistance += Distance;
-					if (CurNodeData.Type == NodeType::Station)
-						TrainTravelTime += TravelTime;
-					break;
-				}
-			}
-
-			for (const auto& Data : DistanceDataList)
-			{
-				if (Data.FromNodeNum == CurNodeData.Num && Data.ToNodeNum == NextNodeData.Num)
-				{
-					DirectDistance += Data.Distance;
-					break;
-				}
-			}
-		}
+		auto& PathData = InOutPathList.at(0);
 
 		float TravelTimeInVechicle = PathData.IVTT;		// IVTT
-		float TravelTimeOutVechicle = PathData.OVTT;	// OVTT
-		float CumulativeTransferPanaltyIndex = 1.f - expf(-static_cast<float>(PathData.CTPI));	// CTPI
-		float TrainTravelTimeRatio = TrainTravelTime / PathData.IVTT;	// RELI
-		float Curve = ActualDistance / DirectDistance;	// CIRC
+		float TravelTimeOutVechicle = PathData.Transfer.OVTT;	// OVTT
+		float CumulativeTransferPanaltyIndex = 1.f - expf(-static_cast<float>(PathData.Transfer.CTPI));	// CTPI
+		float Curve = CalcCurveNTransportationIVTT(PathData);	// CIRC
+		float TrainTravelTimeRatio = PathData.TrainIVTT / PathData.IVTT;	// RELI
 
 		UnityFunctionValue.emplace_back((MNLCoefData.IVTTCoef * TravelTimeInVechicle) + (MNLCoefData.OVTTCoef * TravelTimeOutVechicle) + (MNLCoefData.CTPICoef * CumulativeTransferPanaltyIndex)
 			+ (MNLCoefData.RELICoef * TrainTravelTimeRatio) + (MNLCoefData.CIRCCoef * Curve));
@@ -136,7 +106,52 @@ void FitnessCalculator::SetPassageAssignmentForMNLModel(vector<ShortestPathData>
 	InOutPathList.at(1).TrafficVolumeForPath = static_cast<uint32_t>(TrafficVolume) - InOutPathList.at(0).TrafficVolumeForPath;
 }
 
-void FitnessCalculator::CalculateCustomerCost(const vector<ShortestPathData>& InPathList, float& OutCostSum)
+float FitnessCalculator::CalcCurveNTransportationIVTT(ShortestPathData& PathData)
+{
+	vector<DistanceData> DistanceDataList;
+	if (auto DataCenterInstance = DataCenter::GetInstance())
+		DistanceDataList = DataCenterInstance->GetDistanceData();
+
+	float ActualDistance = 0.f, DirectDistance = 0.f;
+	for (uint64_t i = 0; i < PathData.Path.size() - 1; ++i)
+	{
+		NodeData CurNodeData = PathData.Path.at(i);
+		NodeData NextNodeData = PathData.Path.at(i + 1);
+		for (const auto& Link : LinkDataList)
+		{
+			if (Link.FromNodeNum == CurNodeData.Num && Link.ToNodeNum == NextNodeData.Num)
+			{
+				string RouteName = "";
+				float Distance = 0.f;
+				float TravelTime = Util::Calculator::CalcIVTT(Link, RouteDataMap, Distance, RouteName);
+				ActualDistance += Distance;
+				if (CurNodeData.Type == NodeType::Station && NextNodeData.Type == NodeType::Station)
+					PathData.TrainIVTT += TravelTime;
+				else if (CurNodeData.Type == NodeType::BusStop || NextNodeData.Type == NodeType::BusStop)
+				{
+					if (RouteName.substr(0, 7) == "TownBus")
+						PathData.TownBusIVTT = TravelTime;
+					else
+						PathData.BusIVTT = TravelTime;
+				}
+				break;
+			}
+		}
+
+		for (const auto& Data : DistanceDataList)
+		{
+			if (Data.FromNodeNum == CurNodeData.Num && Data.ToNodeNum == NextNodeData.Num)
+			{
+				DirectDistance += Data.Distance;
+				break;
+			}
+		}
+	}
+
+	return ActualDistance / DirectDistance;
+}
+
+void FitnessCalculator::CalcCustomerCost(const vector<ShortestPathData>& InPathList, float& OutCostSum)
 {
 	// 이거 계산하려고 봤더니 초기에 IVTT, OVTT 계산할 때부터 잡아줘야 할거 같은데...?
 	// IVTT, OVTT를 노선별로 분할되어 저장해두어야 마을버스/버스/전철의 비용을 각각 따로 계산할 수 있음.
@@ -149,20 +164,56 @@ void FitnessCalculator::CalculateCustomerCost(const vector<ShortestPathData>& In
 
 	for (auto& Path : InPathList)
 	{
+		float InitialDispatchesPerHour = 0.f;
+		const auto& FirstNode = Path.Path.at(0);
+		if (FirstNode.Type == NodeType::Station)
+			InitialDispatchesPerHour = static_cast<float>(UserInput.TrainDispatchesPerHour);
+		else
+		{
+			for (const auto& Link : LinkDataList)
+			{
+				if (Link.FromNodeNum == FirstNode.Num && Link.ToNodeNum == Path.Path.at(1).Num)
+				{
+					string RouteName = "";
+					float Dist = 0.f;
+					Util::Calculator::CalcIVTT(Link, RouteDataMap, Dist, RouteName);
+					if (RouteName.substr(0, 7) == "TownBus")
+						InitialDispatchesPerHour = static_cast<float>(UserInput.TownBusDispatchesPerHour);
+					else
+						InitialDispatchesPerHour = static_cast<float>(UserInput.BusDispatchesPerHour);
+					
+					break;
+				}
+			}
+		}
+
+		float TransferWaitTimeCost = 0.f;
+		float TransferTime = 0.f;
+		for (const auto& TransferTimeData : Path.Transfer.TransferTimeList)
+		{
+			TransferTime += TransferTimeData.second;
+			switch (TransferTimeData.first)
+			{
+				case ETransportationType::Train:	TransferWaitTimeCost += UserInput.WaitTimeCost / (2 * UserInput.TrainDispatchesPerHour);
+				case ETransportationType::Bus:		TransferWaitTimeCost += UserInput.WaitTimeCost / (2 * UserInput.BusDispatchesPerHour);
+				case ETransportationType::TownBus:	TransferWaitTimeCost += UserInput.WaitTimeCost / (2 * UserInput.TownBusDispatchesPerHour);
+			}
+		}
+
 		float CustomerCost = 0.f;
-		CustomerCost += UserInput.TownBusTimeCost;// *IVTTForTownBus;
-		CustomerCost += UserInput.BusTimeCost;// *IVTTForBus;
-		CustomerCost += UserInput.TrainTimeCost;// *IVTTForTrain;
-		CustomerCost += UserInput.WaitTimeCost;// / (2 * InitialDispatchesPerHour);
-		CustomerCost;	// 환승 시간 비용
-		CustomerCost += UserInput.WaitTimeCost;// / (2 * DispatchesPerHour);	// 이거 환승할때마다 분할되어 있어야 할 것 같은데...
+		CustomerCost += UserInput.TownBusTimeCost * Path.TownBusIVTT;
+		CustomerCost += UserInput.BusTimeCost * Path.BusIVTT;
+		CustomerCost += UserInput.TrainTimeCost * Path.TrainIVTT;
+		CustomerCost += UserInput.WaitTimeCost / (2 * InitialDispatchesPerHour);
+		CustomerCost += UserInput.TransferTimeCost * TransferTime;
+		CustomerCost += TransferWaitTimeCost;
 		CustomerCost *= static_cast<float>(Path.TrafficVolumeForPath);
 
 		OutCostSum += CustomerCost;
 	}
 }
 
-float FitnessCalculator::CalculateNetworkCost(float SumofCustomerCost)
+float FitnessCalculator::CalcNetworkCost(float SumofCustomerCost)
 {
 	UserInputData UserInput;
 	if (auto DataCenterInstance = DataCenter::GetInstance())
@@ -171,13 +222,38 @@ float FitnessCalculator::CalculateNetworkCost(float SumofCustomerCost)
 	}
 
 	float TotalCost = SumofCustomerCost;
-	//for(auto Path : 마을버스노선list)
-		TotalCost += 2 * UserInput.TownBusOperationCost * UserInput.TownBusDispatchesPerHour;// *마을버스의 편도 노선 길이
+	for (const auto& RoutePair : RouteDataMap)
+	{
+		if (RoutePair.first.substr(0, 7) == "TownBus")	// todo. TownBus 스트링 따로 빼서 지정할 수 있도록 할 것.
+		{
+			float LengthOfTownBusLine = 0.f;
+			for (const auto& RouteOrderPair : RoutePair.second)
+			{
+				auto NextOrderPair = RoutePair.second.find(RouteOrderPair.first + 1);
+				if (NextOrderPair == RoutePair.second.end())
+					break;
+
+				for (const LinkData& Link : LinkDataList)
+				{
+					if (RouteOrderPair.second.Node == Link.FromNodeNum && NextOrderPair->second.Node == Link.ToNodeNum)
+					{
+						LengthOfTownBusLine += Link.Length;
+						break;
+					}
+				}
+			}
+
+			TotalCost += 2 * UserInput.TownBusOperationCost * UserInput.TownBusDispatchesPerHour * (LengthOfTownBusLine / 2);
+			TotalLengthOfTownBusLine += LengthOfTownBusLine;
+		}
+	}
+
+	printf("Calculated NetworkCost : %f\n", TotalCost);
 
 	return TotalCost;
 }
 
-float FitnessCalculator::CalculateFitness(float NetworkCost)
+float FitnessCalculator::CalcFitness(float NetworkCost)
 {
 	UserInputData UserInput;
 	if (auto DataCenterInstance = DataCenter::GetInstance())
@@ -185,8 +261,13 @@ float FitnessCalculator::CalculateFitness(float NetworkCost)
 		UserInput = DataCenterInstance->GetUserInputData();
 	}
 
+	float Value1 = 0.5f * static_cast<float>(UserInput.NumberOfBusesGiven) * UserInput.TownBusSpeed;
+	float Value2 = static_cast<float>(UserInput.TownBusDispatchesPerHour) * TotalLengthOfTownBusLine;
+
 	float Fitness = 1 / (UserInput.PanaltyFactor * NetworkCost);
-	// 추가로 다른 값들 더 들어가야 함..
+	Fitness += UserInput.OperatingHoursPerDay * (UserInput.PanaltyFactor * (Value1 - Value2));
+
+	printf("Calculated Fitness : %f\n", Fitness);
 
 	return Fitness;
 }

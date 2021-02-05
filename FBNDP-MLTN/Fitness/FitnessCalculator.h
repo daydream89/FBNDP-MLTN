@@ -17,9 +17,11 @@ private:
 	float PassageAssignment();
 	void SetPassageAssignmentForMNLModel(vector<ShortestPathData>& InOutPathList, uint64_t TrafficVolume);
 
-	void CalculateCustomerCost(const vector<ShortestPathData>& InPathList, float& OutCostSum);
-	float CalculateNetworkCost(float SumofCustomerCost);
-	float CalculateFitness(float NetworkCost);
+	float CalcCurveNTransportationIVTT(ShortestPathData& PathData);
+
+	void CalcCustomerCost(const vector<ShortestPathData>& InPathList, float& OutCostSum);
+	float CalcNetworkCost(float SumofCustomerCost);
+	float CalcFitness(float NetworkCost);
 
 	bool FindNodeNumberFromGraphData(uint64_t FromNodeNum, uint64_t ToNodeNum);
 
@@ -33,6 +35,7 @@ private:
 	vector<NodeData> GraphData;
 	vector<LinkData> LinkDataList;
 	RouteMap RouteDataMap;
+	float TotalLengthOfTownBusLine = 0.f;
 	uint64_t NumberOfPath = 2;
 	
 	float PassageTimeDiff = 5.f;

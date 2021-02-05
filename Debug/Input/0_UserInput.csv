@@ -11,6 +11,9 @@ TownBusTimeCost,10000
 BusTimeCost,10000
 TrainTimeCost,10000
 WaitTimeCost,10000
+TransferTimeCost,10000
 TownBusSpeed,30
 TownBusOperationCost,1600
 TownBusDispatchesPerHour,12
+NumberOfBusesGiven,50
+OperatingHoursPerDay,10

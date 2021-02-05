@@ -189,6 +189,10 @@ void DataCenter::SetUserInputData(const FileDataList& InData)
 		{
 			UserInput.WaitTimeCost = stof(Value);
 		}
+		else if (Name == "TransferTimeCost")
+		{
+			UserInput.TransferTimeCost = stof(Value);
+		}
 		else if (Name == "TownBusSpeed")
 		{
 			UserInput.TownBusSpeed = stof(Value);
@@ -200,6 +204,14 @@ void DataCenter::SetUserInputData(const FileDataList& InData)
 		else if (Name == "TownBusDispatchesPerHour")
 		{
 			UserInput.TownBusDispatchesPerHour = static_cast<uint64_t>(stoul(Value));
+		}
+		else if (Name == "NumberOfBusesGiven")
+		{
+			UserInput.NumberOfBusesGiven = static_cast<uint64_t>(stoul(Value));
+		}
+		else if (Name == "OperatingHoursPerDay")
+		{
+			UserInput.OperatingHoursPerDay = stof(Value);
 		}
 	}
 }
