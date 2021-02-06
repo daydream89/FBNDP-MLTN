@@ -24,16 +24,14 @@ int main(int argc, char* argv[])
 	int PopulationNum = 8;
 	// Generate initial population
 	Population InitialPopulation(PopulationNum);
-	//InitialPopulation.Selection();
-	//InitialPopulation.Crossover(InitialPopulation.GetSelectedChromosomePair(0));
 	InitialPopulation.GetNextGeneration();
 
 	// Calculate fitness
 	for (int i = 0; i < PopulationNum; ++i)
 	{
 		auto ChromosomeData = InitialPopulation.GetChromosome(i);
-		FitnessCalculator Fitness(ChromosomeData.GetChromosome(), 2);
-		Fitness.Calculate();
+		//FitnessCalculator Fitness(ChromosomeData.GetChromosome(), 2);
+		//Fitness.Calculate();
 	}
 
 	return 0;

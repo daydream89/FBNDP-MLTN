@@ -6,8 +6,11 @@
 
 #define DEBUG_MODE 0
 
-Chromosome::Chromosome(vector<ShortestPathData> NewPath)
+Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>& BusNode, const vector<NodeData>& TownBusNodes, vector<ShortestPathData> NewPath)
 {
+	this->RailNode.assign(RailNode.begin(), RailNode.end());
+	this->BusNode.assign(BusNode.begin(), BusNode.end());
+	this->TownBusNode.assign(TownBusNodes.begin(), TownBusNodes.end());
 	RouteDataList.clear();
 	RouteDataList.assign(NewPath.begin(), NewPath.end());
 
@@ -15,14 +18,43 @@ Chromosome::Chromosome(vector<ShortestPathData> NewPath)
 	
 	for (const auto& RouteIter : RouteDataList)
 	{
-		ChromosomeNodeList.insert(ChromosomeNodeList.end(), RouteIter.Path.begin(), RouteIter.Path.end());
+		for (const auto& PathNodes : RouteIter.Path)
+		{
+			bool IsTownBusStop = false;
+			if (PathNodes.Type == NodeType::BusStop)
+			{
+				for (const auto& TBNodesIter : TownBusNode)
+				{
+					if (TBNodesIter.Num == PathNodes.Num)
+					{
+						IsTownBusStop = true;
+						break;
+					}
+				}
+				if (IsTownBusStop)
+				{
+					ChromosomeNodeList.emplace_back(make_pair(PathNodes, true));
+				}
+				else
+				{
+					ChromosomeNodeList.emplace_back(make_pair(PathNodes, false));
+				}
+			}
+			else if (PathNodes.Type == NodeType::Station)
+			{
+				ChromosomeNodeList.emplace_back(make_pair(PathNodes, true));
+			}
+		}
+		//ChromosomeNodeList.insert(ChromosomeNodeList.end(), RouteIter.Path.begin(), RouteIter.Path.end());
 	}
 }
-Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>& BusNode):bAllRailStationHaveRoute(false),BusRouteNum(0)
+Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>& BusNode, const vector<NodeData>& TownBusNodes)
+	:bAllRailStationHaveRoute(false),BusRouteNum(0)
 {
 	this->RailNode.assign(RailNode.begin(), RailNode.end());
 	this->BusNode.assign(BusNode.begin(), BusNode.end());
-	CopiedBusNode.assign(BusNode.begin(), BusNode.end());
+	this->TownBusNode.assign(TownBusNodes.begin(), TownBusNodes.end());
+	CopiedBusNode.assign(TownBusNode.begin(), TownBusNode.end());
 	for (const auto& CheckRailNode : RailNode)
 		RailStationSelected[CheckRailNode.Num] = false;
 
@@ -108,6 +140,7 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 
 		}
 
+		/*Delete Selecte Bus Nodes*/
 		for (const NodeData& BusRouteNodeNum : SelectedBus.BusRouteData.Path)
 		{
 			for (vector<NodeData>::const_iterator NodeIter = CopiedBusNode.begin(); NodeIter != CopiedBusNode.end();) //B' = \i
@@ -129,7 +162,34 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 	
 	for (const auto& RouteIter : RouteDataList)
 	{
-		ChromosomeNodeList.insert(ChromosomeNodeList.end(), RouteIter.Path.begin(), RouteIter.Path.end());
+		for (const auto& PathNodes : RouteIter.Path)
+		{
+			bool IsTownBusStop = false;
+			if (PathNodes.Type == NodeType::BusStop)
+			{
+				for (const auto& TBNodesIter : TownBusNode)
+				{
+					if (TBNodesIter.Num == PathNodes.Num)
+					{
+						IsTownBusStop = true;
+						break;
+					}
+				}
+				if (IsTownBusStop)
+				{
+					ChromosomeNodeList.emplace_back(make_pair(PathNodes, true));
+				}
+				else
+				{
+					ChromosomeNodeList.emplace_back(make_pair(PathNodes, false));
+				}
+			}
+			else if (PathNodes.Type == NodeType::Station)
+			{
+				ChromosomeNodeList.emplace_back(make_pair(PathNodes, true));
+			}
+		}
+		//ChromosomeNodeList.insert(ChromosomeNodeList.end(), RouteIter.Path.begin(), RouteIter.Path.end());
 	}
 }
 

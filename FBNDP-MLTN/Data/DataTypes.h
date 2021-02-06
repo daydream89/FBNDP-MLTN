@@ -121,6 +121,7 @@ struct UserInputData
 	float PanaltyFactor = 0.0001f;			// 적합도 함수에서 사용하는 값
 	uint64_t NumberOfBusesGiven = 50;		// 주어진 버스 대수
 	float OperatingHoursPerDay = 10.f;		// 하루 운영 시간
+	vector<uint64_t> TownBusNodesNum;		// 마을 버스가 정차하는 노드들
 };
 
 typedef vector<vector<string>> FileDataList;

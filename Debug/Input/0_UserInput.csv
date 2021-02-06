@@ -17,3 +17,4 @@ TownBusOperationCost,1600
 TownBusDispatchesPerHour,12
 NumberOfBusesGiven,50
 OperatingHoursPerDay,10
+TownBusNodesNum,10,1,2,3,4,5,6,7,8,9,10

@@ -213,5 +213,12 @@ void DataCenter::SetUserInputData(const FileDataList& InData)
 		{
 			UserInput.OperatingHoursPerDay = stof(Value);
 		}
+		else if (Name == "TownBusNodesNum")
+		{
+			for (uint64_t i = 0; i < stoull(Value); ++i)
+			{
+				UserInput.TownBusNodesNum.emplace_back(stoull(RowData.at(i + 2)));
+			}
+		}
 	}
 }

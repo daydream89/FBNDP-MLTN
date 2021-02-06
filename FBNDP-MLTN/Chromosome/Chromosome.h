@@ -16,23 +16,20 @@ struct SelectedBusNodeData
 class Chromosome
 {
 public:
-	Chromosome(vector<ShortestPathData> NewPath); /*For Children*/
-	Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>& BusNode);
+	//vector<ShortestPathData> NewPath); /*For Children*/
+	Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>& BusNode, const vector<NodeData>& TownBusNodes, vector<ShortestPathData> NewPath);
+	Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>& BusNode, const vector<NodeData>&TownBusNodes);
 	uint64_t GetRouteNum(){ return RouteDataList.size(); }
 	vector<ShortestPathData> GetRoute(){ return RouteDataList; }
-	vector<NodeData> GetChromosome() { return ChromosomeNodeList; }
+	vector<pair<NodeData, bool>> GetChromosome() { return ChromosomeNodeList; }
 	void RemoveOverlapedRoute(void);
 	
 private:
 	NodeData SelectRailNode();
 	SelectedBusNodeData SelectBusNode(const NodeData& SelectedRailNode);
 
-
-	void CalculateNetworkCost();
-	void SelectMinNetworkCost();
-
-
 	vector<NodeData> BusNode;	//flowchart B
+	vector<NodeData> TownBusNode;	//flowchart B
 	vector<NodeData> RailNode;	//Rail Station Nodes
 
 	map<uint64_t, bool> RailStationSelected;
@@ -42,5 +39,5 @@ private:
 
 	uint64_t BusRouteNum; //flowchart k
 	vector<ShortestPathData> RouteDataList;
-	vector<NodeData> ChromosomeNodeList;
+	vector<pair<NodeData, bool>> ChromosomeNodeList;
 };

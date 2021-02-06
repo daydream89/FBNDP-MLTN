@@ -11,7 +11,7 @@ Population::Population(uint64_t MemberNum)
 	SetNodes();
 	for (uint64_t i = 0; i < MemberNum; ++i)
 	{
-		ChromosomeArray.emplace_back(Chromosome(RailNode, BusNode));
+		ChromosomeArray.emplace_back(Chromosome(RailNode, BusNode, TownBusNode));
 	}
 	assert(GetCurrentChromosomeNum() == MemberNum);
 	printf("All Initial Population Created\n");
@@ -70,11 +70,11 @@ vector<uint64_t> Population::GetOverlappedNodeNum(Chromosome Parent)
 	for (const auto& ChromosomeNodeIter : Parent.GetChromosome())
 	{
 		map<uint64_t, uint64_t>::iterator it;
-		it = NodeCountMap.find(ChromosomeNodeIter.Num);
+		it = NodeCountMap.find(ChromosomeNodeIter.first.Num);
 		if (it == NodeCountMap.end())
 		{
 			/*First Node Num - (not founded)*/
-			NodeCountMap.insert(make_pair(ChromosomeNodeIter.Num, 1));
+			NodeCountMap.insert(make_pair(ChromosomeNodeIter.first.Num, 1));
 		}
 		else
 		{
@@ -84,7 +84,7 @@ vector<uint64_t> Population::GetOverlappedNodeNum(Chromosome Parent)
 	}
 	for (const auto& ChromosomeNodeIter : Parent.GetChromosome())
 	{
-		uint64_t CurrentNodeNum = ChromosomeNodeIter.Num;
+		uint64_t CurrentNodeNum = ChromosomeNodeIter.first.Num;
 		map<uint64_t, uint64_t>::iterator it;
 		it = NodeCountMap.find(CurrentNodeNum);
 		if (it == NodeCountMap.end())
@@ -116,7 +116,7 @@ void Population::Crossover(Chromosome P1, Chromosome P2)
 	ShortestPathData ShortestPath;
 	while (P1CurPosition < P1.GetChromosome().size())//P1RouteNum != 0)
 	{
-		NodeData FirstNode = P1.GetChromosome().at(P1CurPosition);
+		NodeData FirstNode = P1.GetChromosome().at(P1CurPosition).first;
 		if (FirstNode.Type == NodeType::BusStop && P1OverlappedNodeNum.at(P1CurPosition) == 0)
 		{
 			++P1CurPosition;
@@ -214,7 +214,7 @@ void Population::Crossover(Chromosome P1, Chromosome P2)
 				int NodePos = 0;
 				for (const auto& NodeIter : P1.GetChromosome())
 				{
-					if (NodeIter.Num == FirstNode.Num)
+					if (NodeIter.first.Num == FirstNode.Num)
 						if (P1OverlappedNodeNum.at(NodePos) > 0)
 							--P1OverlappedNodeNum.at(NodePos);
 					++NodePos;
@@ -222,7 +222,7 @@ void Population::Crossover(Chromosome P1, Chromosome P2)
 				NodePos = 0;
 				for (const auto& NodeIter : P2.GetChromosome())
 				{
-					if (NodeIter.Num == FirstNode.Num)
+					if (NodeIter.first.Num == FirstNode.Num)
 						if (P2OverlappedNodeNum.at(NodePos) > 0)
 							--P2OverlappedNodeNum.at(NodePos);
 					++NodePos;
@@ -240,7 +240,7 @@ void Population::Crossover(Chromosome P1, Chromosome P2)
 			} while (FoundedNextNode.Type != NodeType::Station);
 		}
 	}
-	Chromosome F1(NewPathData);
+	Chromosome F1(RailNode, BusNode, TownBusNode, NewPathData);
 	ChildrenChromosomeArray.emplace_back(F1);
 }
 
@@ -248,15 +248,24 @@ void Population::SetNodes()
 {
 	if (auto* DataCenter = DataCenter::GetInstance())
 	{
+		UserInputData UserInput;
+		UserInput = DataCenter->GetUserInputData();
+
 		for (auto NodeIter : DataCenter->GetNodeData())
 		{
 			if (NodeIter.Type == NodeType::BusStop)
+			{
 				BusNode.emplace_back(NodeIter);
+				for (uint64_t TownBusNum : UserInput.TownBusNodesNum)
+				{
+					if (TownBusNum == NodeIter.Num)
+						TownBusNode.emplace_back(NodeIter);
+				}
+			}
 			else if (NodeIter.Type == NodeType::Station)
 				RailNode.emplace_back(NodeIter);
 			else
 				fprintf(stderr, "Unkonwn Node Type..?: %d\n", NodeIter.Type);
-
 		}
 	}
 }
@@ -273,7 +282,7 @@ void Population::PrintCurrentPopulationData()
 			WriteFile << ++i << "th Chromosome: ";
 			for (const auto& NodeArrayIter : ChromosomeArrayIter.GetChromosome())
 			{
-				WriteFile << NodeArrayIter.Num << " ";
+				WriteFile << NodeArrayIter.first.Num << " ";
 			}
 			WriteFile << "\n";
 		}

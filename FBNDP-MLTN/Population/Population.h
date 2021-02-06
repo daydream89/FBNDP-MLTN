@@ -11,7 +11,7 @@ public:
 	Population(uint64_t MemberNum);
 	uint64_t GetCurrentChromosomeNum() { return ChromosomeArray.size(); }
 	Chromosome GetChromosome(uint64_t ChromosomeNum) { return ChromosomeArray.at(ChromosomeNum); }
-	vector<NodeData> GetChromosomeData(uint64_t ChromosomeNum)	/*ChromosomeNum번째의 ChromosomeData를 얻음*/
+	vector<pair<NodeData,bool>> GetChromosomeData(uint64_t ChromosomeNum)	/*ChromosomeNum번째의 ChromosomeData를 얻음*/
 	{
 		return ChromosomeArray.at(ChromosomeNum).GetChromosome();
 	}
@@ -32,6 +32,7 @@ private:
 	vector<Chromosome> ChildrenChromosomeArray; /* for Crossover..?*/
 	vector<pair<Chromosome, Chromosome>> SelectionCompair;
 	vector<NodeData> BusNode;
+	vector<NodeData> TownBusNode;
 	vector<NodeData> RailNode;
 
 	vector<uint64_t> GetOverlappedNodeNum(Chromosome Parent);
