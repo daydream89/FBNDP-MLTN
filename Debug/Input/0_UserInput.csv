@@ -15,5 +15,6 @@ TransferTimeCost,10000
 TownBusSpeed,30
 TownBusOperationCost,1600
 TownBusDispatchesPerHour,12
+PanaltyFactor,0.0001
 NumberOfBusesGiven,50
 OperatingHoursPerDay,10
