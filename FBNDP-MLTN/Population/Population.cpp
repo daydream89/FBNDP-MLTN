@@ -17,6 +17,16 @@ Population::Population(uint64_t MemberNum)
 	printf("All Initial Population Created\n");
 	PrintCurrentPopulationData();
 }
+void Population::GetNextGeneration()
+{
+	Selection();
+	for (uint64_t i = 0; i < SelectionCompair.size(); ++i)
+	{
+		Crossover(SelectionCompair.at(i).first, SelectionCompair.at(i).second);
+	}
+
+	/*TODO: Print Parent Chromosomes and make F1 to Parents, F1 must be cleared*/
+}
 void Population::Selection()
 {
 	random_device rd;
@@ -90,11 +100,8 @@ vector<uint64_t> Population::GetOverlappedNodeNum(Chromosome Parent)
 
 	return OverlappedNodeNum;
 }
-void Population::Crossover(pair<Chromosome, Chromosome> Parents)
+void Population::Crossover(Chromosome P1, Chromosome P2)
 {
-	Chromosome P1 = Parents.first;
-	Chromosome P2 = Parents.second;
-
 	vector<uint64_t> P1OverlappedNodeNum = GetOverlappedNodeNum(P1);
 	vector<uint64_t> P2OverlappedNodeNum = GetOverlappedNodeNum(P2);
 
@@ -123,7 +130,7 @@ void Population::Crossover(pair<Chromosome, Chromosome> Parents)
 		}
 		else /* Find the shortest path include first node and add to F1*/
 		{
-			/*TODO: Add FirstNode To F1*/
+			/* Add FirstNode To F1 */
 			ShortestPath.Path.emplace_back(FirstNode);
 
 			NodeData FoundedNextNode;
@@ -220,7 +227,7 @@ void Population::Crossover(pair<Chromosome, Chromosome> Parents)
 							--P2OverlappedNodeNum.at(NodePos);
 					++NodePos;
 				}
-				/*TODO: add FoundedNextNode to F1 or F1's Routes Vector*/
+				/* add FoundedNextNode to F1 or F1's Routes Vector */
 				ShortestPath.Path.emplace_back(FoundedNextNode);
 				FirstNode = FoundedNextNode;
 
@@ -234,7 +241,7 @@ void Population::Crossover(pair<Chromosome, Chromosome> Parents)
 		}
 	}
 	Chromosome F1(NewPathData);
-
+	ChildrenChromosomeArray.emplace_back(F1);
 }
 
 void Population::SetNodes()

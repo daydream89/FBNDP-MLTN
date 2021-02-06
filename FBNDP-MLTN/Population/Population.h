@@ -16,19 +16,20 @@ public:
 		return ChromosomeArray.at(ChromosomeNum).GetChromosome();
 	}
 
-	void Selection(void);
-	pair<Chromosome, Chromosome> GetSelectedChromosomePair(int n) { return SelectionCompair.at(n); }
-	void Crossover(pair<Chromosome, Chromosome> Parents);
+	void GetNextGeneration(void);
+	//pair<Chromosome, Chromosome> GetSelectedChromosomePair(int n) { return SelectionCompair.at(n); }
 
 	/*TODO
 	*  Crossover, Mutation, GetNextGeneration - TODO: Selection, Crossover and Mutation should be private. Ther are used in GetNextGeneration.
 	*/
 private:
 	void SetNodes(void);
+	void Selection(void);
+	void Crossover(Chromosome P1, Chromosome P2);
 
 	uint64_t MaxChromosomeNum;
 	vector<Chromosome> ChromosomeArray;
-	vector<Chromosome> ChildChromosomeArray; /* for Crossover..?*/
+	vector<Chromosome> ChildrenChromosomeArray; /* for Crossover..?*/
 	vector<pair<Chromosome, Chromosome>> SelectionCompair;
 	vector<NodeData> BusNode;
 	vector<NodeData> RailNode;
