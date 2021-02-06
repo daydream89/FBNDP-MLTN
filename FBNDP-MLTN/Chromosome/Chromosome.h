@@ -16,6 +16,7 @@ struct SelectedBusNodeData
 class Chromosome
 {
 public:
+	Chromosome(vector<ShortestPathData> NewPath); /*For Children*/
 	Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>& BusNode);
 	uint64_t GetRouteNum(){ return RouteDataList.size(); }
 	vector<ShortestPathData> GetRoute(){ return RouteDataList; }

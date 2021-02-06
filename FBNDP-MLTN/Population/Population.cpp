@@ -92,12 +92,6 @@ vector<uint64_t> Population::GetOverlappedNodeNum(Chromosome Parent)
 }
 void Population::Crossover(pair<Chromosome, Chromosome> Parents)
 {
-	struct CrossoverData {
-		Chromosome ChromosomeData;
-		vector<uint64_t> OverlappedNodeNum;
-		CrossoverData(Chromosome Parent, vector<uint64_t> Overlapped) : ChromosomeData(Parent), OverlappedNodeNum(Overlapped) {};
-	};
-
 	Chromosome P1 = Parents.first;
 	Chromosome P2 = Parents.second;
 
@@ -110,40 +104,136 @@ void Population::Crossover(pair<Chromosome, Chromosome> Parents)
 	vector<ShortestPathData> P1Routes = P1.GetRoute();
 	vector<ShortestPathData> P2Routes = P2.GetRoute();
 
-	CrossoverData C1(P1, P1OverlappedNodeNum);
-	CrossoverData C2(P2, P2OverlappedNodeNum);
-
-	uint64_t CurrentPosition = 0; // flowchart o
-	while (P1RouteNum != 0)
+	uint64_t P1CurPosition = 0; 
+	vector<ShortestPathData> NewPathData;
+	ShortestPathData ShortestPath;
+	while (P1CurPosition < P1.GetChromosome().size())//P1RouteNum != 0)
 	{
-		NodeData FirstNode = C1.ChromosomeData.GetChromosome().at(CurrentPosition);
-		if (FirstNode.Type == NodeType::Station)
+		NodeData FirstNode = P1.GetChromosome().at(P1CurPosition);
+		if (FirstNode.Type == NodeType::BusStop && P1OverlappedNodeNum.at(P1CurPosition) == 0)
 		{
-			P1.GetChromosome().erase(C1.ChromosomeData.GetChromosome().begin() + CurrentPosition);
+			++P1CurPosition;
 			continue;
 		}
-		else
+		else if (FirstNode.Type == NodeType::Station)
 		{
-			float MinRouteLength = INFINITY;
-			ShortestPathData ShortestPath;
-			for (const auto& PathDataIter : P1Routes)
-			{
-				for (const auto& NodeIter : PathDataIter.Path)
+			P1OverlappedNodeNum.at(P1CurPosition) = 0;
+			++P1CurPosition;
+			continue;
+		}
+		else /* Find the shortest path include first node and add to F1*/
+		{
+			/*TODO: Add FirstNode To F1*/
+			ShortestPath.Path.emplace_back(FirstNode);
+
+			NodeData FoundedNextNode;
+			do {
+				float MinRouteLength = INFINITY;
+				uint64_t P1RouteStartPos = 0;
+				for (const auto& PathDataIter : P1Routes) /*Find First Node in P1*/
+				{
+					bool NodeFoundFlag = false;
+					bool FoundShortestPathFlag = false;
+					uint64_t P1FoundedNodePos = P1RouteStartPos;
+					for (const auto& NodeIter : PathDataIter.Path)
+					{
+						if (P1OverlappedNodeNum.at(P1FoundedNodePos) == 0) /*skip overlap count is 0 Node*/
+						{
+							++P1FoundedNodePos;
+							continue;
+						}
+						if (FoundShortestPathFlag && NodeFoundFlag) /*Found Shortest Path include FirstNode */
+						{
+							FoundedNextNode = NodeIter;
+							break;
+						}
+						if (!FoundShortestPathFlag && NodeFoundFlag) /*Found Including First Node Path, But Not Shortest Path*/
+							break;
+						if (NodeIter.Num == FirstNode.Num) //&& P1OverlappedNodeNum.at(P1FoundedNodePos) > 0)
+						{
+							NodeFoundFlag = true;
+							if (MinRouteLength > PathDataIter.Cost)
+							{
+								/*Find Route Include First Node*/
+								MinRouteLength = PathDataIter.Cost;
+								//ShortestPath = PathDataIter;
+								FoundShortestPathFlag = true;
+							}
+						}
+						++P1FoundedNodePos;
+					}
+					P1RouteStartPos += PathDataIter.Path.size();
+				}
+				uint64_t P2RouteStartPos = 0;
+				for (const auto& PathDataIter : P2Routes) /*Find First Node in P2*/
+				{
+					bool NodeFoundFlag = false;
+					bool FoundShortestPathFlag = false;
+					uint64_t P2FoundedNodePos = P2RouteStartPos;
+					for (const auto& NodeIter : PathDataIter.Path)
+					{
+						if (P2OverlappedNodeNum.at(P2FoundedNodePos) == 0) /*skip overlap count is 0 Node*/
+						{
+							++P2FoundedNodePos;
+							continue;
+						}
+						if (FoundShortestPathFlag && NodeFoundFlag) /*Found Shortest Path include FirstNode */
+						{
+							FoundedNextNode = NodeIter;
+							break;
+						}
+						if (!FoundShortestPathFlag && NodeFoundFlag) /*Found Including First Node Path, But Not Shortest Path*/
+							break;
+						if (NodeIter.Num == FirstNode.Num) //&& P2OverlappedNodeNum.at(P2FoundedNodePos) > 0)
+						{
+							NodeFoundFlag = true;
+							if (MinRouteLength > PathDataIter.Cost)
+							{
+								/*Find Route Include First Node*/
+								MinRouteLength = PathDataIter.Cost;
+								//ShortestPath = PathDataIter;
+								FoundShortestPathFlag = true;
+							}
+						}
+						++P2FoundedNodePos;
+					}
+					P2RouteStartPos += PathDataIter.Path.size();
+				}
+#if DEBUG_MODE
+				printf("Founded Next Node num: %llu\n", FoundedNextNode.Num);
+#endif
+
+				/* Decrease P1 & P2 OverlappedNodeNum (over 0)*/
+				int NodePos = 0;
+				for (const auto& NodeIter : P1.GetChromosome())
 				{
 					if (NodeIter.Num == FirstNode.Num)
-					{
-						if (MinRouteLength > PathDataIter.Cost)
-						{
-							/*Find Route Include First Node*/
-							MinRouteLength = PathDataIter.Cost;
-							ShortestPath = PathDataIter;
-						}
-					}
+						if (P1OverlappedNodeNum.at(NodePos) > 0)
+							--P1OverlappedNodeNum.at(NodePos);
+					++NodePos;
 				}
-			}
-		}
+				NodePos = 0;
+				for (const auto& NodeIter : P2.GetChromosome())
+				{
+					if (NodeIter.Num == FirstNode.Num)
+						if (P2OverlappedNodeNum.at(NodePos) > 0)
+							--P2OverlappedNodeNum.at(NodePos);
+					++NodePos;
+				}
+				/*TODO: add FoundedNextNode to F1 or F1's Routes Vector*/
+				ShortestPath.Path.emplace_back(FoundedNextNode);
+				FirstNode = FoundedNextNode;
 
+				/*If FoundedNextNode is Rail Station, add RoutesData*/
+				if (FoundedNextNode.Type == NodeType::Station)
+				{
+					NewPathData.emplace_back(ShortestPath);
+					ShortestPath.Path.clear();
+				}
+			} while (FoundedNextNode.Type != NodeType::Station);
+		}
 	}
+	Chromosome F1(NewPathData);
 
 }
 

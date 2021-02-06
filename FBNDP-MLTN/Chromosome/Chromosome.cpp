@@ -6,6 +6,18 @@
 
 #define DEBUG_MODE 0
 
+Chromosome::Chromosome(vector<ShortestPathData> NewPath)
+{
+	RouteDataList.clear();
+	RouteDataList.assign(NewPath.begin(), NewPath.end());
+
+	RemoveOverlapedRoute();
+	
+	for (const auto& RouteIter : RouteDataList)
+	{
+		ChromosomeNodeList.insert(ChromosomeNodeList.end(), RouteIter.Path.begin(), RouteIter.Path.end());
+	}
+}
 Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>& BusNode):bAllRailStationHaveRoute(false),BusRouteNum(0)
 {
 	this->RailNode.assign(RailNode.begin(), RailNode.end());
