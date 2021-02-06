@@ -5,8 +5,6 @@ OVTTCoefficient,-0.0296
 CTPICoefficient,-3.8418
 RELICoefficient,3.1469
 CIRCCoefficient,-0.3896
-BusDispatchesPerHour,5
-TrainDispatchesPerHour,4
 TownBusTimeCost,10000
 BusTimeCost,10000
 TrainTimeCost,10000
@@ -15,6 +13,7 @@ TransferTimeCost,10000
 TownBusSpeed,30
 TownBusOperationCost,1600
 TownBusDispatchesPerHour,12
+PanaltyFactor,0.0001
 NumberOfBusesGiven,50
 OperatingHoursPerDay,10
 TownBusNodesNum,10,1,2,3,4,5,6,7,8,9,10

@@ -4,7 +4,7 @@ DataCenter* DataCenter::Instance;
 
 void DataCenter::SetNodeData(const FileDataList& InData)
 {
-	for (auto RowData : InData)
+	for (const auto& RowData : InData)
 	{
 		if (RowData.size() < 7)
 		{
@@ -30,7 +30,7 @@ void DataCenter::SetNodeData(const FileDataList& InData)
 
 void DataCenter::SetLinkData(const FileDataList& InData)
 {
-	for (auto RowData : InData)
+	for (const auto& RowData : InData)
 	{
 		if (RowData.size() < 11)
 		{
@@ -49,7 +49,7 @@ void DataCenter::SetLinkData(const FileDataList& InData)
 
 void DataCenter::SetRouteData(const FileDataList& InData)
 {
-	for (auto RowData : InData)
+	for (const auto& RowData : InData)
 	{
 		if (RowData.size() < 4)
 		{
@@ -79,7 +79,7 @@ void DataCenter::SetRouteData(const FileDataList& InData)
 
 void DataCenter::SetOperatingData(const FileDataList& InData)
 {
-	for (auto RowData : InData)
+	for (const auto& RowData : InData)
 	{
 		if (RowData.size() < 3)
 		{
@@ -99,7 +99,7 @@ void DataCenter::SetOperatingData(const FileDataList& InData)
 
 void DataCenter::SetTrafficVolumeData(const FileDataList& InData)
 {
-	for (auto RowData : InData)
+	for (const auto& RowData : InData)
 	{
 		if (RowData.size() < 3)
 		{
@@ -116,7 +116,7 @@ void DataCenter::SetTrafficVolumeData(const FileDataList& InData)
 
 void DataCenter::SetDistanceData(const FileDataList& InData)
 {
-	for (auto RowData : InData)
+	for (const auto& RowData : InData)
 	{
 		if (RowData.size() < 3)
 		{
@@ -133,7 +133,7 @@ void DataCenter::SetDistanceData(const FileDataList& InData)
 
 void DataCenter::SetUserInputData(const FileDataList& InData)
 {
-	for (auto RowData : InData)
+	for (const auto& RowData : InData)
 	{
 		if (RowData.size() < 2)
 			continue;
@@ -164,14 +164,6 @@ void DataCenter::SetUserInputData(const FileDataList& InData)
 		else if (Name == "CIRCCoefficient")
 		{
 			UserInput.MNLCoefficient.CIRCCoef = stof(Value);
-		}
-		else if (Name == "BusDispatchesPerHour")
-		{
-			UserInput.BusDispatchesPerHour = static_cast<uint64_t>(stoul(Value));
-		}
-		else if (Name == "TrainDispatchesPerHour")
-		{
-			UserInput.TrainDispatchesPerHour = static_cast<uint64_t>(stoul(Value));
 		}
 		else if (Name == "TownBusTimeCost")
 		{
@@ -204,6 +196,10 @@ void DataCenter::SetUserInputData(const FileDataList& InData)
 		else if (Name == "TownBusDispatchesPerHour")
 		{
 			UserInput.TownBusDispatchesPerHour = static_cast<uint64_t>(stoul(Value));
+		}
+		else if (Name == "PanaltyFactor")
+		{
+			UserInput.PanaltyFactor = stof(Value);
 		}
 		else if (Name == "NumberOfBusesGiven")
 		{

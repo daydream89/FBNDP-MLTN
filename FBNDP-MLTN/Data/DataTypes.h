@@ -108,8 +108,6 @@ struct UserInputData
 {
 	float PassageTimeDiff = 5.f;			// 적합도 계산 시의 통행 시간 차이
 	MNLCoefficientData MNLCoefficient;		// MNL Model에서 사용하는 계수 모음
-	uint64_t BusDispatchesPerHour = 5;		// 버스 배차 횟수 (회/hour)
-	uint64_t TrainDispatchesPerHour = 4;	// 전철 배차 횟수 (회/hour)
 	float TownBusTimeCost = 10000.f;		// 마을버스 탑승 시간 비용 (원/인*시간)
 	float BusTimeCost = 10000.f;			// 버스 탑승 시간 비용 (원/인*시간)
 	float TrainTimeCost = 10000.f;			// 전철 탑승 시간 비용 (원/인*시간)
@@ -172,8 +170,21 @@ enum class ETransportationType
 
 struct TransferData
 {
+	ETransportationType Type = ETransportationType::Bus;
+	float TransferTime = 0.f;
+	uint64_t DispatchesPerHour = 0;
+
+	TransferData(ETransportationType InType, float InTransferTime, uint64_t InDispatches)
+		: Type(InType)
+		, TransferTime(InTransferTime)
+		, DispatchesPerHour(InDispatches)
+	{ }
+};
+
+struct OVTTData
+{
 	float InitialDispatchesPerHour = 0.f;
-	vector<pair<ETransportationType, float>> TransferTimeList;
+	vector<TransferData> TransferList;
 	float OVTT = 0.f;
 	uint16_t CTPI = 0;
 };
@@ -186,8 +197,6 @@ struct ShortestPathData
 	float TrainIVTT = 0.f;
 	float BusIVTT = 0.f;
 	float TownBusIVTT = 0.f;
-	TransferData Transfer;
-	//float OVTT = 0.f;
-	//uint16_t CTPI = 0;
+	OVTTData Transfer;
 	uint32_t TrafficVolumeForPath = 0;
 };

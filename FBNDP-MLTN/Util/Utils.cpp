@@ -126,7 +126,7 @@ namespace PathFinderPrivate
 		if (InData.CostType == EPathFinderCostType::Duration)
 		{
 			OutPathData.IVTT = Dist.at(InData.EndNodeNum);
-			OutPathData.Transfer = Util::Calculator::CalcTransferData(OutPathData.Path, InData.RouteDataMap);
+			OutPathData.Transfer = Util::Calculator::CalcOVTTData(OutPathData.Path, InData.RouteDataMap);
 			return OutPathData.IVTT + OutPathData.Transfer.OVTT;
 		}
 
@@ -239,6 +239,19 @@ const NodeData& Util::PathFinder::GetNodeData(uint64_t NodeNum, const vector<Nod
 	return TempNodeData;
 }
 
+OperatingData* Util::PathFinder::GetOperatingData(const string& InRouteName)
+{
+	if (auto DataCenterInst = DataCenter::GetInstance())
+	{
+		auto OperatingData = DataCenterInst->GetOperatingData();
+		auto Iter = OperatingData.find(InRouteName);
+		if (Iter != OperatingData.end())
+			return &Iter->second;
+	}
+
+	return nullptr;
+}
+
 float Util::Calculator::CalcIVTT(const LinkData& InLink, const RouteMap& InRouteMap, float& OutDistance, string& OutRouteName)
 {
 	float IVTT = InLink.Length;
@@ -292,9 +305,9 @@ float Util::Calculator::CalcIVTT(const LinkData& InLink, const RouteMap& InRoute
 	return IVTT;
 }
 
-TransferData Util::Calculator::CalcTransferData(const vector<NodeData>& InPath, const RouteMap& InRouteMap)
+OVTTData Util::Calculator::CalcOVTTData(const vector<NodeData>& InPath, const RouteMap& InRouteMap)
 {
-	TransferData ReturnData;
+	OVTTData ReturnData;
 
 	auto DataCenterInst = DataCenter::GetInstance();
 	if (!DataCenterInst)
@@ -302,12 +315,17 @@ TransferData Util::Calculator::CalcTransferData(const vector<NodeData>& InPath, 
 		return ReturnData;
 	}
 
-	if (1 <= InPath.size())	// add first wait time
+	if (2 <= InPath.size())	// add first wait time
 	{
-		if (InPath.at(0).Type == NodeType::BusStop)
-			ReturnData.InitialDispatchesPerHour = static_cast<float>(DataCenterInst->GetUserInputData().BusDispatchesPerHour);
-		else if (InPath.at(0).Type == NodeType::Station)
-			ReturnData.InitialDispatchesPerHour = static_cast<float>(DataCenterInst->GetUserInputData().TrainDispatchesPerHour);
+		string RouteName = "";
+		PathFinderPrivate::GetRouteNameFromNodesNum(InRouteMap, InPath.at(0).Num, InPath.at(1).Num, RouteName);
+		if (RouteName.substr(0, 7) == "TownBus")
+			ReturnData.InitialDispatchesPerHour = static_cast<float>(DataCenterInst->GetUserInputData().TownBusDispatchesPerHour);
+		else
+		{
+			auto OperatingData = PathFinder::GetOperatingData(RouteName);
+			ReturnData.InitialDispatchesPerHour = OperatingData ? static_cast<float>(OperatingData->Dispatch) : 0.f;
+		}
 
 		ReturnData.OVTT = Util::Converter::ConvertMinuteToHour(1.f / ReturnData.InitialDispatchesPerHour);
 	}
@@ -330,25 +348,17 @@ TransferData Util::Calculator::CalcTransferData(const vector<NodeData>& InPath, 
 
 		if (PreRouteName != CurRouteName)	// route changed!
 		{
-			float WaitTime = 0.f;
-			if (InPath.at(i).Type == NodeType::BusStop)
+			uint64_t Dispatch = 0;
+			if (CurRouteName.substr(0, 7) == "TownBus")
+				Dispatch = DataCenterInst->GetUserInputData().TownBusDispatchesPerHour;
+			else
 			{
-				if (CurRouteName.substr(0, 7) == "TownBus")
-				{
-					WaitTime = Util::Converter::ConvertMinuteToHour(1.f / static_cast<float>(DataCenterInst->GetUserInputData().TownBusDispatchesPerHour));
-					ReturnData.TransferTimeList.emplace_back(make_pair(ETransportationType::TownBus, InPath.at(i).TransferTime));
-				}
-				else
-				{
-					WaitTime = Util::Converter::ConvertMinuteToHour(1.f / static_cast<float>(DataCenterInst->GetUserInputData().BusDispatchesPerHour));
-					ReturnData.TransferTimeList.emplace_back(make_pair(ETransportationType::Bus, InPath.at(i).TransferTime));
-				}
+				auto OperatingData = PathFinder::GetOperatingData(CurRouteName);
+				Dispatch = OperatingData ? OperatingData->Dispatch : 0;
 			}
-			else if (InPath.at(i).Type == NodeType::Station)
-			{
-				WaitTime = Util::Converter::ConvertMinuteToHour(1.f / static_cast<float>(DataCenterInst->GetUserInputData().TrainDispatchesPerHour));
-				ReturnData.TransferTimeList.emplace_back(make_pair(ETransportationType::Train, InPath.at(i).TransferTime));
-			}
+
+			float WaitTime = Util::Converter::ConvertMinuteToHour(1.f / static_cast<float>(Dispatch));
+			ReturnData.TransferList.emplace_back(TransferData(ETransportationType::Train, InPath.at(i).TransferTime, Dispatch));
 
 			ReturnData.OVTT += WaitTime + InPath.at(i).TransferTime;
 			++ReturnData.CTPI;

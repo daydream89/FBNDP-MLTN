@@ -15,12 +15,13 @@ namespace Util
 		size_t FindShortestPath(PathFinderData& InData, vector<ShortestPathData>& OutPath);
 
 		const NodeData& GetNodeData(uint64_t NodeNum, const vector<NodeData>& Graph);
+		OperatingData* GetOperatingData(const string& InRouteName);
 	}
 
 	namespace Calculator
 	{
 		float CalcIVTT(const LinkData& InLink, const RouteMap& InRouteMap, float& OutDistance, string& OutRouteName);
-		TransferData CalcTransferData(const vector<NodeData>& InPath, const RouteMap& InRouteMap);
+		OVTTData CalcOVTTData(const vector<NodeData>& InPath, const RouteMap& InRouteMap);
 	}
 
 	namespace Compare

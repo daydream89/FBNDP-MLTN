@@ -153,51 +153,44 @@ float FitnessCalculator::CalcCurveNTransportationIVTT(ShortestPathData& PathData
 
 void FitnessCalculator::CalcCustomerCost(const vector<ShortestPathData>& InPathList, float& OutCostSum)
 {
-	// 이거 계산하려고 봤더니 초기에 IVTT, OVTT 계산할 때부터 잡아줘야 할거 같은데...?
-	// IVTT, OVTT를 노선별로 분할되어 저장해두어야 마을버스/버스/전철의 비용을 각각 따로 계산할 수 있음.
-
 	UserInputData UserInput;
+	map<string, OperatingData> OperatingDataMap;
 	if (auto DataCenterInstance = DataCenter::GetInstance())
 	{
 		UserInput = DataCenterInstance->GetUserInputData();
+		OperatingDataMap = DataCenterInstance->GetOperatingData();
 	}
 
 	for (auto& Path : InPathList)
 	{
 		float InitialDispatchesPerHour = 0.f;
 		const auto& FirstNode = Path.Path.at(0);
-		if (FirstNode.Type == NodeType::Station)
-			InitialDispatchesPerHour = static_cast<float>(UserInput.TrainDispatchesPerHour);
-		else
+		for (const auto& Link : LinkDataList)
 		{
-			for (const auto& Link : LinkDataList)
+			if (Link.FromNodeNum == FirstNode.Num && Link.ToNodeNum == Path.Path.at(1).Num)
 			{
-				if (Link.FromNodeNum == FirstNode.Num && Link.ToNodeNum == Path.Path.at(1).Num)
+				string RouteName = "";
+				float Dist = 0.f;
+				Util::Calculator::CalcIVTT(Link, RouteDataMap, Dist, RouteName);
+				if (RouteName.substr(0, 7) == "TownBus")
+					InitialDispatchesPerHour = static_cast<float>(UserInput.TownBusDispatchesPerHour);
+				else
 				{
-					string RouteName = "";
-					float Dist = 0.f;
-					Util::Calculator::CalcIVTT(Link, RouteDataMap, Dist, RouteName);
-					if (RouteName.substr(0, 7) == "TownBus")
-						InitialDispatchesPerHour = static_cast<float>(UserInput.TownBusDispatchesPerHour);
-					else
-						InitialDispatchesPerHour = static_cast<float>(UserInput.BusDispatchesPerHour);
-					
-					break;
+					auto Iter = OperatingDataMap.find(RouteName);
+					if (Iter != OperatingDataMap.end())
+						InitialDispatchesPerHour = static_cast<float>(Iter->second.Dispatch);
 				}
+				
+				break;
 			}
 		}
 
 		float TransferWaitTimeCost = 0.f;
 		float TransferTime = 0.f;
-		for (const auto& TransferTimeData : Path.Transfer.TransferTimeList)
+		for (const auto& TransferTimeData : Path.Transfer.TransferList)
 		{
-			TransferTime += TransferTimeData.second;
-			switch (TransferTimeData.first)
-			{
-				case ETransportationType::Train:	TransferWaitTimeCost += UserInput.WaitTimeCost / (2 * UserInput.TrainDispatchesPerHour);
-				case ETransportationType::Bus:		TransferWaitTimeCost += UserInput.WaitTimeCost / (2 * UserInput.BusDispatchesPerHour);
-				case ETransportationType::TownBus:	TransferWaitTimeCost += UserInput.WaitTimeCost / (2 * UserInput.TownBusDispatchesPerHour);
-			}
+			TransferTime += TransferTimeData.TransferTime;
+			TransferWaitTimeCost += UserInput.WaitTimeCost / (2 * TransferTimeData.DispatchesPerHour);
 		}
 
 		float CustomerCost = 0.f;
@@ -299,7 +292,6 @@ bool FitnessCalculator::FindNodeNumberFromGraphData(uint64_t FromNodeNum, uint64
 
 void FitnessCalculator::AddGraphDataToRouteDataMap(const vector<LinkData>& InFullLinkDataList)
 {
-	// 이거 생성된 데이터가 이상한데...? 다시 확인해봐야 할것 같음.
 	int RouteCount = 1;
 	vector<NodeData> NewRouteList;
 	for (const auto& Node : GraphData)
