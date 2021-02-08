@@ -30,8 +30,8 @@ int main(int argc, char* argv[])
 	for (int i = 0; i < PopulationNum; ++i)
 	{
 		auto ChromosomeData = InitialPopulation.GetChromosome(i);
-		//FitnessCalculator Fitness(ChromosomeData.GetChromosome(), 2);
-		//Fitness.Calculate();
+		FitnessCalculator Fitness(ChromosomeData.GetChromosome(), 2);
+		Fitness.Calculate();
 	}
 
 	return 0;

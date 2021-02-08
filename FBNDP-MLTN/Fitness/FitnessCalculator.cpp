@@ -4,39 +4,41 @@
 
 #include <math.h>
 
-FitnessCalculator::FitnessCalculator(const vector<NodeData>& InGraphData, uint64_t PathNum)
-	: GraphData(InGraphData)
-	, NumberOfPath(PathNum)
+FitnessCalculator::FitnessCalculator(const vector<pair<NodeData, bool>>& InGraphData, uint64_t PathNum)
+	: NumberOfPath(PathNum)
 {
+	// set graph data & link data
+
 	if (auto DataCenterInstance = DataCenter::GetInstance())
 	{
 		PassageTimeDiff = DataCenterInstance->GetUserInputData().PassageTimeDiff;
 		PassageTimeDiff = Util::Converter::ConvertMinuteToHour(PassageTimeDiff);
 
+		SetGraphData(InGraphData);
+		SetLinkDataList(InGraphData, DataCenterInstance->GetLinkData());
+
 		RouteDataMap = DataCenterInstance->GetRouteData();
 		AddGraphDataToRouteDataMap(DataCenterInstance->GetLinkData());
 		
 		AddRouteDataMapToGraphData(DataCenterInstance->GetRouteData(), DataCenterInstance->GetNodeData());
-
-		SetLinkDataList(DataCenterInstance->GetLinkData());
 	}
 }
 
-float FitnessCalculator::Calculate()
+double FitnessCalculator::Calculate()
 {
-	float NetworkCost = PassageAssignment();
+	double NetworkCost = PassageAssignment();
 
 	return CalcFitness(NetworkCost);
 }
 
-float FitnessCalculator::PassageAssignment()
+double FitnessCalculator::PassageAssignment()
 {
 	// get OD Matrix
 	vector<TrafficVolumeData> TrafficVolumeDataList;
 	if (auto DataCenterInstance = DataCenter::GetInstance())
 		TrafficVolumeDataList = DataCenterInstance->GetTrafficVolumeData();
 
-	float SumofCustomerCost = 0.f;
+	double SumofCustomerCost = 0.f;
 	for (const TrafficVolumeData& ODData : TrafficVolumeDataList)
 	{
 		if (ODData.FromNodeNum == ODData.ToNodeNum)
@@ -151,7 +153,7 @@ float FitnessCalculator::CalcCurveNTransportationIVTT(ShortestPathData& PathData
 	return ActualDistance / DirectDistance;
 }
 
-void FitnessCalculator::CalcCustomerCost(const vector<ShortestPathData>& InPathList, float& OutCostSum)
+void FitnessCalculator::CalcCustomerCost(const vector<ShortestPathData>& InPathList, double& OutCostSum)
 {
 	UserInputData UserInput;
 	map<string, OperatingData> OperatingDataMap;
@@ -202,11 +204,11 @@ void FitnessCalculator::CalcCustomerCost(const vector<ShortestPathData>& InPathL
 		CustomerCost += TransferWaitTimeCost;
 		CustomerCost *= static_cast<float>(Path.TrafficVolumeForPath);
 
-		OutCostSum += CustomerCost;
+		OutCostSum += static_cast<float>(CustomerCost);
 	}
 }
 
-float FitnessCalculator::CalcNetworkCost(float SumofCustomerCost)
+double FitnessCalculator::CalcNetworkCost(double SumofCustomerCost)
 {
 	UserInputData UserInput;
 	if (auto DataCenterInstance = DataCenter::GetInstance())
@@ -214,7 +216,7 @@ float FitnessCalculator::CalcNetworkCost(float SumofCustomerCost)
 		UserInput = DataCenterInstance->GetUserInputData();
 	}
 
-	float TotalCost = SumofCustomerCost;
+	double TotalCost = SumofCustomerCost;
 	for (const auto& RoutePair : RouteDataMap)
 	{
 		if (RoutePair.first.substr(0, 7) == "TownBus")	// todo. TownBus 스트링 따로 빼서 지정할 수 있도록 할 것.
@@ -236,17 +238,17 @@ float FitnessCalculator::CalcNetworkCost(float SumofCustomerCost)
 				}
 			}
 
-			TotalCost += 2 * UserInput.TownBusOperationCost * UserInput.TownBusDispatchesPerHour * (LengthOfTownBusLine / 2);
+			TotalCost += static_cast<double>(2 * UserInput.TownBusOperationCost * UserInput.TownBusDispatchesPerHour * (LengthOfTownBusLine / 2));
 			TotalLengthOfTownBusLine += LengthOfTownBusLine;
 		}
 	}
 
-	printf("Calculated NetworkCost : %f\n", TotalCost);
+	printf("Calculated NetworkCost : %lf\n", TotalCost);
 
 	return TotalCost;
 }
 
-float FitnessCalculator::CalcFitness(float NetworkCost)
+double FitnessCalculator::CalcFitness(double NetworkCost)
 {
 	UserInputData UserInput;
 	if (auto DataCenterInstance = DataCenter::GetInstance())
@@ -257,10 +259,10 @@ float FitnessCalculator::CalcFitness(float NetworkCost)
 	float Value1 = 0.5f * static_cast<float>(UserInput.NumberOfBusesGiven) * UserInput.TownBusSpeed;
 	float Value2 = static_cast<float>(UserInput.TownBusDispatchesPerHour) * TotalLengthOfTownBusLine;
 
-	float Fitness = 1 / (UserInput.PanaltyFactor * NetworkCost);
+	double Fitness = 1 / (UserInput.PanaltyFactor * NetworkCost);
 	Fitness += UserInput.OperatingHoursPerDay * (UserInput.PanaltyFactor * (Value1 - Value2));
 
-	printf("Calculated Fitness : %f\n", Fitness);
+	printf("Calculated Fitness : %lf\n", Fitness);
 
 	return Fitness;
 }
@@ -307,21 +309,21 @@ void FitnessCalculator::AddGraphDataToRouteDataMap(const vector<LinkData>& InFul
 
 				RouteData Route;
 				Route.Node = Iter->Num;
-				Route.CumDistance = PrevCumDistance + FindLinkLength(InFullLinkDataList, PrevNodeNum, Iter->Num);
+				Route.CumDistance = PrevCumDistance + FindLinkLength(LinkDataList, PrevNodeNum, Iter->Num);
 				NewRouteMap.insert(make_pair(++Order, Route));
 			}
 
 			// add station data
 			RouteData Route;
 			Route.Node = Node.Num;
-			Route.CumDistance = NewRouteMap.find(Order)->second.CumDistance + FindLinkLength(InFullLinkDataList, NewRouteMap.find(Order)->second.Node, Node.Num);
+			Route.CumDistance = NewRouteMap.find(Order)->second.CumDistance + FindLinkLength(LinkDataList, NewRouteMap.find(Order)->second.Node, Node.Num);
 			NewRouteMap.insert(make_pair(++Order, Route));
 
 			for (vector<NodeData>::reverse_iterator RIter = NewRouteList.rbegin(); RIter != NewRouteList.rend(); ++RIter)
 			{
 				RouteData Route;
 				Route.Node = RIter->Num;
-				Route.CumDistance = NewRouteMap.find(Order)->second.CumDistance + FindLinkLength(InFullLinkDataList, NewRouteMap.find(Order)->second.Node, RIter->Num);
+				Route.CumDistance = NewRouteMap.find(Order)->second.CumDistance + FindLinkLength(LinkDataList, NewRouteMap.find(Order)->second.Node, RIter->Num);
 				NewRouteMap.insert(make_pair(++Order, Route));
 			}
 
@@ -350,20 +352,69 @@ void FitnessCalculator::AddRouteDataMapToGraphData(const RouteMap& RouteDataMap,
 	}
 }
 
-void FitnessCalculator::SetLinkDataList(const vector<LinkData>& InFullLinkDataList)
+void FitnessCalculator::SetGraphData(const vector<pair<NodeData, bool>>& InGraphData)
 {
-	for (const auto& FullLinkData : InFullLinkDataList)
-	{
-		for (size_t i = 1; i < GraphData.size() - 1; ++i)
-		{
-			uint64_t CurNodeNum = GraphData.at(i).Num;
-			uint64_t NextNodeNum = GraphData.at(i + 1).Num;
+	for (const auto& GraphPair : InGraphData)
+		if (GraphPair.second)
+			GraphData.push_back(GraphPair.first);
+}
 
-			if (FullLinkData.FromNodeNum == CurNodeNum && FullLinkData.ToNodeNum == NextNodeNum)
+void FitnessCalculator::SetLinkDataList(const vector<pair<NodeData, bool>>& InFullGraphData, const vector<LinkData>& InFullLinkDataList)
+{
+	if (InFullGraphData.size() < 1 || InFullLinkDataList.size() < 1)
+	{
+		return;
+	}
+
+	vector<LinkData> LinkListToReverseIntegrated;
+	vector<LinkData> LinkListToIntegrated;
+	uint64_t StartNodeNum = InFullGraphData.at(0).first.Num;
+	for (size_t i = 0; i < InFullGraphData.size() - 1; ++i)
+	{
+		uint64_t NextNodeNum = InFullGraphData.at(i + 1).first.Num;
+		for (const auto& FullLink : InFullLinkDataList)
+		{
+			if (FullLink.FromNodeNum == InFullGraphData.at(i).first.Num && FullLink.ToNodeNum == NextNodeNum)
+				LinkListToIntegrated.push_back(FullLink);
+			if (FullLink.FromNodeNum == NextNodeNum && FullLink.ToNodeNum == InFullGraphData.at(i).first.Num)
+				LinkListToReverseIntegrated.push_back(FullLink);
+		}
+
+		if (InFullGraphData.at(i + 1).second)
+		{
+			if (LinkListToIntegrated.size() != 0)
 			{
-				LinkDataList.emplace_back(FullLinkData);
-				break;
+				LinkData NewLinkData;
+				NewLinkData.FromNodeNum = StartNodeNum;
+				NewLinkData.ToNodeNum = NextNodeNum;
+				NewLinkData.Type = LinkListToIntegrated.at(0).Type;
+				for (const auto& IntegratedLink : LinkListToIntegrated)
+				{
+					NewLinkData.Length += IntegratedLink.Length;
+					NewLinkData.Speed += IntegratedLink.Speed;
+				}
+				NewLinkData.Speed /= LinkListToIntegrated.size();
+				LinkDataList.push_back(NewLinkData);
 			}
+
+			if (LinkListToReverseIntegrated.size() != 0)
+			{
+				LinkData NewLinkData;
+				NewLinkData.FromNodeNum = NextNodeNum;
+				NewLinkData.ToNodeNum = StartNodeNum;
+				NewLinkData.Type = LinkListToReverseIntegrated.at(0).Type;
+				for (const auto& IntegratedLink : LinkListToReverseIntegrated)
+				{
+					NewLinkData.Length += IntegratedLink.Length;
+					NewLinkData.Speed += IntegratedLink.Speed;
+				}
+				NewLinkData.Speed /= LinkListToReverseIntegrated.size();
+				LinkDataList.push_back(NewLinkData);
+			}
+
+			StartNodeNum = NextNodeNum;
+			LinkListToIntegrated.clear();
+			LinkListToReverseIntegrated.clear();
 		}
 	}
 }

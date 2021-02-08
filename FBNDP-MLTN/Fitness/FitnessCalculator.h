@@ -9,26 +9,27 @@ using namespace std;
 class FitnessCalculator
 {
 public:
-	FitnessCalculator(const vector<NodeData>& InGraphData, uint64_t PathNum);
+	FitnessCalculator(const vector<pair<NodeData, bool>>& InGraphData, uint64_t PathNum);
 
-	float Calculate();	// returns result of Fitness Function
+	double Calculate();	// returns result of Fitness Function
 
 private:
-	float PassageAssignment();
+	double PassageAssignment();
 	void SetPassageAssignmentForMNLModel(vector<ShortestPathData>& InOutPathList, uint64_t TrafficVolume);
 
 	float CalcCurveNTransportationIVTT(ShortestPathData& PathData);
 
-	void CalcCustomerCost(const vector<ShortestPathData>& InPathList, float& OutCostSum);
-	float CalcNetworkCost(float SumofCustomerCost);
-	float CalcFitness(float NetworkCost);
+	void CalcCustomerCost(const vector<ShortestPathData>& InPathList, double& OutCostSum);
+	double CalcNetworkCost(double SumofCustomerCost);
+	double CalcFitness(double NetworkCost);
 
 	bool FindNodeNumberFromGraphData(uint64_t FromNodeNum, uint64_t ToNodeNum);
 
 	void AddGraphDataToRouteDataMap(const vector<LinkData>& InFullLinkDataList);
 	void AddRouteDataMapToGraphData(const RouteMap& RouteDataMap, const vector<NodeData>& FullGraphData);
 
-	void SetLinkDataList(const vector<LinkData>& InFullLinkDataList);
+	void SetGraphData(const vector<pair<NodeData, bool>>& InGraphData);
+	void SetLinkDataList(const vector<pair<NodeData, bool>>& InFullGraphData, const vector<LinkData>& InFullLinkDataList);
 	float FindLinkLength(const vector<LinkData>& InFullLinkDataList, uint64_t FromNodeNum, uint64_t ToNodeNum);
 
 private:
