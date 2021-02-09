@@ -213,6 +213,7 @@ size_t Util::PathFinder::FindShortestPath(PathFinderData& InData, vector<Shortes
 		// todo. NewPathCost 재계산 필요함.. 기존 Cost에 RemovedCost를 빼는 방식은 OVTT로 인해 문제 생길 가능성이 존재함.
 		// 그냥 CompletePath를 기준으로 재계산 하는것이 정확함.
 		NewPathData.Path = CompletePath;
+		NewPathData.Cost = NewPathCost;
 		SecondPathCandidateMap.emplace(make_pair(NewPathCost, NewPathData));
 	}
 
