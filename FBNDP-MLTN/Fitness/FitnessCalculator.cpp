@@ -132,9 +132,9 @@ float FitnessCalculator::CalcCurveNTransportationIVTT(ShortestPathData& PathData
 				else if (CurNodeData.Type == NodeType::BusStop || NextNodeData.Type == NodeType::BusStop)
 				{
 					if (RouteName.substr(0, 7) == "TownBus")
-						PathData.TownBusIVTT = TravelTime;
+						PathData.TownBusIVTT += TravelTime;
 					else
-						PathData.BusIVTT = TravelTime;
+						PathData.BusIVTT += TravelTime;
 				}
 				break;
 			}
