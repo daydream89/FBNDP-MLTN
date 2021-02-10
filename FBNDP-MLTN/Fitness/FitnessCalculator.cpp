@@ -4,7 +4,7 @@
 
 #include <math.h>
 
-FitnessCalculator::FitnessCalculator(const vector<pair<NodeData, bool>>& InGraphData, uint64_t PathNum)
+FitnessCalculator::FitnessCalculator(int ChromosomeIndex, uint64_t PathNum)
 	: NumberOfPath(PathNum)
 {
 	// set graph data & link data
@@ -14,8 +14,9 @@ FitnessCalculator::FitnessCalculator(const vector<pair<NodeData, bool>>& InGraph
 		PassageTimeDiff = DataCenterInstance->GetUserInputData().PassageTimeDiff;
 		PassageTimeDiff = Util::Converter::ConvertMinuteToHour(PassageTimeDiff);
 
-		SetGraphData(InGraphData);
-		SetLinkDataList(InGraphData, DataCenterInstance->GetLinkData());
+		auto& ChromosomeData = DataCenterInstance->GetChromosomeRoutesDataRef(ChromosomeIndex);
+		SetGraphData(ChromosomeData);
+		SetLinkDataList(ChromosomeData, DataCenterInstance->GetLinkData());
 
 		RouteDataMap = DataCenterInstance->GetRouteData();
 		AddGraphDataToRouteDataMap(DataCenterInstance->GetLinkData());
@@ -56,6 +57,9 @@ double FitnessCalculator::PassageAssignment()
 		SetPassageAssignmentForMNLModel(ShortestPathList, ODData.TrafficVolume);
 		
 		CalcCustomerCost(ShortestPathList, SumofCustomerCost);
+
+		if (auto DataCenterInstance = DataCenter::GetInstance())
+			DataCenterInstance->AddShortestPathDataList(ShortestPathList);
 	}
 
 	return CalcNetworkCost(SumofCustomerCost);
@@ -256,11 +260,11 @@ double FitnessCalculator::CalcFitness(double NetworkCost)
 		UserInput = DataCenterInstance->GetUserInputData();
 	}
 
-	float Value1 = 0.5f * static_cast<float>(UserInput.NumberOfBusesGiven) * UserInput.TownBusSpeed;
-	float Value2 = static_cast<float>(UserInput.TownBusDispatchesPerHour) * TotalLengthOfTownBusLine;
+	double Value1 = 0.5f * static_cast<double>(UserInput.NumberOfBusesGiven) * static_cast<double>(UserInput.TownBusSpeed);
+	double Value2 = static_cast<double>(UserInput.TownBusDispatchesPerHour) * static_cast<double>(TotalLengthOfTownBusLine);
 
 	double Fitness = 1 / (UserInput.PanaltyFactor * NetworkCost);
-	Fitness += UserInput.OperatingHoursPerDay * (UserInput.PanaltyFactor * (Value1 - Value2));
+	Fitness += static_cast<double>(UserInput.OperatingHoursPerDay) * (UserInput.PanaltyFactor * (Value1 - Value2));
 
 	printf("Calculated Fitness : %lf\n", Fitness);
 
@@ -352,36 +356,40 @@ void FitnessCalculator::AddRouteDataMapToGraphData(const RouteMap& RouteDataMap,
 	}
 }
 
-void FitnessCalculator::SetGraphData(const vector<pair<NodeData, bool>>& InGraphData)
+void FitnessCalculator::SetGraphData(const vector<ShortestPathData>& InPathData)
 {
-	for (const auto& GraphPair : InGraphData)
-		if (GraphPair.second)
-			GraphData.push_back(GraphPair.first);
+	for (const auto& PathData : InPathData)
+		for (const auto& TownBusPair : PathData.TownBusData.TownBusStopCheck)
+			if(TownBusPair.second)
+				GraphData.push_back(TownBusPair.first);
 }
 
-void FitnessCalculator::SetLinkDataList(const vector<pair<NodeData, bool>>& InFullGraphData, const vector<LinkData>& InFullLinkDataList)
+void FitnessCalculator::SetLinkDataList(const vector<ShortestPathData>& InPathData, const vector<LinkData>& InFullLinkDataList)
 {
-	if (InFullGraphData.size() < 1 || InFullLinkDataList.size() < 1)
-	{
+	if (InPathData.size() < 1 || InFullLinkDataList.size() < 1)
 		return;
-	}
 
-	vector<LinkData> LinkListToReverseIntegrated;
-	vector<LinkData> LinkListToIntegrated;
-	uint64_t StartNodeNum = InFullGraphData.at(0).first.Num;
-	for (size_t i = 0; i < InFullGraphData.size() - 1; ++i)
+	for (const auto& Path : InPathData)
 	{
-		uint64_t NextNodeNum = InFullGraphData.at(i + 1).first.Num;
-		for (const auto& FullLink : InFullLinkDataList)
-		{
-			if (FullLink.FromNodeNum == InFullGraphData.at(i).first.Num && FullLink.ToNodeNum == NextNodeNum)
-				LinkListToIntegrated.push_back(FullLink);
-			if (FullLink.FromNodeNum == NextNodeNum && FullLink.ToNodeNum == InFullGraphData.at(i).first.Num)
-				LinkListToReverseIntegrated.push_back(FullLink);
-		}
+		auto TownBusRoute = Path.TownBusData.TownBusStopCheck;
 
-		if (InFullGraphData.at(i + 1).second)
+		vector<LinkData> LinkListToReverseIntegrated;
+		vector<LinkData> LinkListToIntegrated;
+		uint64_t StartNodeNum = TownBusRoute.at(0).first.Num;
+		for (size_t i = 0; i < TownBusRoute.size() - 1; ++i)
 		{
+			if (!TownBusRoute.at(i + 1).second)
+				continue;
+
+			uint64_t NextNodeNum = TownBusRoute.at(i + 1).first.Num;
+			for (const auto& FullLink : InFullLinkDataList)
+			{
+				if (FullLink.FromNodeNum == TownBusRoute.at(i).first.Num && FullLink.ToNodeNum == NextNodeNum)
+					LinkListToIntegrated.push_back(FullLink);
+				if (FullLink.FromNodeNum == NextNodeNum && FullLink.ToNodeNum == TownBusRoute.at(i).first.Num)
+					LinkListToReverseIntegrated.push_back(FullLink);
+			}
+
 			if (LinkListToIntegrated.size() != 0)
 			{
 				LinkData NewLinkData;

@@ -218,3 +218,9 @@ void DataCenter::SetUserInputData(const FileDataList& InData)
 		}
 	}
 }
+
+void DataCenter::AddShortestPathDataList(const vector<ShortestPathData>& InPathDataList)
+{
+	for (const auto& PathData : InPathDataList)
+		ShortestPathDataList.push_back(PathData);
+}

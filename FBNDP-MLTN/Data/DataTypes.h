@@ -58,7 +58,7 @@ struct NodeData
 	uint64_t Num = -1;			// node 번호
 	Coordinate Coord;			// 2차원 좌표
 	float TransferTime = 0.f;	// 환승 시간
-	NodeType Type;				// node 종류
+	NodeType Type = NodeType::BusStop;	// node 종류
 };
 
 // 네트워크 링크에 대한 data
@@ -116,7 +116,7 @@ struct UserInputData
 	float TownBusSpeed = 30.f;				// 마을버스 운영 속도 (km/h)
 	float TownBusOperationCost = 1600.f;	// 마을버스 운영 비용 (원/대*km)
 	uint64_t TownBusDispatchesPerHour = 12;	// 마을버스 배차 횟수 (회/hour)
-	float PanaltyFactor = 0.0001f;			// 적합도 함수에서 사용하는 값
+	double PanaltyFactor = 0.0001f;			// 적합도 함수에서 사용하는 값
 	uint64_t NumberOfBusesGiven = 110;		// 주어진 버스 대수
 	float OperatingHoursPerDay = 10.f;		// 하루 운영 시간
 	vector<uint64_t> TownBusNodesNum;		// 마을 버스가 정차하는 노드들
@@ -199,7 +199,7 @@ struct ShortestPathData
 	vector<NodeData> Path;
 	TownBusRouteData TownBusData;
 	float Cost = 0.f;	// IVTT + OVTT
-	float IVTT = 0.f;
+	float IVTT = 0.f;	// TrainIVTT + BusIVTT + TownBusIVTT
 	float TrainIVTT = 0.f;
 	float BusIVTT = 0.f;
 	float TownBusIVTT = 0.f;

@@ -40,7 +40,12 @@ public:
 
 	void AddTownBusRouteData(vector<ShortestPathData> TownBusRoute) { ChromosomeTownBusRouteData.emplace_back(TownBusRoute); };
 	void ClearTownBusRouteData() { ChromosomeTownBusRouteData.clear(); };
-	const vector<ShortestPathData> GetChromosomeRoutesData(uint64_t ChromosomeNum) { return ChromosomeTownBusRouteData.at(ChromosomeNum); };
+	const vector<ShortestPathData>& GetChromosomeRoutesData(uint64_t ChromosomeNum) { return ChromosomeTownBusRouteData.at(ChromosomeNum); };
+	vector<ShortestPathData>& GetChromosomeRoutesDataRef(uint64_t ChromosomeNum) { return ChromosomeTownBusRouteData.at(ChromosomeNum); };
+
+	void AddShortestPathDataList(const vector<ShortestPathData>& InPathDataList);
+	const vector<ShortestPathData>& GetShortestPathDataList() { return ShortestPathDataList; }
+	void ClearShortestPathDataList() { ShortestPathDataList.clear(); }
 
 private:
 	DataCenter() {}
@@ -48,13 +53,17 @@ private:
 
 	static DataCenter* Instance;
 
+	// Data read from outside
 	vector<NodeData> NodeDataList;
 	vector<LinkData> LinkDataList;
 	RouteMap RouteDataMap;
 	map<string, OperatingData> OperatingDataMap;
 	vector<TrafficVolumeData> TrafficVolumeDataList;
 	vector<DistanceData> DistanceDataList;
-	vector<vector<ShortestPathData>> ChromosomeTownBusRouteData;
 
 	UserInputData UserInput;
+
+	// Data calculated from inside
+	vector<ShortestPathData> ShortestPathDataList;
+	vector<vector<ShortestPathData>> ChromosomeTownBusRouteData;
 };

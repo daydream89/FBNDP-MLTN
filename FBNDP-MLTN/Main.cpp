@@ -29,9 +29,9 @@ int main(int argc, char* argv[])
 	// Calculate fitness
 	for (int i = 0; i < PopulationNum; ++i)
 	{
-		auto ChromosomeData = InitialPopulation.GetChromosome(i);
-		FitnessCalculator Fitness(ChromosomeData.GetChromosome(), 2);
+		FitnessCalculator Fitness(i, 2);
 		Fitness.Calculate();
+		printf("Finished Calculate %dth Chromosome.\n", i);
 	}
 
 	return 0;

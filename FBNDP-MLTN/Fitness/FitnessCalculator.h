@@ -9,7 +9,7 @@ using namespace std;
 class FitnessCalculator
 {
 public:
-	FitnessCalculator(const vector<pair<NodeData, bool>>& InGraphData, uint64_t PathNum);
+	FitnessCalculator(int ChromosomeIndex, uint64_t PathNum);
 
 	double Calculate();	// returns result of Fitness Function
 
@@ -28,8 +28,8 @@ private:
 	void AddGraphDataToRouteDataMap(const vector<LinkData>& InFullLinkDataList);
 	void AddRouteDataMapToGraphData(const RouteMap& RouteDataMap, const vector<NodeData>& FullGraphData);
 
-	void SetGraphData(const vector<pair<NodeData, bool>>& InGraphData);
-	void SetLinkDataList(const vector<pair<NodeData, bool>>& InFullGraphData, const vector<LinkData>& InFullLinkDataList);
+	void SetGraphData(const vector<ShortestPathData>& InPathData);
+	void SetLinkDataList(const vector<ShortestPathData>& InPathData, const vector<LinkData>& InFullLinkDataList);
 	float FindLinkLength(const vector<LinkData>& InFullLinkDataList, uint64_t FromNodeNum, uint64_t ToNodeNum);
 
 private:
