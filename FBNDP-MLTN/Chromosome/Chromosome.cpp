@@ -86,6 +86,33 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 			++BusRouteNum; //k = k+1
 			ShortestPathData RoutePathData;
 			RoutePathData.Path.assign(SelectedBus.BusRouteData.Path.begin(), SelectedBus.BusRouteData.Path.end());
+			for (const auto& BusRoute : RoutePathData.Path)
+			{
+				bool IsTownBusStop = false;
+				if (BusRoute.Type == NodeType::BusStop)
+				{
+					for (const auto& TBNodesIter : TownBusNode)
+					{
+						if (TBNodesIter.Num == BusRoute.Num)
+						{
+							IsTownBusStop = true;
+							break;
+						}
+					}
+					if (IsTownBusStop)
+					{
+						RoutePathData.TownBusData.TownBusStopCheck.emplace_back(make_pair(BusRoute, true));
+					}
+					else
+					{
+						RoutePathData.TownBusData.TownBusStopCheck.emplace_back(make_pair(BusRoute, false));
+					}
+				}
+				else if (BusRoute.Type == NodeType::Station)
+				{
+					RoutePathData.TownBusData.TownBusStopCheck.emplace_back(make_pair(BusRoute, true));
+				}
+			}
 			RoutePathData.Cost = SelectedBus.BusRouteData.Cost;
 			RouteDataList.emplace_back(RoutePathData);
 		}
@@ -129,6 +156,33 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 					if (RouteIter.Path.begin()->Num == ExistRoute.Path.begin()->Num)
 					{
 						RouteIter.Path.insert(RouteIter.Path.begin(), FoundedShortestRoute.Path.begin(), FoundedShortestRoute.Path.end());
+						for (const auto& BusRoute : RouteIter.Path)
+						{
+							bool IsTownBusStop = false;
+							if (BusRoute.Type == NodeType::BusStop)
+							{
+								for (const auto& TBNodesIter : TownBusNode)
+								{
+									if (TBNodesIter.Num == BusRoute.Num)
+									{
+										IsTownBusStop = true;
+										break;
+									}
+								}
+								if (IsTownBusStop)
+								{
+									RouteIter.TownBusData.TownBusStopCheck.emplace_back(make_pair(BusRoute, true));
+								}
+								else
+								{
+									RouteIter.TownBusData.TownBusStopCheck.emplace_back(make_pair(BusRoute, false));
+								}
+							}
+							else if (BusRoute.Type == NodeType::Station)
+							{
+								RouteIter.TownBusData.TownBusStopCheck.emplace_back(make_pair(BusRoute, true));
+							}
+						}
 					}
 				}
 			}

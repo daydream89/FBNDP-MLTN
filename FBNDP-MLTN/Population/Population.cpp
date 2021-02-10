@@ -23,6 +23,7 @@ Population::Population(uint64_t MemberNum)
 }
 void Population::GetNextGeneration()
 {
+	
 	Selection();
 	for (uint64_t i = 0; i < SelectionCompair.size(); ++i)
 	{
@@ -30,9 +31,20 @@ void Population::GetNextGeneration()
 	}
 
 	/*TODO: Print Parent Chromosomes and make F1 to Parents, F1 must be cleared*/
+	ChromosomeArray.clear();
+	ChromosomeArray.assign(ChildrenChromosomeArray.begin(), ChildrenChromosomeArray.end());
+	ChildrenChromosomeArray.clear();
 }
 void Population::Selection()
 {
+	if (auto DataCenterInstance = DataCenter::GetInstance())
+	{
+		for (uint64_t i = 0; i < MaxChromosomeNum; ++i)
+		{
+			ChromosomeArray.at(i).GetRouteRef().clear();
+			ChromosomeArray.at(i).GetRouteRef().assign(DataCenterInstance->GetChromosomeRoutesDataRef(i).begin(), DataCenterInstance->GetChromosomeRoutesDataRef(i).end());
+		}
+	}
 	random_device rd;
 	mt19937 gen(rd());
 

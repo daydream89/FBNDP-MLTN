@@ -24,7 +24,6 @@ int main(int argc, char* argv[])
 	int PopulationNum = 8;
 	// Generate initial population
 	Population InitialPopulation(PopulationNum);
-	InitialPopulation.GetNextGeneration();
 
 	// Calculate fitness
 	for (int i = 0; i < PopulationNum; ++i)
@@ -33,6 +32,7 @@ int main(int argc, char* argv[])
 		Fitness.Calculate();
 		printf("Finished Calculate %dth Chromosome.\n", i);
 	}
+	InitialPopulation.GetNextGeneration();
 
 	return 0;
 }
