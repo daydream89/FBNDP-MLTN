@@ -38,6 +38,10 @@ public:
 	void SetUserInputData(const FileDataList& InData);
 	const UserInputData& GetUserInputData() { return UserInput; }
 
+	void AddTownBusRouteData(vector<ShortestPathData> TownBusRoute) { ChromosomeTownBusRouteData.emplace_back(TownBusRoute); };
+	void ClearTownBusRouteData() { ChromosomeTownBusRouteData.clear(); };
+	const vector<ShortestPathData> GetChromosomeRoutesData(uint64_t ChromosomeNum) { return ChromosomeTownBusRouteData.at(ChromosomeNum); };
+
 private:
 	DataCenter() {}
 	~DataCenter() {}
@@ -50,6 +54,7 @@ private:
 	map<string, OperatingData> OperatingDataMap;
 	vector<TrafficVolumeData> TrafficVolumeDataList;
 	vector<DistanceData> DistanceDataList;
+	vector<vector<ShortestPathData>> ChromosomeTownBusRouteData;
 
 	UserInputData UserInput;
 };

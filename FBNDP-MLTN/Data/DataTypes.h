@@ -189,9 +189,15 @@ struct OVTTData
 	uint16_t CTPI = 0;
 };
 
+struct TownBusRouteData
+{
+	vector<pair<NodeData, bool>> TownBusStopCheck;
+	float RouteCostPerPerson;
+};
 struct ShortestPathData
 {
 	vector<NodeData> Path;
+	TownBusRouteData TownBusData;
 	float Cost = 0.f;	// IVTT + OVTT
 	float IVTT = 0.f;
 	float TrainIVTT = 0.f;

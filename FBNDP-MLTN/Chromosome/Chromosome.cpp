@@ -16,7 +16,7 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 
 	RemoveOverlapedRoute();
 	
-	for (const auto& RouteIter : RouteDataList)
+	for (auto& RouteIter : RouteDataList)
 	{
 		for (const auto& PathNodes : RouteIter.Path)
 		{
@@ -34,15 +34,18 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 				if (IsTownBusStop)
 				{
 					ChromosomeNodeList.emplace_back(make_pair(PathNodes, true));
+					RouteIter.TownBusData.TownBusStopCheck.emplace_back(make_pair(PathNodes, true));
 				}
 				else
 				{
 					ChromosomeNodeList.emplace_back(make_pair(PathNodes, false));
+					RouteIter.TownBusData.TownBusStopCheck.emplace_back(make_pair(PathNodes, false));
 				}
 			}
 			else if (PathNodes.Type == NodeType::Station)
 			{
 				ChromosomeNodeList.emplace_back(make_pair(PathNodes, true));
+				RouteIter.TownBusData.TownBusStopCheck.emplace_back(make_pair(PathNodes, true));
 			}
 		}
 		//ChromosomeNodeList.insert(ChromosomeNodeList.end(), RouteIter.Path.begin(), RouteIter.Path.end());
@@ -134,6 +137,33 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 				++BusRouteNum; //k = k+1
 				ShortestPathData RoutePathData;
 				RoutePathData.Path.assign(SelectedBus.BusRouteData.Path.begin(), SelectedBus.BusRouteData.Path.end());
+				for (const auto& BusRoute : RoutePathData.Path)
+				{
+					bool IsTownBusStop = false;
+					if (BusRoute.Type == NodeType::BusStop)
+					{
+						for (const auto& TBNodesIter : TownBusNode)
+						{
+							if (TBNodesIter.Num == BusRoute.Num)
+							{
+								IsTownBusStop = true;
+								break;
+							}
+						}
+						if (IsTownBusStop)
+						{
+							RoutePathData.TownBusData.TownBusStopCheck.emplace_back(make_pair(BusRoute, true));
+						}
+						else
+						{
+							RoutePathData.TownBusData.TownBusStopCheck.emplace_back(make_pair(BusRoute, false));
+						}
+					}
+					else if (BusRoute.Type == NodeType::Station)
+					{
+						RoutePathData.TownBusData.TownBusStopCheck.emplace_back(make_pair(BusRoute, true));
+					}
+				}
 				RoutePathData.Cost = SelectedBus.BusRouteData.Cost;
 				RouteDataList.emplace_back(RoutePathData);
 			}
