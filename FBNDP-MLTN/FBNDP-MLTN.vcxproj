@@ -139,8 +139,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Chromosome\Chromosome.cpp" />
-    <ClCompile Include="CSVReader\CSVReader.cpp" />
     <ClCompile Include="Data\DataCenter.cpp" />
+    <ClCompile Include="File\CSVReader.cpp" />
+    <ClCompile Include="File\CSVWriter.cpp" />
     <ClCompile Include="Fitness\FitnessCalculator.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Population\Population.cpp" />
@@ -148,9 +149,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Chromosome\Chromosome.h" />
-    <ClInclude Include="CSVReader\CSVReader.h" />
     <ClInclude Include="Data\DataCenter.h" />
     <ClInclude Include="Data\DataTypes.h" />
+    <ClInclude Include="File\CSVReader.h" />
+    <ClInclude Include="File\CSVWriter.h" />
     <ClInclude Include="Fitness\FitnessCalculator.h" />
     <ClInclude Include="Population\Population.h" />
     <ClInclude Include="Util\Utils.h" />

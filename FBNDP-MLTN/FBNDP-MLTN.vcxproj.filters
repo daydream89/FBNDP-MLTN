@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Source Files\ReadCSV">
-      <UniqueIdentifier>{f8f4fe76-93ff-423f-add2-6bfa22e8ae9e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Data">
       <UniqueIdentifier>{309f2399-d343-4dee-8c4a-b61fbd5da66d}</UniqueIdentifier>
     </Filter>
@@ -31,13 +28,13 @@
     <Filter Include="Source Files\Chromosome">
       <UniqueIdentifier>{62ad295f-18dd-43f0-bbc7-c765fb16d1be}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\File">
+      <UniqueIdentifier>{f8f4fe76-93ff-423f-add2-6bfa22e8ae9e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CSVReader\CSVReader.cpp">
-      <Filter>Source Files\ReadCSV</Filter>
     </ClCompile>
     <ClCompile Include="Data\DataCenter.cpp">
       <Filter>Source Files\Data</Filter>
@@ -54,11 +51,14 @@
     <ClCompile Include="Chromosome\Chromosome.cpp">
       <Filter>Source Files\Chromosome</Filter>
     </ClCompile>
+    <ClCompile Include="File\CSVWriter.cpp">
+      <Filter>Source Files\File</Filter>
+    </ClCompile>
+    <ClCompile Include="File\CSVReader.cpp">
+      <Filter>Source Files\File</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CSVReader\CSVReader.h">
-      <Filter>Source Files\ReadCSV</Filter>
-    </ClInclude>
     <ClInclude Include="Data\DataCenter.h">
       <Filter>Source Files\Data</Filter>
     </ClInclude>
@@ -76,6 +76,12 @@
     </ClInclude>
     <ClInclude Include="Chromosome\Chromosome.h">
       <Filter>Source Files\Chromosome</Filter>
+    </ClInclude>
+    <ClInclude Include="File\CSVWriter.h">
+      <Filter>Source Files\File</Filter>
+    </ClInclude>
+    <ClInclude Include="File\CSVReader.h">
+      <Filter>Source Files\File</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
