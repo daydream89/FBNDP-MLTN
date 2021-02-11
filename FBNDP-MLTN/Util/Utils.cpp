@@ -378,7 +378,7 @@ void Util::Calculator::CalcNumOfPassengerPerRoute(vector<ShortestPathData>& InPa
 			continue;
 
 		map<string, uint32_t> RouteCostMap;
-		for (int i = 0; i < InPath.size() - 1; ++i)
+		for (int i = 0; i < Path.size() - 1; ++i)
 		{
 			string RouteName = "";
 			uint64_t CurNodeNum = Path.at(i).Num;
