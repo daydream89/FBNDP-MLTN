@@ -351,46 +351,6 @@ void FitnessCalculator::AddGraphDataToRouteDataMap(vector<ShortestPathData>& InO
 		RouteDataMap.insert(make_pair(RouteName, NewRouteMap));
 		PathData.TownBusData.RouteName = RouteName;
 	}
-	/*
-	for (const auto& Node : GraphData)
-	{
-		if (Node.Type == NodeType::Station)
-		{
-			uint64_t Order = 0;
-			map<uint64_t, RouteData> NewRouteMap;
-			for (vector<NodeData>::iterator Iter = NewRouteList.begin(); Iter != NewRouteList.end(); ++Iter)
-			{
-				uint64_t PrevNodeNum = NewRouteMap.find(Order) != NewRouteMap.end() ? NewRouteMap.find(Order)->second.Node : Iter->Num;
-				float PrevCumDistance = NewRouteMap.find(Order) != NewRouteMap.end() ? NewRouteMap.find(Order)->second.CumDistance : 0.f;
-
-				RouteData Route;
-				Route.Node = Iter->Num;
-				Route.CumDistance = PrevCumDistance + FindLinkLength(LinkDataList, PrevNodeNum, Iter->Num);
-				NewRouteMap.insert(make_pair(++Order, Route));
-			}
-
-			// add station data
-			RouteData Route;
-			Route.Node = Node.Num;
-			Route.CumDistance = NewRouteMap.find(Order)->second.CumDistance + FindLinkLength(LinkDataList, NewRouteMap.find(Order)->second.Node, Node.Num);
-			NewRouteMap.insert(make_pair(++Order, Route));
-
-			for (vector<NodeData>::reverse_iterator RIter = NewRouteList.rbegin(); RIter != NewRouteList.rend(); ++RIter)
-			{
-				RouteData Route;
-				Route.Node = RIter->Num;
-				Route.CumDistance = NewRouteMap.find(Order)->second.CumDistance + FindLinkLength(LinkDataList, NewRouteMap.find(Order)->second.Node, RIter->Num);
-				NewRouteMap.insert(make_pair(++Order, Route));
-			}
-
-			string RouteName = "TownBus";
-			RouteName.append(to_string(RouteCount++));
-			RouteDataMap.insert(make_pair(RouteName, NewRouteMap));
-			NewRouteList.clear();
-		}
-		else
-			NewRouteList.emplace_back(Node);
-	}*/
 }
 
 void FitnessCalculator::AddRouteDataMapToGraphData(const RouteMap& RouteDataMap, const vector<NodeData>& FullGraphData)
