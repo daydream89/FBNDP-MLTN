@@ -22,6 +22,7 @@ namespace Util
 	{
 		float CalcIVTT(const LinkData& InLink, const RouteMap& InRouteMap, float& OutDistance, string& OutRouteName);
 		OVTTData CalcOVTTData(const vector<NodeData>& InPath, const RouteMap& InRouteMap);
+		void CalcNumOfPassengerPerRoute(vector<ShortestPathData>& InPath, const RouteMap& InRouteMap, map<string, uint32_t>& OutRouteCost);
 	}
 
 	namespace Compare

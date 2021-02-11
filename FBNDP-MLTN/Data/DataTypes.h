@@ -191,8 +191,9 @@ struct OVTTData
 
 struct TownBusRouteData
 {
+	string RouteName = "";
 	vector<pair<NodeData, bool>> TownBusStopCheck;
-	float RouteCostPerPerson;
+	double RouteCostPerPerson = 0.f;
 };
 struct ShortestPathData
 {

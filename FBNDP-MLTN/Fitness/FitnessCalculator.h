@@ -3,13 +3,21 @@
 #include "../Data/DataCenter.h"
 
 #include <vector>
+#include <map>
 
 using namespace std;
+
+struct FitnessRouteData
+{
+	RouteData Route;
+	TownBusRouteData* DataCenterRoutePtr = nullptr;
+};
+typedef map<string, map<uint64_t, FitnessRouteData>> FitnessRouteMap;
 
 class FitnessCalculator
 {
 public:
-	FitnessCalculator(int ChromosomeIndex, uint64_t PathNum);
+	FitnessCalculator(int InChromosomeIndex, uint64_t PathNum);
 
 	double Calculate();	// returns result of Fitness Function
 
@@ -25,7 +33,7 @@ private:
 
 	bool FindNodeNumberFromGraphData(uint64_t FromNodeNum, uint64_t ToNodeNum);
 
-	void AddGraphDataToRouteDataMap(const vector<LinkData>& InFullLinkDataList);
+	void AddGraphDataToRouteDataMap(vector<ShortestPathData>& InOutPathDataList);
 	void AddRouteDataMapToGraphData(const RouteMap& RouteDataMap, const vector<NodeData>& FullGraphData);
 
 	void SetGraphData(const vector<ShortestPathData>& InPathData);
@@ -33,6 +41,8 @@ private:
 	float FindLinkLength(const vector<LinkData>& InFullLinkDataList, uint64_t FromNodeNum, uint64_t ToNodeNum);
 
 private:
+	int ChromosomeIndex = 0;
+	
 	vector<NodeData> GraphData;
 	vector<LinkData> LinkDataList;
 	RouteMap RouteDataMap;

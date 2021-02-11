@@ -4,8 +4,9 @@
 
 #include <math.h>
 
-FitnessCalculator::FitnessCalculator(int ChromosomeIndex, uint64_t PathNum)
-	: NumberOfPath(PathNum)
+FitnessCalculator::FitnessCalculator(int InChromosomeIndex, uint64_t PathNum)
+	: ChromosomeIndex(InChromosomeIndex)
+	, NumberOfPath(PathNum)
 {
 	// set graph data & link data
 
@@ -19,7 +20,7 @@ FitnessCalculator::FitnessCalculator(int ChromosomeIndex, uint64_t PathNum)
 		SetLinkDataList(ChromosomeData, DataCenterInstance->GetLinkData());
 
 		RouteDataMap = DataCenterInstance->GetRouteData();
-		AddGraphDataToRouteDataMap(DataCenterInstance->GetLinkData());
+		AddGraphDataToRouteDataMap(ChromosomeData);
 		
 		AddRouteDataMapToGraphData(DataCenterInstance->GetRouteData(), DataCenterInstance->GetNodeData());
 	}
@@ -39,6 +40,7 @@ double FitnessCalculator::PassageAssignment()
 	if (auto DataCenterInstance = DataCenter::GetInstance())
 		TrafficVolumeDataList = DataCenterInstance->GetTrafficVolumeData();
 
+	map<string, uint32_t> RouteCostMap;
 	double SumofCustomerCost = 0.f;
 	for (const TrafficVolumeData& ODData : TrafficVolumeDataList)
 	{
@@ -58,8 +60,21 @@ double FitnessCalculator::PassageAssignment()
 		
 		CalcCustomerCost(ShortestPathList, SumofCustomerCost);
 
+		Util::Calculator::CalcNumOfPassengerPerRoute(ShortestPathList, RouteDataMap, RouteCostMap);
+
 		if (auto DataCenterInstance = DataCenter::GetInstance())
 			DataCenterInstance->AddShortestPathDataList(ShortestPathList);
+	}
+
+	// apply customer cost per person in ChromosomeData.
+	if (auto DataCenterInstance = DataCenter::GetInstance())
+	{
+		for (auto& PathData : DataCenterInstance->GetChromosomeRoutesDataRef(ChromosomeIndex))
+		{
+			auto Iter = RouteCostMap.find(PathData.TownBusData.RouteName);
+			if (Iter != RouteCostMap.end())
+				PathData.TownBusData.RouteCostPerPerson = SumofCustomerCost / static_cast<double>(Iter->second);
+		}
 	}
 
 	return CalcNetworkCost(SumofCustomerCost);
@@ -296,10 +311,47 @@ bool FitnessCalculator::FindNodeNumberFromGraphData(uint64_t FromNodeNum, uint64
 	return bExistFromNodeNum && bExistToNodeNum;
 }
 
-void FitnessCalculator::AddGraphDataToRouteDataMap(const vector<LinkData>& InFullLinkDataList)
+void FitnessCalculator::AddGraphDataToRouteDataMap(vector<ShortestPathData>& InOutPathDataList)
 {
 	int RouteCount = 1;
-	vector<NodeData> NewRouteList;
+	for (auto& PathData : InOutPathDataList)
+	{
+		uint64_t Order = 0;
+		map<uint64_t, RouteData> NewRouteMap;
+		vector<pair<NodeData, bool>>& TownBusDataList = PathData.TownBusData.TownBusStopCheck;
+		for (vector<pair<NodeData, bool>>::iterator Iter = TownBusDataList.begin(); Iter != TownBusDataList.end(); ++Iter)
+		{
+			if (!Iter->second)
+				continue;
+
+			uint64_t PrevNodeNum = NewRouteMap.find(Order) != NewRouteMap.end() ? NewRouteMap.find(Order)->second.Node : Iter->first.Num;
+			float PrevCumDistance = NewRouteMap.find(Order) != NewRouteMap.end() ? NewRouteMap.find(Order)->second.CumDistance : 0.f;
+
+			RouteData Route;
+			Route.Node = Iter->first.Num;
+			Route.CumDistance = PrevCumDistance + FindLinkLength(LinkDataList, PrevNodeNum, Iter->first.Num);
+			NewRouteMap.insert(make_pair(++Order, Route));
+		}
+
+		vector<pair<NodeData, bool>>::reverse_iterator RIter = TownBusDataList.rbegin();
+		for (++RIter; RIter != TownBusDataList.rend(); ++RIter)
+		{
+			if (!RIter->second)
+				continue;
+
+			RouteData Route;
+			Route.Node = RIter->first.Num;
+			Route.CumDistance = NewRouteMap.find(Order)->second.CumDistance + FindLinkLength(LinkDataList, NewRouteMap.find(Order)->second.Node, RIter->first.Num);
+			NewRouteMap.insert(make_pair(++Order, Route));
+		}
+
+		string RouteName = "TownBus";
+		RouteName.append(to_string(RouteCount++));
+
+		RouteDataMap.insert(make_pair(RouteName, NewRouteMap));
+		PathData.TownBusData.RouteName = RouteName;
+	}
+	/*
 	for (const auto& Node : GraphData)
 	{
 		if (Node.Type == NodeType::Station)
@@ -338,7 +390,7 @@ void FitnessCalculator::AddGraphDataToRouteDataMap(const vector<LinkData>& InFul
 		}
 		else
 			NewRouteList.emplace_back(Node);
-	}
+	}*/
 }
 
 void FitnessCalculator::AddRouteDataMapToGraphData(const RouteMap& RouteDataMap, const vector<NodeData>& FullGraphData)

@@ -369,6 +369,41 @@ OVTTData Util::Calculator::CalcOVTTData(const vector<NodeData>& InPath, const Ro
 	return ReturnData;
 }
 
+void Util::Calculator::CalcNumOfPassengerPerRoute(vector<ShortestPathData>& InPath, const RouteMap& InRouteMap, map<string, uint32_t>& OutRouteCost)
+{
+	for (const auto& PathData : InPath)
+	{
+		auto Path = PathData.Path;
+		if (Path.size() < 2)
+			continue;
+
+		map<string, uint32_t> RouteCostMap;
+		for (int i = 0; i < InPath.size() - 1; ++i)
+		{
+			string RouteName = "";
+			uint64_t CurNodeNum = Path.at(i).Num;
+			uint64_t NextNodeNum = Path.at(i + 1).Num;
+			PathFinderPrivate::GetRouteNameFromNodesNum(InRouteMap, CurNodeNum, NextNodeNum, RouteName);
+			if (RouteName.empty())
+				continue;
+
+			if (RouteCostMap.find(RouteName) == RouteCostMap.end())
+				RouteCostMap.insert(make_pair(RouteName, PathData.TrafficVolumeForPath));
+		}
+
+		for (const auto& RouteCostPair : RouteCostMap)
+		{
+			auto FoundRoute = OutRouteCost.find(RouteCostPair.first);
+			if (FoundRoute != OutRouteCost.end())
+				FoundRoute->second += RouteCostPair.second;
+			else
+			{
+				OutRouteCost.insert(RouteCostPair);
+			}
+		}
+	}
+}
+
 bool Util::Compare::IsFloatEqual(float Value1, float Value2)
 {
 	return fabs(Value1 - Value2) < FLT_EPSILON;
