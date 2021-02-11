@@ -1,6 +1,7 @@
-#include "File/CSVReader.h"
 #include "Data/DataCenter.h"
 #include "Data/DataTypes.h"
+#include "File/CSVReader.h"
+#include "File/CSVWriter.h"
 #include "Fitness/FitnessCalculator.h"
 #include "Population/Population.h"
 
@@ -8,6 +9,8 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
+	CSVWriter Writer;
+
 	// file read
 	if (auto* DataCenter = DataCenter::GetInstance())
 	{
@@ -19,20 +22,22 @@ int main(int argc, char* argv[])
 		DataCenter->SetTrafficVolumeData(Reader.GetFileData("./Input/5_OD_demand.csv"));
 		DataCenter->SetDistanceData(Reader.GetFileData("./Input/6_Direct_distance.csv"));
 		DataCenter->SetUserInputData(Reader.GetFileData("./Input/0_UserInput.csv"));
-	}
 
-	int PopulationNum = 8;
-	// Generate initial population
-	Population InitialPopulation(PopulationNum);
+		int PopulationNum = 8;
+		// Generate initial population
+		Population InitialPopulation(PopulationNum);
 
-	// Calculate fitness
-	for (int i = 0; i < PopulationNum; ++i)
-	{
-		FitnessCalculator Fitness(i, 2);
-		Fitness.Calculate();
-		printf("Finished Calculate %dth Chromosome.\n", i);
+		// Calculate fitness
+		for (int i = 0; i < PopulationNum; ++i)
+		{
+			FitnessCalculator Fitness(i, 2);
+			Fitness.Calculate();
+			printf("Finished Calculate %dth Chromosome.\n", i);
+
+			Writer.WriteCSVFile(0, i, DataCenter->GetShortestPathDataList());
+		}
+		InitialPopulation.GetNextGeneration();
 	}
-	InitialPopulation.GetNextGeneration();
 
 	return 0;
 }

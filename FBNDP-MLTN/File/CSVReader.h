@@ -1,9 +1,6 @@
 #pragma once
 
-#include <iostream>
 #include <fstream>
-#include <istream>
-#include <sstream>
 
 #include "../Data/DataTypes.h"
 

@@ -207,3 +207,10 @@ struct ShortestPathData
 	OVTTData Transfer;
 	uint32_t TrafficVolumeForPath = 0;
 };
+
+enum class EWriteFileType
+{
+	ChromosomeData = 0,
+	ShortestPath = 1,
+	Result = 2,
+};

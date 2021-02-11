@@ -1,5 +1,9 @@
 #include "CSVReader.h"
 
+#include <iostream>
+#include <istream>
+#include <sstream>
+
 FileDataList CSVReader::GetFileData(string FileName)
 {
 	ifstream FileStream(FileName);
