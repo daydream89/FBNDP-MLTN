@@ -43,6 +43,7 @@ void Population::Selection()
 		{
 			ChromosomeArray.at(i).GetRouteRef().clear();
 			ChromosomeArray.at(i).GetRouteRef().assign(DataCenterInstance->GetChromosomeRoutesDataRef(i).begin(), DataCenterInstance->GetChromosomeRoutesDataRef(i).end());
+			ChromosomeArray.at(i).SetRouteNum();
 		}
 	}
 	random_device rd;
@@ -145,7 +146,7 @@ void Population::Crossover(Chromosome P1, Chromosome P2)
 
 			NodeData FoundedNextNode;
 			do {
-				float MinRouteLength = INFINITY;
+				double MinRouteCost = INFINITY;
 				uint64_t P1RouteStartPos = 0;
 				for (const auto& PathDataIter : P1Routes) /*Find First Node in P1*/
 				{
@@ -164,10 +165,10 @@ void Population::Crossover(Chromosome P1, Chromosome P2)
 						if (NodeIter.Num == FirstNode.Num) //&& P1OverlappedNodeNum.at(P1FoundedNodePos) > 0)
 						{
 							NodeFoundFlag = true;
-							if (MinRouteLength > PathDataIter.Cost)
+							if (MinRouteCost >= PathDataIter.TownBusData.RouteCostPerPerson)
 							{
 								/*Find Route Include First Node*/
-								MinRouteLength = PathDataIter.Cost;
+								MinRouteCost = PathDataIter.TownBusData.RouteCostPerPerson;
 								//ShortestPath = PathDataIter;
 								FoundShortestPathFlag = true;
 							}
@@ -194,10 +195,10 @@ void Population::Crossover(Chromosome P1, Chromosome P2)
 						if (NodeIter.Num == FirstNode.Num) //&& P2OverlappedNodeNum.at(P2FoundedNodePos) > 0)
 						{
 							NodeFoundFlag = true;
-							if (MinRouteLength > PathDataIter.Cost)
+							if (MinRouteCost >= PathDataIter.TownBusData.RouteCostPerPerson)
 							{
 								/*Find Route Include First Node*/
-								MinRouteLength = PathDataIter.Cost;
+								MinRouteCost = PathDataIter.TownBusData.RouteCostPerPerson;
 								//ShortestPath = PathDataIter;
 								FoundShortestPathFlag = true;
 							}
