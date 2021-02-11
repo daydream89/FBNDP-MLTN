@@ -112,6 +112,8 @@ void FitnessCalculator::SetPassageAssignmentForMNLModel(vector<ShortestPathData>
 
 		UnityFunctionValue.emplace_back((MNLCoefData.IVTTCoef * TravelTimeInVechicle) + (MNLCoefData.OVTTCoef * TravelTimeOutVechicle) + (MNLCoefData.CTPICoef * CumulativeTransferPanaltyIndex)
 			+ (MNLCoefData.RELICoef * TrainTravelTimeRatio) + (MNLCoefData.CIRCCoef * Curve));
+
+		CalcCurveNTransportationIVTT(InOutPathList.at(1));
 	}
 	else
 	{
@@ -214,16 +216,16 @@ void FitnessCalculator::CalcCustomerCost(const vector<ShortestPathData>& InPathL
 			TransferWaitTimeCost += UserInput.WaitTimeCost / (2 * TransferTimeData.DispatchesPerHour);
 		}
 
-		float CustomerCost = 0.f;
+		double CustomerCost = 0;
 		CustomerCost += UserInput.TownBusTimeCost * Path.TownBusIVTT;
 		CustomerCost += UserInput.BusTimeCost * Path.BusIVTT;
 		CustomerCost += UserInput.TrainTimeCost * Path.TrainIVTT;
 		CustomerCost += UserInput.WaitTimeCost / (2 * InitialDispatchesPerHour);
 		CustomerCost += UserInput.TransferTimeCost * TransferTime;
 		CustomerCost += TransferWaitTimeCost;
-		CustomerCost *= static_cast<float>(Path.TrafficVolumeForPath);
+		CustomerCost *= static_cast<double>(Path.TrafficVolumeForPath);
 
-		OutCostSum += static_cast<float>(CustomerCost);
+		OutCostSum += CustomerCost;
 	}
 }
 
@@ -241,21 +243,9 @@ double FitnessCalculator::CalcNetworkCost(double SumofCustomerCost)
 		if (RoutePair.first.substr(0, 7) == "TownBus")	// todo. TownBus 스트링 따로 빼서 지정할 수 있도록 할 것.
 		{
 			float LengthOfTownBusLine = 0.f;
-			for (const auto& RouteOrderPair : RoutePair.second)
-			{
-				auto NextOrderPair = RoutePair.second.find(RouteOrderPair.first + 1);
-				if (NextOrderPair == RoutePair.second.end())
-					break;
-
-				for (const LinkData& Link : LinkDataList)
-				{
-					if (RouteOrderPair.second.Node == Link.FromNodeNum && NextOrderPair->second.Node == Link.ToNodeNum)
-					{
-						LengthOfTownBusLine += Link.Length;
-						break;
-					}
-				}
-			}
+			auto RIter = RoutePair.second.rbegin();
+			if (RIter != RoutePair.second.rend())
+				LengthOfTownBusLine = RIter->second.CumDistance;
 
 			TotalCost += static_cast<double>(2 * UserInput.TownBusOperationCost * UserInput.TownBusDispatchesPerHour * (LengthOfTownBusLine / 2));
 			TotalLengthOfTownBusLine += LengthOfTownBusLine;
