@@ -17,3 +17,6 @@ PanaltyFactor,0.0001
 NumberOfBusesGiven,110
 OperatingHoursPerDay,10
 TownBusNodesNum,10,1,2,3,4,5,6,7,8,9,10
+NoCrossoverNum,2
+PopulationNum,8
+MaxGeneration,10

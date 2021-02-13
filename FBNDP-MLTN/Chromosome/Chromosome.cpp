@@ -325,7 +325,7 @@ void Chromosome::RemoveOverlapedRoute(void)
 				if (it != NodeCheckMap.end())
 				{
 #if DEBUG_MODE
-					printf("NodeNum is founded: %d\n", it->first);
+					printf("NodeNum is founded: %llu\n", it->first);
 #endif
 					it->second = true;
 				}

@@ -120,6 +120,9 @@ struct UserInputData
 	uint64_t NumberOfBusesGiven = 110;		// 주어진 버스 대수
 	float OperatingHoursPerDay = 10.f;		// 하루 운영 시간
 	vector<uint64_t> TownBusNodesNum;		// 마을 버스가 정차하는 노드들
+	uint64_t NoCrossoverNum = 2;			// 교차변이하지 않을 유전자의 수
+	uint64_t PopulationNum = 8;				// 유전 집단의 수
+	uint64_t MaxGeneration = 10;			// 유전 세대 수
 };
 
 typedef vector<vector<string>> FileDataList;

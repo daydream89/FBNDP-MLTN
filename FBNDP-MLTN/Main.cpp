@@ -23,20 +23,26 @@ int main(int argc, char* argv[])
 		DataCenter->SetDistanceData(Reader.GetFileData("./Input/6_Direct_distance.csv"));
 		DataCenter->SetUserInputData(Reader.GetFileData("./Input/0_UserInput.csv"));
 
-		int PopulationNum = 8;
 		// Generate initial population
+		uint64_t PopulationNum = DataCenter->GetUserInputData().PopulationNum;
 		Population InitialPopulation(PopulationNum);
 
-		// Calculate fitness
-		for (int i = 0; i < PopulationNum; ++i)
+		uint64_t MaxGeneration = DataCenter->GetUserInputData().MaxGeneration;
+		for (uint64_t GenerationNum = 0 ; GenerationNum < MaxGeneration; ++GenerationNum)
 		{
-			FitnessCalculator Fitness(i, 2);
-			Fitness.Calculate();
-			printf("Finished Calculate %dth Chromosome.\n", i);
+			printf("\n\n%llust Generation Data\n", GenerationNum + 1);
+			// Calculate fitness
+			for (int i = 0; i < PopulationNum; ++i)
+			{
+				FitnessCalculator Fitness(i, 2);
+				double ChromosomeFitness = Fitness.Calculate();
+				InitialPopulation.GetChromosomeRef(i).SetFitnessValue(ChromosomeFitness);
+				printf("Finished Calculate %dth Chromosome.\n", i);
 
-			Writer.WriteCSVFile(0, i, DataCenter->GetShortestPathDataList());
+				Writer.WriteCSVFile(0, i, DataCenter->GetShortestPathDataList());
+			}
+			InitialPopulation.GetNextGeneration();
 		}
-		InitialPopulation.GetNextGeneration();
 	}
 
 	return 0;
