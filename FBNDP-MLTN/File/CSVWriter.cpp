@@ -2,8 +2,14 @@
 
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 
 #include "../Data/DataCenter.h"
+
+CSVWriter::CSVWriter()
+{
+	_wmkdir(L"./Output");
+}
 
 void CSVWriter::WriteCSVFile(int GenerationNumber, const vector<vector<ShortestPathData>>& InTownBusRouteDataList)
 {
