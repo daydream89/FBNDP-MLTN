@@ -259,6 +259,7 @@ float Util::Calculator::CalcIVTT(const LinkData& InLink, const RouteMap& InRoute
 	string RouteName = "";
 	for (auto RoutePair : InRouteMap)
 	{
+		RouteName = "";
 		float PreCumDistance = -1.f, PostCumDistance = -1.f;
 		for (auto RouteOrderPair : RoutePair.second)
 		{
