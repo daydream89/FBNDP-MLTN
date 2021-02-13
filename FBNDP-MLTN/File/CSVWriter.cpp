@@ -31,7 +31,28 @@ void CSVWriter::WriteCSVFile(int GenerationNumber, int ChromosomeIndex, const ve
 	FileStream.open(FileName);
 	if (FileStream.is_open())
 	{
-		FileStream << "test" << endl;
+		string NewLine = "\n";
+		string IndexRow = "Cost,TrainIVTT,BusIVTT,TownBusIVTT,OVTT,TrafficVolume,Path\n";
+		FileStream.write(IndexRow.c_str(), IndexRow.length());
+		for (const auto& PathData : InPathDataList)
+		{
+			string PathStr = "";
+			for (const auto& Node : PathData.Path)
+				PathStr.append(to_string(Node.Num) + " ");
+
+			string Row = "";
+			Row.append(to_string(PathData.Cost) + ",");
+			Row.append(to_string(PathData.TrainIVTT) + ",");
+			Row.append(to_string(PathData.BusIVTT) + ",");
+			Row.append(to_string(PathData.TownBusIVTT) + ",");
+			Row.append(to_string(PathData.Transfer.OVTT) + ",");
+			Row.append(to_string(PathData.TrafficVolumeForPath) + ",");
+			Row.append(PathStr);
+
+			FileStream.write(Row.c_str(), Row.length());
+			FileStream.write(NewLine.c_str(), NewLine.length());
+		}
+		FileStream.write(NewLine.c_str(), NewLine.length());
 	}
 
 	FileStream.close();
