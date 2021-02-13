@@ -63,3 +63,27 @@ void CSVWriter::WriteCSVFile(int GenerationNumber, int ChromosomeIndex, const ve
 
 	FileStream.close();
 }
+
+void CSVWriter::WriteCSVFile(const vector<NodeData>& InFinalResultData)
+{
+	string FileName = "./Output/";
+	FileName.append("Result.csv");
+
+	ofstream FileStream;
+	FileStream.open(FileName);
+	if (FileStream.is_open())
+	{
+		string NewLine = "\n";
+		string IndexRow = "Path\n";
+		FileStream.write(IndexRow.c_str(), IndexRow.length());
+
+		string Row = "";
+		for (const auto& Node : InFinalResultData)
+			Row.append(to_string(Node.Num) + " ");
+
+		FileStream.write(Row.c_str(), Row.length());
+		FileStream.write(NewLine.c_str(), NewLine.length());
+	}
+
+	FileStream.close();
+}
