@@ -216,6 +216,18 @@ void DataCenter::SetUserInputData(const FileDataList& InData)
 				UserInput.TownBusNodesNum.emplace_back(stoull(RowData.at(i + 2)));
 			}
 		}
+		else if (Name == "NoCrossoverNum")
+		{
+			UserInput.NoCrossoverNum = static_cast<uint64_t>(stoul(Value));
+		}
+		else if (Name == "PopulationNum")
+		{
+			UserInput.PopulationNum = static_cast<uint64_t>(stoul(Value));
+		}
+		else if (Name == "MaxGeneration")
+		{
+			UserInput.MaxGeneration = static_cast<uint64_t>(stoul(Value));
+		}
 	}
 }
 

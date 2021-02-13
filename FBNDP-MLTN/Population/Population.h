@@ -11,9 +11,14 @@ public:
 	Population(uint64_t MemberNum);
 	uint64_t GetCurrentChromosomeNum() { return ChromosomeArray.size(); }
 	Chromosome GetChromosome(uint64_t ChromosomeNum) { return ChromosomeArray.at(ChromosomeNum); }
+	Chromosome& GetChromosomeRef(uint64_t ChromosomeNum) { return ChromosomeArray.at(ChromosomeNum); }
 	vector<pair<NodeData,bool>> GetChromosomeData(uint64_t ChromosomeNum)	/*ChromosomeNum번째의 ChromosomeData를 얻음*/
 	{
 		return ChromosomeArray.at(ChromosomeNum).GetChromosome();
+	}
+	vector<pair<NodeData,bool>>& GetChromosomeDataRef(uint64_t ChromosomeNum)	/*ChromosomeNum번째의 ChromosomeData를 얻음*/
+	{
+		return ChromosomeArray.at(ChromosomeNum).GetChromosomeRef();
 	}
 
 	void GetNextGeneration(void);

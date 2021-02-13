@@ -34,9 +34,18 @@ void Population::GetNextGeneration()
 	ChromosomeArray.clear();
 	ChromosomeArray.assign(ChildrenChromosomeArray.begin(), ChildrenChromosomeArray.end());
 	ChildrenChromosomeArray.clear();
+	if (auto DataCenterInstance = DataCenter::GetInstance())
+	{
+		DataCenterInstance->ClearTownBusRouteData();
+		for (uint64_t i = 0; i < MaxChromosomeNum; ++i)
+		{
+			DataCenterInstance->AddTownBusRouteData(ChromosomeArray.at(i).GetRoute());
+		}
+	}
 }
 void Population::Selection()
 {
+	uint64_t CrossoverExceptionNum = 0;
 	if (auto DataCenterInstance = DataCenter::GetInstance())
 	{
 		for (uint64_t i = 0; i < MaxChromosomeNum; ++i)
@@ -45,12 +54,60 @@ void Population::Selection()
 			ChromosomeArray.at(i).GetRouteRef().assign(DataCenterInstance->GetChromosomeRoutesDataRef(i).begin(), DataCenterInstance->GetChromosomeRoutesDataRef(i).end());
 			ChromosomeArray.at(i).SetRouteNum();
 		}
+		CrossoverExceptionNum = DataCenterInstance->GetUserInputData().NoCrossoverNum;
+	}
+
+	/*Find Crossover Exceptions..Large Fitness*/
+	vector<uint64_t> CrossoverExceptPositions;
+	for(uint64_t i = 0; i < CrossoverExceptionNum; ++i)
+	{
+		double MaxFitness = -INFINITY;
+		uint64_t MaxChromosomePos = 0;
+		for (uint64_t i = 0; i < ChromosomeArray.size(); ++i)
+		{
+			bool ContinueFlag = false;
+			for (const auto& ExceptPositionIter : CrossoverExceptPositions)
+			{
+				if (ExceptPositionIter == i)
+				{
+					ContinueFlag = true;
+					break;
+				}
+			}
+			if (ContinueFlag)
+				continue;
+			if (ChromosomeArray.at(i).GetFitnessValue() > MaxFitness)
+			{
+				MaxFitness = ChromosomeArray.at(i).GetFitnessValue();
+				MaxChromosomePos = i;
+			}
+		}
+		CrossoverExceptPositions.emplace_back(MaxChromosomePos);
+		ChildrenChromosomeArray.emplace_back(ChromosomeArray.at(MaxChromosomePos));
+	}
+
+	vector<Chromosome> SelectionChromosomeArray;
+	for (uint64_t i = 0; i < ChromosomeArray.size(); ++i)
+	{
+		bool ExceptionFounded = false;
+		for (const auto& ExceptPositionIter : CrossoverExceptPositions)
+		{
+			if (ExceptPositionIter == i)
+			{
+				ExceptionFounded = true;
+				break;
+			}
+		}
+		if (ExceptionFounded)
+			continue;
+		SelectionChromosomeArray.emplace_back(ChromosomeArray.at(i));
+		
 	}
 	random_device rd;
 	mt19937 gen(rd());
 
 	vector<uint64_t> RandomOrder;
-	for (uint64_t i = 0; i < ChromosomeArray.size(); ++i)
+	for (uint64_t i = 0; i < ChromosomeArray.size() - CrossoverExceptionNum; ++i)
 	{
 		RandomOrder.emplace_back(i);
 	}
@@ -72,9 +129,9 @@ void Population::Selection()
 
 	SelectionCompair.clear();
 	/*Make Chromosome Pair(Selection)*/
-	for (uint64_t i = 0; i < ChromosomeArray.size(); ++i)
+	for (uint64_t i = 0; i < SelectionChromosomeArray.size(); ++i)
 	{
-		SelectionCompair.emplace_back(make_pair(ChromosomeArray.at(i), ChromosomeArray.at(RandomOrder.at(i))));
+		SelectionCompair.emplace_back(make_pair(SelectionChromosomeArray.at(i), SelectionChromosomeArray.at(RandomOrder.at(i))));
 	}
 }
 
