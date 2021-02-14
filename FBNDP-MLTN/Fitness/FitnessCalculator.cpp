@@ -100,20 +100,22 @@ void FitnessCalculator::SetPassageAssignmentForMNLModel(vector<ShortestPathData>
 		if (PassageTimeDiff < fabsf(Compare))
 		{
 			InOutPathList.at(0).TrafficVolumeForPath = static_cast<uint32_t>(TrafficVolume);
+			InOutPathList.at(1).TrafficVolumeForPath = 0;
+			return;
 		}
 
 		auto& PathData = InOutPathList.at(0);
+		for (auto& PathData : InOutPathList)
+		{
+			float TravelTimeInVechicle = PathData.IVTT;		// IVTT
+			float TravelTimeOutVechicle = PathData.Transfer.OVTT;	// OVTT
+			float CumulativeTransferPanaltyIndex = 1.f - expf(-static_cast<float>(PathData.Transfer.CTPI));	// CTPI
+			float Curve = CalcCurveNTransportationIVTT(PathData);	// CIRC
+			float TrainTravelTimeRatio = PathData.TrainIVTT / PathData.IVTT;	// RELI
 
-		float TravelTimeInVechicle = PathData.IVTT;		// IVTT
-		float TravelTimeOutVechicle = PathData.Transfer.OVTT;	// OVTT
-		float CumulativeTransferPanaltyIndex = 1.f - expf(-static_cast<float>(PathData.Transfer.CTPI));	// CTPI
-		float Curve = CalcCurveNTransportationIVTT(PathData);	// CIRC
-		float TrainTravelTimeRatio = PathData.TrainIVTT / PathData.IVTT;	// RELI
-
-		UnityFunctionValue.emplace_back((MNLCoefData.IVTTCoef * TravelTimeInVechicle) + (MNLCoefData.OVTTCoef * TravelTimeOutVechicle) + (MNLCoefData.CTPICoef * CumulativeTransferPanaltyIndex)
-			+ (MNLCoefData.RELICoef * TrainTravelTimeRatio) + (MNLCoefData.CIRCCoef * Curve));
-
-		CalcCurveNTransportationIVTT(InOutPathList.at(1));
+			UnityFunctionValue.emplace_back((MNLCoefData.IVTTCoef * TravelTimeInVechicle) + (MNLCoefData.OVTTCoef * TravelTimeOutVechicle) + (MNLCoefData.CTPICoef * CumulativeTransferPanaltyIndex)
+				+ (MNLCoefData.RELICoef * TrainTravelTimeRatio) + (MNLCoefData.CIRCCoef * Curve));
+		}
 	}
 	else
 	{
