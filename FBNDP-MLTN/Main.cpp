@@ -31,6 +31,7 @@ int main(int argc, char* argv[])
 		for (uint64_t GenerationNum = 0 ; GenerationNum < MaxGeneration; ++GenerationNum)
 		{
 			printf("\n\n%llust Generation Data\n", GenerationNum + 1);
+			Writer.WriteCSVFile(GenerationNum+1, DataCenter->GetAllChromosomeRoutesDataRef());
 			// Calculate fitness
 			for (int i = 0; i < PopulationNum; ++i)
 			{

@@ -13,17 +13,52 @@ CSVWriter::CSVWriter()
 
 void CSVWriter::WriteCSVFile(int GenerationNumber, const vector<vector<ShortestPathData>>& InTownBusRouteDataList)
 {
-	string FileName = "./Output/";
-	FileName.append(to_string(GenerationNumber) + "_");
-	FileName.append("ChromosomeData.csv");
-	ofstream FileStream;
-	FileStream.open(FileName);
-	if (FileStream.is_open())
+	string FileNameRoutes = "./Output/";
+	FileNameRoutes.append(to_string(GenerationNumber) + "_");
+	FileNameRoutes.append("ChromosomeRoutesData.csv");
+
+	string FileNameStops = "./Output/";
+	FileNameStops.append(to_string(GenerationNumber) + "_");
+	FileNameStops.append("ChromosomeStopsData.csv");
+
+	ofstream RoutesFileStream;
+	RoutesFileStream.open(FileNameRoutes);
+
+	ofstream StopsFileStream;
+	StopsFileStream.open(FileNameStops);
+	if (RoutesFileStream.is_open() && StopsFileStream.is_open())
 	{
+		for (uint64_t PopSize = 0; PopSize < InTownBusRouteDataList.size(); ++PopSize)
+		{
+			string NewLine = "\n";
+			string ChromosomeRouteData = "";
+			string ChromosomeStopData = "";
+			ChromosomeRouteData.append(to_string(PopSize + 1) + "_ChromosomeTownBusRoutes: ");
+			ChromosomeStopData.append(to_string(PopSize + 1) + "_ChromosomeTownBusStops: ");
+			RoutesFileStream.write(ChromosomeRouteData.c_str(), ChromosomeRouteData.length());
+			StopsFileStream.write(ChromosomeStopData.c_str(), ChromosomeStopData.length());
+			for (const auto& ShortestPathDataIter : InTownBusRouteDataList.at(PopSize))
+			{
+				for (const auto& RouteIter : ShortestPathDataIter.TownBusData.TownBusStopCheck)
+				{
+					/*RoutesInfo*/
+					string NodeNum = "";
+					NodeNum.append(to_string(RouteIter.first.Num) + " ");
+					RoutesFileStream.write(NodeNum.c_str(), NodeNum.length());
+					if (RouteIter.second == true) /*TownBusStop*/
+					{
+						StopsFileStream.write(NodeNum.c_str(), NodeNum.length());
+					}
+				}
+			}
+			RoutesFileStream.write(NewLine.c_str(), NewLine.length());
+			StopsFileStream.write(NewLine.c_str(), NewLine.length());
+		}
 		// write data
 	}
 
-	FileStream.close();
+	RoutesFileStream.close();
+	StopsFileStream.close();
 }
 
 void CSVWriter::WriteCSVFile(int GenerationNumber, int ChromosomeIndex, const vector<ShortestPathData>& InPathDataList)

@@ -42,6 +42,7 @@ public:
 	void ClearTownBusRouteData() { ChromosomeTownBusRouteData.clear(); };
 	const vector<ShortestPathData>& GetChromosomeRoutesData(uint64_t ChromosomeNum) { return ChromosomeTownBusRouteData.at(ChromosomeNum); };
 	vector<ShortestPathData>& GetChromosomeRoutesDataRef(uint64_t ChromosomeNum) { return ChromosomeTownBusRouteData.at(ChromosomeNum); };
+	vector<vector<ShortestPathData>>& GetAllChromosomeRoutesDataRef(void) { return ChromosomeTownBusRouteData; };
 
 	void AddShortestPathDataList(const vector<ShortestPathData>& InPathDataList);
 	const vector<ShortestPathData>& GetShortestPathDataList() { return ShortestPathDataList; }
