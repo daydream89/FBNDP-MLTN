@@ -34,6 +34,7 @@
 .vs/
 FBNDP-MLTN/Debug/
 FBNDP-MLTN/Input
+FBNDP-MLTN/Output
 .vs/FBNDP-MLTN/v16/.suo
 .vs/FBNDP-MLTN/v16/Browse.VC.db
 *.ipch
