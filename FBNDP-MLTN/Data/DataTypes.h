@@ -200,6 +200,7 @@ struct TownBusRouteData
 };
 struct ShortestPathData
 {
+	int Order = 0;
 	vector<NodeData> Path;
 	TownBusRouteData TownBusData;
 	float Cost = 0.f;	// IVTT + OVTT

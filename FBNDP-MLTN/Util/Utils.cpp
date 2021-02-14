@@ -146,6 +146,7 @@ size_t Util::PathFinder::FindShortestPath(PathFinderData& InData, vector<Shortes
 	// 1. find shortest path with Dijkstra Algorithm.
 	Coordinate RemovedLink(InData.StartNodeNum, InData.StartNodeNum);
 	ShortestPathData FirstPathData;
+	FirstPathData.Order = 1;
 	FirstPathData.Cost = PathFinderPrivate::DijkstraAlgorithm(InData, RemovedLink, FirstPathData);
 	if (INFINITY <= FirstPathData.Cost)
 	{
@@ -220,6 +221,7 @@ size_t Util::PathFinder::FindShortestPath(PathFinderData& InData, vector<Shortes
 	// 3. save above result into map. (total cost & path pair)
 	if (SecondPathCandidateMap.begin() != SecondPathCandidateMap.end())
 	{
+		SecondPathCandidateMap.begin()->second.Order = 2;
 		OutPath.emplace_back(SecondPathCandidateMap.begin()->second);
 	}
 

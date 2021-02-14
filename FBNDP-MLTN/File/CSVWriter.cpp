@@ -11,7 +11,7 @@ CSVWriter::CSVWriter()
 	_wmkdir(L"./Output");
 }
 
-void CSVWriter::WriteCSVFile(int GenerationNumber, const vector<vector<ShortestPathData>>& InTownBusRouteDataList)
+void CSVWriter::WriteCSVFile(uint64_t GenerationNumber, const vector<vector<ShortestPathData>>& InTownBusRouteDataList)
 {
 	string FileNameRoutes = "./Output/";
 	FileNameRoutes.append(to_string(GenerationNumber) + "_");
@@ -61,7 +61,7 @@ void CSVWriter::WriteCSVFile(int GenerationNumber, const vector<vector<ShortestP
 	StopsFileStream.close();
 }
 
-void CSVWriter::WriteCSVFile(int GenerationNumber, int ChromosomeIndex, const vector<ShortestPathData>& InPathDataList)
+void CSVWriter::WriteCSVFile(uint64_t GenerationNumber, int ChromosomeIndex, const vector<ShortestPathData>& InPathDataList)
 {
 	string FileName = "./Output/";
 	FileName.append(to_string(GenerationNumber) + "_");
@@ -73,7 +73,7 @@ void CSVWriter::WriteCSVFile(int GenerationNumber, int ChromosomeIndex, const ve
 	if (FileStream.is_open())
 	{
 		string NewLine = "\n";
-		string IndexRow = "Cost,TrainIVTT,BusIVTT,TownBusIVTT,OVTT,TrafficVolume,Path\n";
+		string IndexRow = "Order,Cost,TrainIVTT,BusIVTT,TownBusIVTT,OVTT,TrafficVolume,Path\n";
 		FileStream.write(IndexRow.c_str(), IndexRow.length());
 		for (const auto& PathData : InPathDataList)
 		{
@@ -82,6 +82,7 @@ void CSVWriter::WriteCSVFile(int GenerationNumber, int ChromosomeIndex, const ve
 				PathStr.append(to_string(Node.Num) + " ");
 
 			string Row = "";
+			Row.append(to_string(PathData.Order) + ",");
 			Row.append(to_string(PathData.Cost) + ",");
 			Row.append(to_string(PathData.TrainIVTT) + ",");
 			Row.append(to_string(PathData.BusIVTT) + ",");
