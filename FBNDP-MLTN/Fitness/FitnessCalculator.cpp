@@ -25,6 +25,7 @@ FitnessCalculator::FitnessCalculator(int InChromosomeIndex, uint64_t PathNum)
 		AddGraphDataToRouteDataMap(ChromosomeData);
 		
 		AddRouteDataMapToGraphData(DataCenterInstance->GetRouteData(), DataCenterInstance->GetNodeData());
+		AddRouteDataMapToLinkData(RouteDataMap, DataCenterInstance->GetLinkData());
 	}
 }
 
@@ -358,6 +359,45 @@ void FitnessCalculator::AddRouteDataMapToGraphData(const RouteMap& RouteDataMap,
 			GraphData.push_back(Util::PathFinder::GetNodeData(RoutePair.second.Node, FullGraphData));
 			if (RouteOneWayCount < ++CurCount)
 				break;
+		}
+	}
+}
+
+void FitnessCalculator::AddRouteDataMapToLinkData(const RouteMap& RouteDataMap, const vector<LinkData>& FullLinkData)
+{
+	for (const auto& RouteMapPair : RouteDataMap)
+	{
+		auto Iter = RouteMapPair.second.begin();
+		auto RIter = RouteMapPair.second.rbegin();
+		if (RIter == RouteMapPair.second.rend() || Iter == RouteMapPair.second.end())
+			continue;
+
+		uint64_t FirstOrder = Iter->first;
+		uint64_t LastOrder = RIter->first;
+		for (uint64_t i = FirstOrder; i < LastOrder - 1; ++i)
+		{
+			auto FromRouteNode = RouteMapPair.second.find(i)->second;
+			auto ToRouteNode = RouteMapPair.second.find(i + 1)->second;
+			for (const auto& Link : FullLinkData)
+			{
+				if (Link.FromNodeNum == FromRouteNode.Node && Link.ToNodeNum == ToRouteNode.Node)
+				{
+					bool bExist = false;
+					for (const auto& ExistLink : LinkDataList)
+					{
+						if (ExistLink.FromNodeNum == FromRouteNode.Node && ExistLink.ToNodeNum == ToRouteNode.Node)
+						{
+							bExist = true;
+							break;
+						}
+					}
+
+					if (!bExist)
+						LinkDataList.emplace_back(Link);
+
+					break;
+				}
+			}
 		}
 	}
 }

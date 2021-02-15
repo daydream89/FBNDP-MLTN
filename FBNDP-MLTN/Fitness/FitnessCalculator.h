@@ -35,6 +35,7 @@ private:
 
 	void AddGraphDataToRouteDataMap(vector<ShortestPathData>& InOutPathDataList);
 	void AddRouteDataMapToGraphData(const RouteMap& RouteDataMap, const vector<NodeData>& FullGraphData);
+	void AddRouteDataMapToLinkData(const RouteMap& RouteDataMap, const vector<LinkData>& FullLinkData);
 
 	void SetGraphData(const vector<ShortestPathData>& InPathData);
 	void SetLinkDataList(const vector<ShortestPathData>& InPathData, const vector<LinkData>& InFullLinkDataList);
