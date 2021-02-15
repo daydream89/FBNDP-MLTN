@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
 				InitialPopulation.GetChromosomeRef(i).SetFitnessValue(ChromosomeFitness);
 				printf("Finished Calculate %dth Chromosome.\n", i);
 
-				Writer.WriteCSVFile(0, i, DataCenter->GetShortestPathDataList());
+				Writer.WriteCSVFile(GenerationNum+1, i+1, DataCenter->GetShortestPathDataList());
 			}
 			InitialPopulation.GetNextGeneration();
 		}

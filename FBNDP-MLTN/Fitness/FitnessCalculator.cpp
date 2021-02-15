@@ -12,6 +12,8 @@ FitnessCalculator::FitnessCalculator(int InChromosomeIndex, uint64_t PathNum)
 
 	if (auto DataCenterInstance = DataCenter::GetInstance())
 	{
+		DataCenterInstance->ClearShortestPathDataList();
+
 		PassageTimeDiff = DataCenterInstance->GetUserInputData().PassageTimeDiff;
 		PassageTimeDiff = Util::Converter::ConvertMinuteToHour(PassageTimeDiff);
 
