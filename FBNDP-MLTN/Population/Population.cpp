@@ -191,7 +191,16 @@ void Population::Crossover(Chromosome P1, Chromosome P2)
 	while (P1CurPosition < P1.GetChromosome().size())//P1RouteNum != 0)
 	{
 		NodeData FirstNode = P1.GetChromosome().at(P1CurPosition).first;
-		if (FirstNode.Type == NodeType::Station)
+		bool IsTownBusStop = false;
+		for (const auto& TBNodesIter : TownBusNode)
+		{
+			if (TBNodesIter.Num == FirstNode.Num)
+			{
+				IsTownBusStop = true;
+				break;
+			}
+		}
+		if (FirstNode.Type == NodeType::Station || !IsTownBusStop)
 		{
 			++P1CurPosition;
 			continue;
@@ -201,7 +210,7 @@ void Population::Crossover(Chromosome P1, Chromosome P2)
 			/* Add FirstNode To F1 */
 			ShortestPath.Path.emplace_back(FirstNode);
 
-			NodeData FoundedNextNode;
+			vector<NodeData> FoundedNextNode;
 			do {
 				double MinRouteCost = INFINITY;
 				uint64_t P1RouteStartPos = 0;
@@ -210,16 +219,19 @@ void Population::Crossover(Chromosome P1, Chromosome P2)
 					bool NodeFoundFlag = false;
 					bool FoundShortestPathFlag = false;
 					uint64_t P1FoundedNodePos = P1RouteStartPos;
-					for (const auto& NodeIter : PathDataIter.Path)
+					for (const auto& NodeIter : PathDataIter.TownBusData.TownBusStopCheck)
 					{
 						if (FoundShortestPathFlag && NodeFoundFlag) /*Found Shortest Path include FirstNode */
 						{
-							FoundedNextNode = NodeIter;
-							break;
+							FoundedNextNode.emplace_back(NodeIter.first);
+							if (NodeIter.second == true)
+								break;
+							else
+								continue;
 						}
 						if (!FoundShortestPathFlag && NodeFoundFlag) /*Found Including First Node Path, But Not Shortest Path*/
 							break;
-						if (NodeIter.Num == FirstNode.Num) //&& P1OverlappedNodeNum.at(P1FoundedNodePos) > 0)
+						if (NodeIter.first.Num == FirstNode.Num) //&& P1OverlappedNodeNum.at(P1FoundedNodePos) > 0)
 						{
 							NodeFoundFlag = true;
 							if (MinRouteCost >= PathDataIter.TownBusData.RouteCostPerPerson)
@@ -228,6 +240,7 @@ void Population::Crossover(Chromosome P1, Chromosome P2)
 								MinRouteCost = PathDataIter.TownBusData.RouteCostPerPerson;
 								//ShortestPath = PathDataIter;
 								FoundShortestPathFlag = true;
+								FoundedNextNode.clear();
 							}
 						}
 						++P1FoundedNodePos;
@@ -240,16 +253,19 @@ void Population::Crossover(Chromosome P1, Chromosome P2)
 					bool NodeFoundFlag = false;
 					bool FoundShortestPathFlag = false;
 					uint64_t P2FoundedNodePos = P2RouteStartPos;
-					for (const auto& NodeIter : PathDataIter.Path)
+					for (const auto& NodeIter : PathDataIter.TownBusData.TownBusStopCheck)
 					{
 						if (FoundShortestPathFlag && NodeFoundFlag) /*Found Shortest Path include FirstNode */
 						{
-							FoundedNextNode = NodeIter;
-							break;
+							FoundedNextNode.emplace_back(NodeIter.first);
+							if (NodeIter.second == true)
+								break;
+							else
+								continue;
 						}
 						if (!FoundShortestPathFlag && NodeFoundFlag) /*Found Including First Node Path, But Not Shortest Path*/
 							break;
-						if (NodeIter.Num == FirstNode.Num) //&& P2OverlappedNodeNum.at(P2FoundedNodePos) > 0)
+						if (NodeIter.first.Num == FirstNode.Num) //&& P2OverlappedNodeNum.at(P2FoundedNodePos) > 0)
 						{
 							NodeFoundFlag = true;
 							if (MinRouteCost >= PathDataIter.TownBusData.RouteCostPerPerson)
@@ -258,6 +274,7 @@ void Population::Crossover(Chromosome P1, Chromosome P2)
 								MinRouteCost = PathDataIter.TownBusData.RouteCostPerPerson;
 								//ShortestPath = PathDataIter;
 								FoundShortestPathFlag = true;
+								FoundedNextNode.clear();
 							}
 						}
 						++P2FoundedNodePos;
@@ -269,16 +286,17 @@ void Population::Crossover(Chromosome P1, Chromosome P2)
 #endif
 
 				/* add FoundedNextNode to F1 or F1's Routes Vector */
-				ShortestPath.Path.emplace_back(FoundedNextNode);
-				FirstNode = FoundedNextNode;
+				//ShortestPath.Path.emplace_back(FoundedNextNode);
+				ShortestPath.Path.insert(ShortestPath.Path.end(), FoundedNextNode.begin(), FoundedNextNode.end());
+				FirstNode = FoundedNextNode.at(FoundedNextNode.size()-1);
 
 				/*If FoundedNextNode is Rail Station, add RoutesData*/
-				if (FoundedNextNode.Type == NodeType::Station)
+				if (FoundedNextNode.at(FoundedNextNode.size()-1).Type == NodeType::Station)
 				{
 					NewPathData.emplace_back(ShortestPath);
 					ShortestPath.Path.clear();
 				}
-			} while (FoundedNextNode.Type != NodeType::Station);
+			} while (FoundedNextNode.at(FoundedNextNode.size()-1).Type != NodeType::Station);
 			++P1CurPosition;
 		}
 	}
