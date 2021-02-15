@@ -46,6 +46,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
+	printf("\nCalculation Finished! Press any key.\n");
 	getchar();
 
 	return 0;
