@@ -374,7 +374,7 @@ void FitnessCalculator::AddRouteDataMapToLinkData(const RouteMap& RouteDataMap, 
 
 		uint64_t FirstOrder = Iter->first;
 		uint64_t LastOrder = RIter->first;
-		for (uint64_t i = FirstOrder; i < LastOrder - 1; ++i)
+		for (uint64_t i = FirstOrder; i < LastOrder; ++i)
 		{
 			auto FromRouteNode = RouteMapPair.second.find(i)->second;
 			auto ToRouteNode = RouteMapPair.second.find(i + 1)->second;
