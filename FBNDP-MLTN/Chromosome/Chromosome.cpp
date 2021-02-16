@@ -3,6 +3,7 @@
 #include <random>
 #include <map>
 #include <cassert>
+#include <math.h>
 
 #define DEBUG_MODE 0
 
@@ -410,7 +411,7 @@ SelectedBusNodeData Chromosome::SelectBusNode(const NodeData& SelectedRailNode)
 	float TotalLengthDiff = 0.0f;
 	for (auto& PercentMapIter : CalculatePercentMap)
 	{
-		PercentMapIter.second = MaxPlusMinLength - PercentMapIter.second;
+		PercentMapIter.second = (powf(2.7f, MaxPlusMinLength - PercentMapIter.second) * 0.0001);
 		TotalLengthDiff += PercentMapIter.second;
 	}
 
