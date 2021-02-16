@@ -28,14 +28,14 @@ void CSVWriter::WriteCSVFile(uint64_t GenerationNumber, const vector<vector<Shor
 	StopsFileStream.open(FileNameStops);
 	if (RoutesFileStream.is_open() && StopsFileStream.is_open())
 	{
+		string IndexRow = "Chromosome Data, NodeNum\n";
+		RoutesFileStream.write(IndexRow.c_str(), IndexRow.length());
+		StopsFileStream.write(IndexRow.c_str(), IndexRow.length());
 		for (uint64_t PopSize = 0; PopSize < InTownBusRouteDataList.size(); ++PopSize)
 		{
 			string NewLine = "\n";
 			string ChromosomeRouteData = "";
 			string ChromosomeStopData = "";
-			string IndexRow = "Chromosome Data, NodeNum\n";
-			RoutesFileStream.write(IndexRow.c_str(), IndexRow.length());
-			StopsFileStream.write(IndexRow.c_str(), IndexRow.length());
 			ChromosomeRouteData.append(to_string(PopSize + 1) + "_ChromosomeTownBusRoutes, ");
 			ChromosomeStopData.append(to_string(PopSize + 1) + "_ChromosomeTownBusStops, ");
 			RoutesFileStream.write(ChromosomeRouteData.c_str(), ChromosomeRouteData.length());
