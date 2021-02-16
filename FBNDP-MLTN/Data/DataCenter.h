@@ -21,6 +21,7 @@ public:
 	const vector<NodeData>& GetNodeData() { return NodeDataList; }
 
 	void SetLinkData(const FileDataList& InData);
+	void SetAdditionalLinkDataFromRouteData();
 	const vector<LinkData>& GetLinkData() { return LinkDataList; }
 
 	void SetRouteData(const FileDataList& InData);
@@ -52,6 +53,7 @@ private:
 	DataCenter() {}
 	~DataCenter() {}
 
+private:
 	static DataCenter* Instance;
 
 	// Data read from outside

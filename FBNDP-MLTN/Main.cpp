@@ -11,9 +11,9 @@ int main(int argc, char* argv[])
 {
 	CSVWriter Writer;
 
-	// file read
 	if (auto* DataCenter = DataCenter::GetInstance())
 	{
+		// file read
 		CSVReader Reader;
 		DataCenter->SetLinkData(Reader.GetFileData("./Input/1_Link.csv"));
 		DataCenter->SetNodeData(Reader.GetFileData("./Input/2_Node.csv"));
@@ -22,6 +22,7 @@ int main(int argc, char* argv[])
 		DataCenter->SetTrafficVolumeData(Reader.GetFileData("./Input/5_OD_demand.csv"));
 		DataCenter->SetDistanceData(Reader.GetFileData("./Input/6_Direct_distance.csv"));
 		DataCenter->SetUserInputData(Reader.GetFileData("./Input/0_UserInput.csv"));
+		DataCenter->SetAdditionalLinkDataFromRouteData();
 
 		// Generate initial population
 		uint64_t PopulationNum = DataCenter->GetUserInputData().PopulationNum;
