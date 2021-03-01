@@ -117,6 +117,7 @@ struct UserInputData
 	float TownBusOperationCost = 1600.f;	// 마을버스 운영 비용 (원/대*km)
 	uint64_t TownBusDispatchesPerHour = 12;	// 마을버스 배차 횟수 (회/hour)
 	double PanaltyFactor = 0.0001f;			// 적합도 함수에서 사용하는 값
+	double PanaltyFactor2 = 0.001f;			// 적합도 함수에서 사용하는 값
 	uint64_t NumberOfBusesGiven = 110;		// 주어진 버스 대수
 	float OperatingHoursPerDay = 10.f;		// 하루 운영 시간
 	vector<uint64_t> TownBusNodesNum;		// 마을 버스가 정차하는 노드들

@@ -274,7 +274,7 @@ double FitnessCalculator::CalcFitness(double NetworkCost)
 	double Value2 = static_cast<double>(UserInput.TownBusDispatchesPerHour) * static_cast<double>(TotalLengthOfTownBusLine);
 
 	double Fitness = 1 / (UserInput.PanaltyFactor * NetworkCost);
-	Fitness += static_cast<double>(UserInput.OperatingHoursPerDay) * (UserInput.PanaltyFactor * (Value1 - Value2));
+	Fitness += static_cast<double>(UserInput.OperatingHoursPerDay) * (UserInput.PanaltyFactor2 * (Value1 - Value2));
 
 	printf("Calculated Fitness : %lf\n", Fitness);
 

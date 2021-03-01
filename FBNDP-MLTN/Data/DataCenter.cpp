@@ -247,6 +247,10 @@ void DataCenter::SetUserInputData(const FileDataList& InData)
 		{
 			UserInput.PanaltyFactor = stof(Value);
 		}
+		else if (Name == "PanaltyFactor2")
+		{
+			UserInput.PanaltyFactor2 = stof(Value);
+		}
 		else if (Name == "NumberOfBusesGiven")
 		{
 			UserInput.NumberOfBusesGiven = static_cast<uint64_t>(stoul(Value));
