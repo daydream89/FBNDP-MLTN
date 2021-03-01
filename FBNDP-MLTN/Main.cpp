@@ -22,7 +22,6 @@ int main(int argc, char* argv[])
 		DataCenter->SetTrafficVolumeData(Reader.GetFileData("./Input/5_OD_demand.csv"));
 		DataCenter->SetDistanceData(Reader.GetFileData("./Input/6_Direct_distance.csv"));
 		DataCenter->SetUserInputData(Reader.GetFileData("./Input/0_UserInput.csv"));
-		DataCenter->SetAdditionalLinkDataFromRouteData();
 
 		// Generate initial population
 		uint64_t PopulationNum = DataCenter->GetUserInputData().PopulationNum;

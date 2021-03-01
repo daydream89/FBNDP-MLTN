@@ -22,6 +22,7 @@ FitnessCalculator::FitnessCalculator(int InChromosomeIndex, uint64_t PathNum)
 		SetLinkDataList(ChromosomeData, DataCenterInstance->GetLinkData());
 
 		RouteDataMap = DataCenterInstance->GetRouteData();
+		AddLinkDataFromDefaultRouteData(RouteDataMap, DataCenterInstance->GetOperatingData());
 		AddGraphDataToRouteDataMap(ChromosomeData);
 		
 		AddRouteDataMapToGraphData(DataCenterInstance->GetRouteData(), DataCenterInstance->GetNodeData());
@@ -469,6 +470,52 @@ void FitnessCalculator::SetLinkDataList(const vector<ShortestPathData>& InPathDa
 			StartNodeNum = NextNodeNum;
 			LinkListToIntegrated.clear();
 			LinkListToReverseIntegrated.clear();
+		}
+	}
+}
+
+void FitnessCalculator::AddLinkDataFromDefaultRouteData(const RouteMap& InRouteDataMap, const map<string, OperatingData>& InOperatingData)
+{
+	for (const auto& RouteMapPair : InRouteDataMap)
+	{
+		auto Iter = RouteMapPair.second.begin();
+		auto RIter = RouteMapPair.second.rbegin();
+		if (RIter == RouteMapPair.second.rend() || Iter == RouteMapPair.second.end())
+			continue;
+
+		uint64_t FirstOrder = Iter->first;
+		uint64_t LastOrder = RIter->first;
+		for (uint64_t i = FirstOrder; i < LastOrder; ++i)
+		{
+			auto FromRouteNode = RouteMapPair.second.find(i)->second;
+			auto ToRouteNode = RouteMapPair.second.find(i + 1)->second;
+
+			bool bExist = false;
+			for (const auto& Link : LinkDataList)
+			{
+				if (Link.FromNodeNum == FromRouteNode.Node && Link.ToNodeNum == ToRouteNode.Node)
+				{
+					bExist = true;
+					break;
+				}
+			}
+
+			if (bExist)
+				continue;
+
+			LinkData Link;
+			Link.FromNodeNum = FromRouteNode.Node;
+			Link.ToNodeNum = ToRouteNode.Node;
+			Link.Length = ToRouteNode.CumDistance - FromRouteNode.CumDistance;
+
+			if (RouteMapPair.first.substr(0, 5) == "metro" || RouteMapPair.first.substr(0, 5) == "Metro")
+				Link.Type = LinkType::Rail;
+
+			auto OperatingIter = InOperatingData.find(RouteMapPair.first);
+			if (OperatingIter != InOperatingData.end())
+				Link.Speed = OperatingIter->second.Speed;
+
+			LinkDataList.emplace_back(Link);
 		}
 	}
 }

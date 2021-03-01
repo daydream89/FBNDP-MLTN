@@ -39,6 +39,7 @@ private:
 
 	void SetGraphData(const vector<ShortestPathData>& InPathData);
 	void SetLinkDataList(const vector<ShortestPathData>& InPathData, const vector<LinkData>& InFullLinkDataList);
+	void AddLinkDataFromDefaultRouteData(const RouteMap& InRouteDataMap, const map<string, OperatingData>& InOperatingData);
 	float FindLinkLength(const vector<LinkData>& InFullLinkDataList, uint64_t FromNodeNum, uint64_t ToNodeNum);
 
 private:
