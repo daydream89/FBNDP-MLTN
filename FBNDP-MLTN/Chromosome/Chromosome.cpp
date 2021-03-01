@@ -226,19 +226,18 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 		}
 
 		/*Delete Selecte Bus Nodes*/
-		for (const NodeData& BusRouteNodeNum : SelectedBus.BusRouteData.Path)
+		bool break_flag = false;
+		uint64_t SelectedBusNodeNum = SelectedBus.BusRouteData.Path.at(0).Num;
+		for (vector<NodeData>::const_iterator NodeIter = CopiedBusNode.begin(); NodeIter != CopiedBusNode.end();) //B' = \i
 		{
-			for (vector<NodeData>::const_iterator NodeIter = CopiedBusNode.begin(); NodeIter != CopiedBusNode.end();) //B' = \i
+			if (NodeIter->Num == SelectedBusNodeNum)
 			{
-				if (NodeIter->Num == BusRouteNodeNum.Num)
-				{
-					CopiedBusNode.erase(NodeIter);
-					break;
-				}
-				else
-				{
-					++NodeIter;
-				}
+				CopiedBusNode.erase(NodeIter);
+				break;
+			}
+			else
+			{
+				++NodeIter;
 			}
 		}
 	}
