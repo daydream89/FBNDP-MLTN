@@ -105,6 +105,8 @@ void FitnessCalculator::SetPassageAssignmentForMNLModel(vector<ShortestPathData>
 		{
 			InOutPathList.at(0).TrafficVolumeForPath = static_cast<uint32_t>(TrafficVolume);
 			InOutPathList.at(1).TrafficVolumeForPath = 0;
+			CalcCurveNTransportationIVTT(InOutPathList.at(0));
+			CalcCurveNTransportationIVTT(InOutPathList.at(1));
 			return;
 		}
 
