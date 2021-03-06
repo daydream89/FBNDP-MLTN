@@ -331,7 +331,7 @@ OVTTData Util::Calculator::CalcOVTTData(const vector<NodeData>& InPath, const Ro
 			ReturnData.InitialDispatchesPerHour = OperatingData ? static_cast<float>(OperatingData->Dispatch) : 0.f;
 		}
 
-		ReturnData.OVTT = Util::Converter::ConvertMinuteToHour(1.f / ReturnData.InitialDispatchesPerHour);
+		ReturnData.OVTT = Util::Converter::ConvertMinuteToHour(60.f / ReturnData.InitialDispatchesPerHour);
 	}
 
 	if (InPath.size() < 2)
@@ -361,11 +361,14 @@ OVTTData Util::Calculator::CalcOVTTData(const vector<NodeData>& InPath, const Ro
 				Dispatch = OperatingData ? OperatingData->Dispatch : 0;
 			}
 
-			float WaitTime = Util::Converter::ConvertMinuteToHour(1.f / static_cast<float>(Dispatch));
+			float WaitTime = Util::Converter::ConvertMinuteToHour(60.f / static_cast<float>(Dispatch));
 			ReturnData.TransferList.emplace_back(TransferData(ETransportationType::Train, InPath.at(i).TransferTime, Dispatch));
 
-			ReturnData.OVTT += WaitTime + InPath.at(i).TransferTime;
+			ReturnData.OVTT += WaitTime + Util::Converter::ConvertMinuteToHour(InPath.at(i).TransferTime);
 			++ReturnData.CTPI;
+			
+			PreRouteName = CurRouteName;
+			CurRouteName = "";
 		}
 	}
 
