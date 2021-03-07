@@ -191,6 +191,14 @@ struct OVTTData
 	vector<TransferData> TransferList;
 	float OVTT = 0.f;
 	uint16_t CTPI = 0;
+
+	void Clear()
+	{
+		InitialDispatchesPerHour = 0.f;
+		TransferList.clear();
+		OVTT = 0.f;
+		CTPI = 0;
+	}
 };
 
 struct TownBusRouteData

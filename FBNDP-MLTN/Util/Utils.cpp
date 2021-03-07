@@ -173,22 +173,6 @@ size_t Util::PathFinder::FindShortestPath(PathFinderData& InData, vector<Shortes
 		Coordinate RemovedLink(FinderData.StartNodeNum, FinderData.EndNodeNum);
 		ShortestPathData NewPathData;
 		float NewPathCost = PathFinderPrivate::DijkstraAlgorithm(FinderData, RemovedLink, NewPathData);
-
-		float RemovedLinkCost = 0.f;
-		for (const auto& Link : InData.GraphLink)
-		{
-			if (Link.FromNodeNum == FinderData.StartNodeNum && Link.ToNodeNum == FinderData.EndNodeNum)
-			{
-				float Distance = 0.f; string RouteName = ""; // not use;
-				if (InData.CostType == EPathFinderCostType::Duration)
-					RemovedLinkCost = Calculator::CalcIVTT(Link, InData.RouteDataMap, Distance, RouteName);
-				else if (InData.CostType == EPathFinderCostType::Length)
-					RemovedLinkCost = Link.Length;
-
-				break;
-			}
-		}
-		NewPathCost += (FirstPathData.Cost - RemovedLinkCost);
 		if (INFINITY <= NewPathCost)
 			continue;
 		
@@ -211,10 +195,26 @@ size_t Util::PathFinder::FindShortestPath(PathFinderData& InData, vector<Shortes
 			}
 		}
 
-		// todo. NewPathCost 재계산 필요함.. 기존 Cost에 RemovedCost를 빼는 방식은 OVTT로 인해 문제 생길 가능성이 존재함.
-		// 그냥 CompletePath를 기준으로 재계산 하는것이 정확함.
+		// recalculate Cost
 		NewPathData.Path = CompletePath;
-		NewPathData.Cost = NewPathCost;
+		NewPathData.IVTT = 0.f;
+		NewPathData.Transfer.Clear();
+		for (int i = 0; i < NewPathData.Path.size() - 1; ++i)
+		{
+			NodeData& CurNode = NewPathData.Path.at(i);
+			NodeData& NextNode = NewPathData.Path.at(i + 1);
+			for (const auto& Link : InData.GraphLink)
+			{
+				if (Link.FromNodeNum == CurNode.Num && Link.ToNodeNum == NextNode.Num)
+				{
+					float Distance = 0.f; string RouteName = ""; // not use;
+					NewPathData.IVTT += Calculator::CalcIVTT(Link, InData.RouteDataMap, Distance, RouteName);
+					break;
+				}
+			}
+		}
+		NewPathData.Transfer = Calculator::CalcOVTTData(NewPathData.Path, InData.RouteDataMap);
+		NewPathData.Cost = NewPathData.IVTT + NewPathData.Transfer.OVTT;
 		SecondPathCandidateMap.emplace(make_pair(NewPathCost, NewPathData));
 	}
 
