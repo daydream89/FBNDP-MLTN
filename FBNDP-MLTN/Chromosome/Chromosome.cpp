@@ -447,7 +447,7 @@ SelectedBusNodeData Chromosome::SelectBusNode(const NodeData& SelectedRailNode)
 	float TotalLengthDiff = 0.0f;
 	for (auto& PercentMapIter : CalculatePercentMap)
 	{
-		PercentMapIter.second = (powf(2.7f, MaxPlusMinLength - PercentMapIter.second) * 0.0001);
+		PercentMapIter.second = (powf(2.7f, MaxPlusMinLength - PercentMapIter.second) * 0.0001f);
 		TotalLengthDiff += PercentMapIter.second;
 	}
 
