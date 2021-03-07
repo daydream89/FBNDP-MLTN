@@ -133,6 +133,7 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 					vector<NodeData> InputGraph;
 					vector<ShortestPathData> ShortestRoute;
 					InputGraph.assign(CopiedBusNode.begin(), CopiedBusNode.end());
+					//InputGraph.assign(CopiedBusNode.begin(), CopiedBusNode.end());
 					InputGraph.emplace_back(RouteDataIter.Path.at(0));
 					PathFinderData ShortestPathData(InputGraph, SelectedBus.SelectedBusNode.Num, RouteDataIter.Path.begin()->Num, EPathFinderCostType::Length, 1);
 					if (Util::PathFinder::FindShortestPath(ShortestPathData, ShortestRoute) != 0)
@@ -150,7 +151,7 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 				}
 			}
 			/* SelectedBus.BusRouteData.Cost vs Shortest Cost include exist route */
-			if (FoundedShortestRoute.Cost > SelectedBus.BusRouteData.Cost || FoundedShortestRoute.Cost >= INFINITY) /* Find Lesat Cost Path */
+			if ((FoundedShortestRoute.Cost < SelectedBus.BusRouteData.Cost) && FoundedShortestRoute.Cost != 0)// || FoundedShortestRoute.Cost >= INFINITY) /* Find Lesat Cost Path */
 			{
 				for (auto RouteIter : RouteDataList)
 				{
@@ -276,9 +277,45 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 		//ChromosomeNodeList.insert(ChromosomeNodeList.end(), RouteIter.Path.begin(), RouteIter.Path.end());
 	}
 }
+void Chromosome::RemoveSameRoute(void)
+{
+	for (int i = 0; i < RouteDataList.size() - 1; ++i)
+	{
+		bool SameRouteFlag = true;
+		vector<NodeData> CheckingRoute = RouteDataList.at(i).Path;
+		for (int j = i + 1; j < RouteDataList.size(); ++j)
+		{
+			vector<NodeData> CurrentRoute = RouteDataList.at(j).Path;
+			if (CheckingRoute.size() != CurrentRoute.size())
+			{
+#if DEBUG_MODE
+				printf("Route length is different, Not same Route\n");
+#endif
+				continue;
+			}
+			for (int RoutePos = 0; RoutePos < CheckingRoute.size(); ++RoutePos)
+			{
+				if (CheckingRoute.at(RoutePos).Num != CurrentRoute.at(RoutePos).Num)
+				{
+#if DEBUG_MODE
+				printf("Not same Route\n");
+#endif
+					SameRouteFlag = false;
+					break;
+				}
+			}
+			if (SameRouteFlag)
+				RouteDataList.erase(RouteDataList.begin() + j);
+		}
+	}
+	for (const auto& CheckingRoute : RouteDataList)
+	{
+	}
+}
 
 void Chromosome::RemoveOverlapedRoute(void)
 {
+	RemoveSameRoute();
 	vector<ShortestPathData> OverlapRemovedRoute;
 
 	int Count1 = 0;

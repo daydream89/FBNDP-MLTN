@@ -25,6 +25,7 @@ public:
 	vector<ShortestPathData>& GetRouteRef(){ return RouteDataList; }
 	vector<pair<NodeData, bool>> GetChromosome() { return ChromosomeNodeList; }
 	vector<pair<NodeData, bool>>& GetChromosomeRef() { return ChromosomeNodeList; }
+	void RemoveSameRoute(void);
 	void RemoveOverlapedRoute(void);
 	void SetFitnessValue(double Fitness) { FitnessValue = Fitness; };
 	double GetFitnessValue(void) { return FitnessValue; };
