@@ -36,8 +36,8 @@ void CSVWriter::WriteCSVFile(uint64_t GenerationNumber, const vector<vector<Shor
 			string NewLine = "\n";
 			string ChromosomeRouteData = "";
 			string ChromosomeStopData = "";
-			ChromosomeRouteData.append(to_string(PopSize + 1) + "_ChromosomeTownBusRoutes, ");
-			ChromosomeStopData.append(to_string(PopSize + 1) + "_ChromosomeTownBusStops, ");
+			ChromosomeRouteData.append(to_string(PopSize + 1) + "_ChromosomeTownBusRoutes,");
+			ChromosomeStopData.append(to_string(PopSize + 1) + "_ChromosomeTownBusStops,");
 			RoutesFileStream.write(ChromosomeRouteData.c_str(), ChromosomeRouteData.length());
 			StopsFileStream.write(ChromosomeStopData.c_str(), ChromosomeStopData.length());
 			for (const auto& ShortestPathDataIter : InTownBusRouteDataList.at(PopSize))
@@ -46,7 +46,7 @@ void CSVWriter::WriteCSVFile(uint64_t GenerationNumber, const vector<vector<Shor
 				{
 					/*RoutesInfo*/
 					string NodeNum = "";
-					NodeNum.append(to_string(RouteIter.first.Num) + " ");
+					NodeNum.append(to_string(RouteIter.first.Num) + ",");
 					RoutesFileStream.write(NodeNum.c_str(), NodeNum.length());
 					if (RouteIter.second == true) /*TownBusStop*/
 					{
