@@ -30,11 +30,13 @@ FitnessCalculator::FitnessCalculator(int InChromosomeIndex, uint64_t PathNum)
 	}
 }
 
-double FitnessCalculator::Calculate()
+FitnessResultData FitnessCalculator::Calculate()
 {
-	double NetworkCost = PassageAssignment();
+	FitnessResultData ResultData;
+	ResultData.ObjectFunctionValue = PassageAssignment();
+	ResultData.FitnessValue = CalcFitness(ResultData.ObjectFunctionValue);
 
-	return CalcFitness(NetworkCost);
+	return ResultData;
 }
 
 double FitnessCalculator::PassageAssignment()

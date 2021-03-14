@@ -228,3 +228,9 @@ enum class EWriteFileType
 	ShortestPath = 1,
 	Result = 2,
 };
+
+struct FitnessResultData
+{
+	double ObjectFunctionValue;
+	double FitnessValue;
+};

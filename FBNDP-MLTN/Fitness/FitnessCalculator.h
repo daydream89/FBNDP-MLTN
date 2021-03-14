@@ -19,7 +19,7 @@ class FitnessCalculator
 public:
 	FitnessCalculator(int InChromosomeIndex, uint64_t PathNum);
 
-	double Calculate();	// returns result of Fitness Function
+	FitnessResultData Calculate();	// returns result of Fitness Function
 
 private:
 	double PassageAssignment();

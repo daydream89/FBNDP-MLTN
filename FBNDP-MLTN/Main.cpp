@@ -36,8 +36,9 @@ int main(int argc, char* argv[])
 			for (int i = 0; i < PopulationNum; ++i)
 			{
 				FitnessCalculator Fitness(i, 2);
-				double ChromosomeFitness = Fitness.Calculate();
-				InitialPopulation.GetChromosomeRef(i).SetFitnessValue(ChromosomeFitness);
+				FitnessResultData ChromosomeFitnessResult = Fitness.Calculate();
+				InitialPopulation.GetChromosomeRef(i).SetFitnessValue(ChromosomeFitnessResult.FitnessValue);
+				InitialPopulation.GetChromosomeRef(i).SetObjectFunctionValue(ChromosomeFitnessResult.ObjectFunctionValue);
 				printf("Finished Calculate %dth Chromosome.\n", i);
 
 				Writer.WriteCSVFile(GenerationNum+1, i+1, DataCenter->GetShortestPathDataList());
