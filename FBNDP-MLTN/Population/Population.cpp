@@ -178,6 +178,22 @@ void Population::Crossover(Chromosome P1, Chromosome P2)
 {
 	//vector<uint64_t> P1OverlappedNodeNum = GetOverlappedNodeNum(P1);
 	//vector<uint64_t> P2OverlappedNodeNum = GetOverlappedNodeNum(P2);
+	bool CrossoverOccured = false;
+	if (auto* DataCenter = DataCenter::GetInstance())
+	{
+		uint64_t CrossoverOccurPercent = DataCenter->GetUserInputData().CrossoverPercent;
+		random_device rd;
+		mt19937 gen(rd());
+		uniform_int_distribution<int64_t> dis(1, 100);
+		int64_t RandomNum = dis(gen);
+		if (RandomNum < CrossoverOccurPercent)
+			CrossoverOccured = true;
+	}
+	if (CrossoverOccured == false)
+	{
+		ChildrenChromosomeArray.emplace_back(P1);
+		return;
+	}
 
 	uint64_t P1RouteNum = P1.GetRouteNum();
 	uint64_t P2RouteNum = P2.GetRouteNum();

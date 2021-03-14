@@ -124,6 +124,7 @@ struct UserInputData
 	uint64_t NoCrossoverNum = 2;			// 교차변이하지 않을 유전자의 수
 	uint64_t PopulationNum = 8;				// 유전 집단의 수
 	uint64_t MaxGeneration = 10;			// 유전 세대 수
+	uint64_t CrossoverPercent = 80;			// 교차 확률 
 };
 
 typedef vector<vector<string>> FileDataList;

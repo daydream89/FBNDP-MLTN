@@ -232,6 +232,10 @@ void DataCenter::SetUserInputData(const FileDataList& InData)
 		{
 			UserInput.MaxGeneration = static_cast<uint64_t>(stoul(Value));
 		}
+		else if (Name == "CrossoverPercent")
+		{
+			UserInput.CrossoverPercent = static_cast<uint64_t>(stoul(Value));
+		}
 	}
 }
 
