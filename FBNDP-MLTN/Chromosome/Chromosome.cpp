@@ -281,10 +281,10 @@ void Chromosome::RemoveSameRoute(void)
 {
 	for (int i = 0; i < RouteDataList.size() - 1; ++i)
 	{
-		bool SameRouteFlag = true;
 		vector<NodeData> CheckingRoute = RouteDataList.at(i).Path;
 		for (int j = i + 1; j < RouteDataList.size(); ++j)
 		{
+			bool SameRouteFlag = true;
 			vector<NodeData> CurrentRoute = RouteDataList.at(j).Path;
 			if (CheckingRoute.size() != CurrentRoute.size())
 			{
@@ -304,12 +304,11 @@ void Chromosome::RemoveSameRoute(void)
 					break;
 				}
 			}
-			if (SameRouteFlag)
+			if (SameRouteFlag) {
 				RouteDataList.erase(RouteDataList.begin() + j);
+				j = i;
+			}
 		}
-	}
-	for (const auto& CheckingRoute : RouteDataList)
-	{
 	}
 }
 
