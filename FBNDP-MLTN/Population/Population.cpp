@@ -25,10 +25,13 @@ void Population::GetNextGeneration()
 {
 	
 	Selection();
+
 	for (uint64_t i = 0; i < SelectionCompair.size(); ++i)
 	{
 		Crossover(SelectionCompair.at(i).first, SelectionCompair.at(i).second);
 	}
+
+	Mutation();
 
 	/*TODO: Print Parent Chromosomes and make F1 to Parents, F1 must be cleared*/
 	ChromosomeArray.clear();
@@ -184,9 +187,9 @@ void Population::Crossover(Chromosome P1, Chromosome P2)
 		uint64_t CrossoverOccurPercent = DataCenter->GetUserInputData().CrossoverPercent;
 		random_device rd;
 		mt19937 gen(rd());
-		uniform_int_distribution<int64_t> dis(1, 100);
-		int64_t RandomNum = dis(gen);
-		if (RandomNum < CrossoverOccurPercent)
+		uniform_int_distribution<uint64_t> dis(1, 100);
+		uint64_t RandomNum = dis(gen);
+		if (RandomNum <= CrossoverOccurPercent)
 			CrossoverOccured = true;
 	}
 	if (CrossoverOccured == false)
@@ -318,6 +321,22 @@ void Population::Crossover(Chromosome P1, Chromosome P2)
 	}
 	Chromosome F1(RailNode, BusNode, TownBusNode, NewPathData);
 	ChildrenChromosomeArray.emplace_back(F1);
+}
+
+void Population::Mutation()
+{
+	random_device rd;
+	mt19937 gen(rd());
+	uniform_int_distribution<int64_t> dis(1, 100);
+	int64_t RandomNum = dis(gen);
+	if (RandomNum <= 5) /*TODO: Get Mutation percent from User..*/
+	{
+	}
+	else
+	{
+	}
+
+
 }
 
 void Population::SetNodes()
