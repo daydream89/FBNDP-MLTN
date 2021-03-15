@@ -1,4 +1,5 @@
 #include "Population.h"
+#include "../util/Utils.h"
 #include "../Data/DataCenter.h"
 #include <cassert>
 #include <random>
@@ -31,7 +32,10 @@ void Population::GetNextGeneration()
 		Crossover(SelectionCompair.at(i).first, SelectionCompair.at(i).second);
 	}
 
-	Mutation();
+	for (uint64_t i = 0; i < ChildrenChromosomeArray.size(); ++i)
+	{
+		Mutation(ChildrenChromosomeArray.at(i));
+	}
 
 	/*TODO: Print Parent Chromosomes and make F1 to Parents, F1 must be cleared*/
 	ChromosomeArray.clear();
@@ -323,7 +327,7 @@ void Population::Crossover(Chromosome P1, Chromosome P2)
 	ChildrenChromosomeArray.emplace_back(F1);
 }
 
-void Population::Mutation()
+void Population::Mutation(Chromosome MutantCh)
 {
 	random_device rd;
 	mt19937 gen(rd());
@@ -331,9 +335,104 @@ void Population::Mutation()
 	int64_t RandomNum = dis(gen);
 	if (RandomNum <= 5) /*TODO: Get Mutation percent from User..*/
 	{
+		/*TODO: Mutation Occur*/
+		/*TODO - step 1: find random TownBusNode(i) in Route a */
+		bool FindRandomNode = false;
+		uint64_t FoundedRandomNodeNum = 0;
+		uniform_int_distribution<uint64_t> PosDistribute(0, MutantCh.GetChromosomeRef().size() - 1);
+		uint64_t SelectedNodeRouteNum = 0;
+		do {
+			uint64_t RandomPos = PosDistribute(gen);
+			if ((MutantCh.GetChromosomeRef().at(RandomPos).second == true) &&
+				(MutantCh.GetChromosomeRef().at(RandomPos).first.Type == NodeType::BusStop))
+			{
+				FindRandomNode = true;
+				FoundedRandomNodeNum = MutantCh.GetChromosomeRef().at(RandomPos).first.Num;
+				uint64_t ChromosomePos = 0;
+				for (const auto& RouteIter : MutantCh.GetRouteRef())
+				{
+					++SelectedNodeRouteNum; /*Route a*/
+					ChromosomePos += RouteIter.Path.size();
+					if (ChromosomePos >= RandomPos)
+						break;
+				}
+			}
+		} while (!FindRandomNode);
+		/*TODO - step 2: find nearest TownBusNode(j) from step 1 TownBusNode(i)*/
+		map <uint64_t, ShortestPathData> BetweenTownBusShortestRoutes;
+		for (auto BusNodeIter : TownBusNode)
+		{
+			if (BusNodeIter.Num == FoundedRandomNodeNum) /*same bus node, skip*/
+				continue;
+
+			vector<NodeData> InputGraph;
+			vector<ShortestPathData> ShortestRoute;
+			InputGraph.assign(BusNode.begin(), BusNode.end());
+			PathFinderData ShortestPathData(InputGraph, FoundedRandomNodeNum, BusNodeIter.Num, EPathFinderCostType::Length, 1);
+			if (Util::PathFinder::FindShortestPath(ShortestPathData, ShortestRoute) == 0)
+			{
+#if DEBUG_MODE
+				printf("No Route\n");
+#endif
+				continue;
+			}
+			BetweenTownBusShortestRoutes.insert(make_pair(BusNodeIter.Num, ShortestRoute.at(0)));
+		}
+
+		bool NearestNodeFounded = false;
+		vector<uint64_t> NearestNodePosArray;
+		do {
+			uint64_t NearestTownBusNodeNum = 0;
+			float MinCost = INFINITY;
+			for (const auto& MapIter : BetweenTownBusShortestRoutes)
+			{
+				if (MapIter.second.Cost < MinCost)
+				{
+					NearestTownBusNodeNum = MapIter.first;
+					MinCost = MapIter.second.Cost;
+				}
+			}
+			
+			printf("Founded Nearest TownBus Node: %llu\n", NearestTownBusNodeNum);
+			uint64_t SecondSelectedNodeRouteNum = 0;
+			uint64_t SecondTownBusNodePos = 0;
+			for (const auto& RouteIter : MutantCh.GetRouteRef())
+			{
+				++SecondSelectedNodeRouteNum; /*Route b*/
+				if (SelectedNodeRouteNum == SecondSelectedNodeRouteNum) /*same route*/
+				{
+					SecondTownBusNodePos += RouteIter.Path.size();
+					continue;
+				}
+				for (const auto& BusNodeIter : RouteIter.Path)
+				{
+					printf("SecondPos NodeNum: %llu\n", MutantCh.GetChromosomeRef().at(SecondTownBusNodePos).first.Num);
+					if (BusNodeIter.Num == NearestTownBusNodeNum)
+					{
+						NearestNodePosArray	.emplace_back(SecondTownBusNodePos);
+						NearestNodeFounded = true;
+					}
+					++SecondTownBusNodePos;
+				}
+			}
+
+			if (NearestNodeFounded && (NearestNodePosArray.size() != 1)) /*TODO: Select one...*/
+			{
+				
+				uniform_int_distribution<int64_t> NearestDis(0, NearestNodePosArray.size() - 1);
+				int64_t RandomNodePos = NearestDis(gen);
+				SecondTownBusNodePos = NearestNodePosArray.at(RandomNodePos);
+			}
+			
+			if(NearestNodeFounded == false)
+				BetweenTownBusShortestRoutes.erase(NearestTownBusNodeNum);
+		} while (!NearestNodeFounded);
+		/*TODO - step 3: node j in another route(not route a)*/
+		/*TODO - step 4: swap i and j*/
 	}
 	else
 	{
+		/*TODO: No Mutation*/
 	}
 
 

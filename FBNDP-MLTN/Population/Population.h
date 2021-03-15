@@ -31,7 +31,7 @@ private:
 	void SetNodes(void);
 	void Selection(void);
 	void Crossover(Chromosome P1, Chromosome P2);
-	void Mutation();
+	void Mutation(Chromosome MutantCh);
 
 	uint64_t MaxChromosomeNum;
 	vector<Chromosome> ChromosomeArray;
