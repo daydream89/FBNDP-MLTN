@@ -9,8 +9,8 @@ class Population
 {
 public:
 	Population(uint64_t MemberNum);
-	uint64_t GetCurrentChromosomeNum() { return ChromosomeArray.size(); }
-	Chromosome GetChromosome(uint64_t ChromosomeNum) { return ChromosomeArray.at(ChromosomeNum); }
+	uint64_t GetCurrentChromosomeNum() const { return ChromosomeArray.size(); }
+	Chromosome GetChromosome(uint64_t ChromosomeNum) const { return ChromosomeArray.at(ChromosomeNum); }
 	Chromosome& GetChromosomeRef(uint64_t ChromosomeNum) { return ChromosomeArray.at(ChromosomeNum); }
 	vector<pair<NodeData,bool>> GetChromosomeData(uint64_t ChromosomeNum)	/*ChromosomeNum번째의 ChromosomeData를 얻음*/
 	{

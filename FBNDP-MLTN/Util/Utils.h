@@ -4,6 +4,8 @@
 
 using namespace std;
 
+class Population;
+class Chromosome;
 struct NodeData;
 struct TransferData;
 
@@ -34,4 +36,6 @@ namespace Util
 	{
 		float ConvertMinuteToHour(float Minute);
 	}
+
+	bool FindBestChromosome(const Population& InPopulation, uint64_t& OutChromosomeNumber);
 }
