@@ -7,51 +7,6 @@
 
 #define DEBUG_MODE 0
 
-Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>& BusNode, const vector<NodeData>& TownBusNodes, vector<ShortestPathData> NewPath)
-{
-	this->RailNode.assign(RailNode.begin(), RailNode.end());
-	this->BusNode.assign(BusNode.begin(), BusNode.end());
-	this->TownBusNode.assign(TownBusNodes.begin(), TownBusNodes.end());
-	RouteDataList.clear();
-	RouteDataList.assign(NewPath.begin(), NewPath.end());
-
-	RemoveOverlapedRoute();
-	
-	for (auto& RouteIter : RouteDataList)
-	{
-		for (const auto& PathNodes : RouteIter.Path)
-		{
-			bool IsTownBusStop = false;
-			if (PathNodes.Type == NodeType::BusStop)
-			{
-				for (const auto& TBNodesIter : TownBusNode)
-				{
-					if (TBNodesIter.Num == PathNodes.Num)
-					{
-						IsTownBusStop = true;
-						break;
-					}
-				}
-				if (IsTownBusStop)
-				{
-					ChromosomeNodeList.emplace_back(make_pair(PathNodes, true));
-					RouteIter.TownBusData.TownBusStopCheck.emplace_back(make_pair(PathNodes, true));
-				}
-				else
-				{
-					ChromosomeNodeList.emplace_back(make_pair(PathNodes, false));
-					RouteIter.TownBusData.TownBusStopCheck.emplace_back(make_pair(PathNodes, false));
-				}
-			}
-			else if (PathNodes.Type == NodeType::Station)
-			{
-				ChromosomeNodeList.emplace_back(make_pair(PathNodes, true));
-				RouteIter.TownBusData.TownBusStopCheck.emplace_back(make_pair(PathNodes, true));
-			}
-		}
-		//ChromosomeNodeList.insert(ChromosomeNodeList.end(), RouteIter.Path.begin(), RouteIter.Path.end());
-	}
-}
 Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>& BusNode, const vector<NodeData>& TownBusNodes)
 	:bAllRailStationHaveRoute(false),BusRouteNum(0)
 {
@@ -244,8 +199,26 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 	}
 
 	RemoveOverlapedRoute();
+	SetChromosomeFromRoute();
+}
+
+Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>& BusNode, const vector<NodeData>& TownBusNodes, vector<ShortestPathData> NewPath)
+{
+	this->RailNode.assign(RailNode.begin(), RailNode.end());
+	this->BusNode.assign(BusNode.begin(), BusNode.end());
+	this->TownBusNode.assign(TownBusNodes.begin(), TownBusNodes.end());
+	RouteDataList.clear();
+	RouteDataList.assign(NewPath.begin(), NewPath.end());
+
+	RemoveOverlapedRoute();
 	
-	for (const auto& RouteIter : RouteDataList)
+	SetChromosomeFromRoute();
+}
+
+void Chromosome::SetChromosomeFromRoute(void)
+{
+	ChromosomeNodeList.clear();
+	for (auto& RouteIter : RouteDataList)
 	{
 		for (const auto& PathNodes : RouteIter.Path)
 		{
@@ -263,20 +236,23 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 				if (IsTownBusStop)
 				{
 					ChromosomeNodeList.emplace_back(make_pair(PathNodes, true));
+					RouteIter.TownBusData.TownBusStopCheck.emplace_back(make_pair(PathNodes, true));
 				}
 				else
 				{
 					ChromosomeNodeList.emplace_back(make_pair(PathNodes, false));
+					RouteIter.TownBusData.TownBusStopCheck.emplace_back(make_pair(PathNodes, false));
 				}
 			}
 			else if (PathNodes.Type == NodeType::Station)
 			{
 				ChromosomeNodeList.emplace_back(make_pair(PathNodes, true));
+				RouteIter.TownBusData.TownBusStopCheck.emplace_back(make_pair(PathNodes, true));
 			}
 		}
-		//ChromosomeNodeList.insert(ChromosomeNodeList.end(), RouteIter.Path.begin(), RouteIter.Path.end());
 	}
 }
+
 void Chromosome::RemoveSameRoute(void)
 {
 	for (int i = 0; i < RouteDataList.size() - 1; ++i)

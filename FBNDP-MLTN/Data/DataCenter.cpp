@@ -236,6 +236,10 @@ void DataCenter::SetUserInputData(const FileDataList& InData)
 		{
 			UserInput.CrossoverPercent = static_cast<uint64_t>(stoul(Value));
 		}
+		else if (Name == "MutationPercent")
+		{
+			UserInput.MutationPercent = static_cast<uint64_t>(stoul(Value));
+		}
 	}
 }
 

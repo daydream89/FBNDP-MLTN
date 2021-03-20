@@ -31,7 +31,7 @@ private:
 	void SetNodes(void);
 	void Selection(void);
 	void Crossover(Chromosome P1, Chromosome P2);
-	void Mutation(Chromosome MutantCh);
+	void Mutation(Chromosome& MutantCh);
 
 	uint64_t MaxChromosomeNum;
 	vector<Chromosome> ChromosomeArray;
@@ -42,5 +42,6 @@ private:
 	vector<NodeData> RailNode;
 
 	vector<uint64_t> GetOverlappedNodeNum(Chromosome Parent);
+	void ConnectExchangedRoute(Chromosome& MutantCh, uint64_t RouteNum, uint64_t RoutePos, uint64_t ChromosomePos);
 	void PrintCurrentPopulationData();
 };

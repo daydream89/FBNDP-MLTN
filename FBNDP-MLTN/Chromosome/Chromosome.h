@@ -31,6 +31,7 @@ public:
 	double GetFitnessValue(void) { return FitnessValue; };
 	void SetObjectFunctionValue(double InObjectFunctionValue) { ObjectFunctionValue = InObjectFunctionValue; }
 	double GetObjectFunctionValue() { return ObjectFunctionValue; }
+	void SetChromosomeFromRoute(void);
 	
 private:
 	NodeData SelectRailNode();
