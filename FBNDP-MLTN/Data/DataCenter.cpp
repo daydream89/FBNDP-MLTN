@@ -244,3 +244,9 @@ void DataCenter::AddShortestPathDataList(const vector<ShortestPathData>& InPathD
 	for (const auto& PathData : InPathDataList)
 		ShortestPathDataList.push_back(PathData);
 }
+
+void DataCenter::AddBestResultData(uint64_t GenerationNum, const GenerationBestResultData& ResultData)
+{
+	if (BestResultData.find(GenerationNum) == BestResultData.end())
+		BestResultData.insert(make_pair(GenerationNum, ResultData));
+}

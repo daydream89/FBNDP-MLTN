@@ -48,6 +48,9 @@ public:
 	const vector<ShortestPathData>& GetShortestPathDataList() { return ShortestPathDataList; }
 	void ClearShortestPathDataList() { ShortestPathDataList.clear(); }
 
+	void AddBestResultData(uint64_t GenerationNum, const GenerationBestResultData& ResultData);
+	const map<uint64_t, GenerationBestResultData>& GetAllBestResultData() { return BestResultData; }
+
 private:
 	DataCenter() {}
 	~DataCenter() {}
@@ -68,4 +71,5 @@ private:
 	// Data calculated from inside
 	vector<ShortestPathData> ShortestPathDataList;
 	vector<vector<ShortestPathData>> ChromosomeTownBusRouteData;
+	map<uint64_t, GenerationBestResultData> BestResultData;
 };

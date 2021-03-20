@@ -13,5 +13,6 @@ public:
 
 	void WriteCSVFile(uint64_t GenerationNumber, const vector<vector<ShortestPathData>>& InTownBusRouteDataList);
 	void WriteCSVFile(uint64_t GenerationNumber, int ChromosomeIndex, const vector<ShortestPathData>& InPathDataList);
+	void WriteCSVFile(const map<uint64_t, GenerationBestResultData>& InBestResultData);
 	void WriteCSVFile(const vector<NodeData>& InFinalResultData);
 };

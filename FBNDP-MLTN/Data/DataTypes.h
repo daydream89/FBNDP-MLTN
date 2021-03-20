@@ -234,3 +234,9 @@ struct FitnessResultData
 	double ObjectFunctionValue;
 	double FitnessValue;
 };
+
+struct GenerationBestResultData
+{
+	FitnessResultData FitnessData;
+	uint32_t ChromosomeNumber;
+};
