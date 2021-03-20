@@ -250,3 +250,15 @@ void DataCenter::AddBestResultData(uint64_t GenerationNum, const GenerationBestR
 	if (BestResultData.find(GenerationNum) == BestResultData.end())
 		BestResultData.insert(make_pair(GenerationNum, ResultData));
 }
+
+void DataCenter::AddBestResultData(uint64_t GenerationNum, double FitnessValue, double ObjFuncValue, uint64_t ChromosomeNum)
+{
+	if (BestResultData.find(GenerationNum) == BestResultData.end())
+	{
+		GenerationBestResultData Data;
+		Data.FitnessData.FitnessValue = FitnessValue;
+		Data.FitnessData.ObjectFunctionValue = ObjFuncValue;
+		Data.ChromosomeNumber = ChromosomeNum;
+		BestResultData.insert(make_pair(GenerationNum, Data));
+	}
+}

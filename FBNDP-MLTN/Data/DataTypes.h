@@ -238,5 +238,5 @@ struct FitnessResultData
 struct GenerationBestResultData
 {
 	FitnessResultData FitnessData;
-	uint32_t ChromosomeNumber;
+	uint64_t ChromosomeNumber;
 };

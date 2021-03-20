@@ -4,6 +4,7 @@
 #include "File/CSVWriter.h"
 #include "Fitness/FitnessCalculator.h"
 #include "Population/Population.h"
+#include "Util/Utils.h"
 
 using namespace std;
 
@@ -43,8 +44,18 @@ int main(int argc, char* argv[])
 
 				Writer.WriteCSVFile(GenerationNum+1, i+1, DataCenter->GetShortestPathDataList());
 			}
+
+			uint64_t BestChromosomeNum = -1;
+			if (Util::FindBestChromosome(InitialPopulation, BestChromosomeNum))
+			{
+				Chromosome BestChromosome = InitialPopulation.GetChromosome(BestChromosomeNum);
+				DataCenter->AddBestResultData(GenerationNum + 1, BestChromosome.GetFitnessValue(), BestChromosome.GetObjectFunctionValue(), BestChromosomeNum);
+			}
+
 			InitialPopulation.GetNextGeneration();
 		}
+
+		Writer.WriteCSVFile(DataCenter->GetAllBestResultData());
 	}
 
 	printf("\nCalculation Finished! Press any key.\n");

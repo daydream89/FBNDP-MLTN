@@ -419,3 +419,27 @@ float Util::Converter::ConvertMinuteToHour(float Minute)
 {
 	return Minute / 60.f;
 }
+
+#include "../Chromosome/Chromosome.h"
+#include "../Population/Population.h"
+bool Util::FindBestChromosome(const Population& InPopulation, uint64_t& OutChromosomeNumber)
+{
+	uint64_t ChromosomeSize = InPopulation.GetCurrentChromosomeNum();
+	if (ChromosomeSize < 1)
+		return false;
+
+	OutChromosomeNumber = 0;
+	if (ChromosomeSize == 1)
+		return true;
+
+	for (uint64_t i = 1; i < ChromosomeSize; ++i)
+	{
+		auto ChromosomeData = InPopulation.GetChromosome(i);
+		if (InPopulation.GetChromosome(OutChromosomeNumber).GetFitnessValue() < ChromosomeData.GetFitnessValue())
+		{
+			OutChromosomeNumber = i;
+		}
+	}
+
+	return true;
+}
