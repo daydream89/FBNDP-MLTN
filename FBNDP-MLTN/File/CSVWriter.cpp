@@ -113,15 +113,15 @@ void CSVWriter::WriteCSVFile(const map<uint64_t, GenerationBestResultData>& InBe
 	if (FileStream.is_open())
 	{
 		string NewLine = "\n";
-		string IndexRow = "GenerationNumber Fitness ObjectFunctionValue ChromosomeName\n";
+		string IndexRow = "GenerationNumber,Fitness,ObjectFunctionValue,ChromosomeName\n";
 		FileStream.write(IndexRow.c_str(), IndexRow.length());
 
 		for (const auto& ResultPair : InBestResultData)
 		{
 			string Row = "";
-			Row.append(to_string(ResultPair.first) + " ");
-			Row.append(to_string(ResultPair.second.FitnessData.FitnessValue) + " ");
-			Row.append(to_string(ResultPair.second.FitnessData.ObjectFunctionValue) + " ");
+			Row.append(to_string(ResultPair.first) + ",");
+			Row.append(to_string(ResultPair.second.FitnessData.FitnessValue) + ",");
+			Row.append(to_string(ResultPair.second.FitnessData.ObjectFunctionValue) + ",");
 			Row.append("Chromosome" + to_string(ResultPair.second.ChromosomeNumber));
 
 			FileStream.write(Row.c_str(), Row.length());

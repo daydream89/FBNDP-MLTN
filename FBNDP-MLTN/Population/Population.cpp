@@ -25,24 +25,24 @@ Population::Population(uint64_t MemberNum)
 void Population::GetNextGeneration()
 {
 	
-	Selection();
-
-	for (uint64_t i = 0; i < SelectionCompair.size(); ++i)
-	{
-		Crossover(SelectionCompair.at(i).first, SelectionCompair.at(i).second);
-	}
-
-	for (uint64_t i = 0; i < ChildrenChromosomeArray.size(); ++i)
-	{
-		Mutation(ChildrenChromosomeArray.at(i));
-	}
-
-	/*Print Parent Chromosomes and make F1 to Parents, F1 must be cleared*/
-	ChromosomeArray.clear();
-	ChromosomeArray.assign(ChildrenChromosomeArray.begin(), ChildrenChromosomeArray.end());
-	ChildrenChromosomeArray.clear();
 	if (auto DataCenterInstance = DataCenter::GetInstance())
 	{
+		Selection();
+
+		for (uint64_t i = 0; i < SelectionCompair.size(); ++i)
+		{
+			Crossover(SelectionCompair.at(i).first, SelectionCompair.at(i).second);
+		}
+
+		for (uint64_t i = DataCenterInstance->GetUserInputData().NoCrossoverNum; i < ChildrenChromosomeArray.size(); ++i)
+		{
+			Mutation(ChildrenChromosomeArray.at(i));
+		}
+
+		/*Print Parent Chromosomes and make F1 to Parents, F1 must be cleared*/
+		ChromosomeArray.clear();
+		ChromosomeArray.assign(ChildrenChromosomeArray.begin(), ChildrenChromosomeArray.end());
+		ChildrenChromosomeArray.clear();
 		DataCenterInstance->ClearTownBusRouteData();
 		for (uint64_t i = 0; i < MaxChromosomeNum; ++i)
 		{
