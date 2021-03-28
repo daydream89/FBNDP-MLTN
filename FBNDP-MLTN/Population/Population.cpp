@@ -20,7 +20,7 @@ Population::Population(uint64_t MemberNum)
 	}
 	assert(GetCurrentChromosomeNum() == MemberNum);
 	printf("All Initial Population Created\n");
-	PrintCurrentPopulationData();
+//	PrintCurrentPopulationData();
 }
 void Population::GetNextGeneration()
 {

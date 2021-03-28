@@ -42,6 +42,7 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 			++BusRouteNum; //k = k+1
 			ShortestPathData RoutePathData;
 			RoutePathData.Path.assign(SelectedBus.BusRouteData.Path.begin(), SelectedBus.BusRouteData.Path.end());
+			/*
 			for (const auto& BusRoute : RoutePathData.Path)
 			{
 				bool IsTownBusStop = false;
@@ -69,6 +70,7 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 					RoutePathData.TownBusData.TownBusStopCheck.emplace_back(make_pair(BusRoute, true));
 				}
 			}
+			*/
 			RoutePathData.Cost = SelectedBus.BusRouteData.Cost;
 			RouteDataList.emplace_back(RoutePathData);
 		}
@@ -113,6 +115,7 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 					if (RouteIter.Path.begin()->Num == ExistRoute.Path.begin()->Num)
 					{
 						RouteIter.Path.insert(RouteIter.Path.begin(), FoundedShortestRoute.Path.begin(), FoundedShortestRoute.Path.end());
+						/*
 						for (const auto& BusRoute : RouteIter.Path)
 						{
 							bool IsTownBusStop = false;
@@ -140,6 +143,7 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 								RouteIter.TownBusData.TownBusStopCheck.emplace_back(make_pair(BusRoute, true));
 							}
 						}
+						*/
 					}
 				}
 			}
@@ -148,6 +152,7 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 				++BusRouteNum; //k = k+1
 				ShortestPathData RoutePathData;
 				RoutePathData.Path.assign(SelectedBus.BusRouteData.Path.begin(), SelectedBus.BusRouteData.Path.end());
+				/*
 				for (const auto& BusRoute : RoutePathData.Path)
 				{
 					bool IsTownBusStop = false;
@@ -175,6 +180,7 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 						RoutePathData.TownBusData.TownBusStopCheck.emplace_back(make_pair(BusRoute, true));
 					}
 				}
+				*/
 				RoutePathData.Cost = SelectedBus.BusRouteData.Cost;
 				RouteDataList.emplace_back(RoutePathData);
 			}
@@ -220,6 +226,8 @@ void Chromosome::SetChromosomeFromRoute(void)
 	ChromosomeNodeList.clear();
 	for (auto& RouteIter : RouteDataList)
 	{
+		RouteIter.TownBusData.TownBusStopCheck.clear();
+
 		for (const auto& PathNodes : RouteIter.Path)
 		{
 			bool IsTownBusStop = false;
