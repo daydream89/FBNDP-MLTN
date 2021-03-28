@@ -86,7 +86,7 @@ void CSVWriter::WriteCSVFile(uint64_t GenerationNumber, int ChromosomeIndex, con
 
 			string Row = "";
 			Row.append(to_string(PathData.Order) + ",");
-			Row.append(to_string(PathData.Cost) + ",");
+			Row.append(to_string(PathData.TrainIVTT + PathData.BusIVTT + PathData.TownBusIVTT + PathData.Transfer.OVTT) + ",");
 			Row.append(to_string(PathData.TrainIVTT) + ",");
 			Row.append(to_string(PathData.BusIVTT) + ",");
 			Row.append(to_string(PathData.TownBusIVTT) + ",");
@@ -113,7 +113,7 @@ void CSVWriter::WriteCSVFile(const map<uint64_t, GenerationBestResultData>& InBe
 	if (FileStream.is_open())
 	{
 		string NewLine = "\n";
-		string IndexRow = "GenerationNumber,Fitness,ObjectFunctionValue,ChromosomeName\n";
+		string IndexRow = "GenerationNumber,Fitness,ObjectFunctionValue,TotalUserCost,OperatorCost,TotalRouteDistance,ChromosomeName\n";
 		FileStream.write(IndexRow.c_str(), IndexRow.length());
 
 		for (const auto& ResultPair : InBestResultData)
@@ -122,6 +122,9 @@ void CSVWriter::WriteCSVFile(const map<uint64_t, GenerationBestResultData>& InBe
 			Row.append(to_string(ResultPair.first) + ",");
 			Row.append(to_string(ResultPair.second.FitnessData.FitnessValue) + ",");
 			Row.append(to_string(ResultPair.second.FitnessData.ObjectFunctionValue) + ",");
+			Row.append(to_string(ResultPair.second.TotalUserCost) + ",");	// 盲况拎具 窃..
+			Row.append(to_string(ResultPair.second.OperatorCost) + ",");	// 盲况拎具 窃..
+			Row.append(to_string(ResultPair.second.TotalRouteDistance) + ",");	// 盲况拎具 窃..
 			Row.append("Chromosome" + to_string(ResultPair.second.ChromosomeNumber));
 
 			FileStream.write(Row.c_str(), Row.length());

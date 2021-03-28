@@ -27,7 +27,7 @@ private:
 
 	float CalcCurveNTransportationIVTT(ShortestPathData& PathData);
 
-	void CalcCustomerCost(const vector<ShortestPathData>& InPathList, double& OutCostSum);
+	void CalcCustomerCost(vector<ShortestPathData>& InPathList, double& OutCostSum);
 	double CalcNetworkCost(double SumofCustomerCost);
 	double CalcFitness(double NetworkCost);
 

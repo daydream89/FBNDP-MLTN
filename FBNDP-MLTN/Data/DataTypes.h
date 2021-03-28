@@ -239,5 +239,8 @@ struct FitnessResultData
 struct GenerationBestResultData
 {
 	FitnessResultData FitnessData;
+	double TotalUserCost;
+	double OperatorCost;
+	double TotalRouteDistance;
 	uint64_t ChromosomeNumber;
 };

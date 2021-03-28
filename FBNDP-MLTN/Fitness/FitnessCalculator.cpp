@@ -193,7 +193,7 @@ float FitnessCalculator::CalcCurveNTransportationIVTT(ShortestPathData& PathData
 	return ActualDistance / DirectDistance;
 }
 
-void FitnessCalculator::CalcCustomerCost(const vector<ShortestPathData>& InPathList, double& OutCostSum)
+void FitnessCalculator::CalcCustomerCost(vector<ShortestPathData>& InPathList, double& OutCostSum)
 {
 	UserInputData UserInput;
 	map<string, OperatingData> OperatingDataMap;
@@ -203,7 +203,7 @@ void FitnessCalculator::CalcCustomerCost(const vector<ShortestPathData>& InPathL
 		OperatingDataMap = DataCenterInstance->GetOperatingData();
 	}
 
-	for (auto& Path : InPathList)
+	for (ShortestPathData& Path : InPathList)
 	{
 		float InitialDispatchesPerHour = 0.f;
 		const auto& FirstNode = Path.Path.at(0);
@@ -235,13 +235,13 @@ void FitnessCalculator::CalcCustomerCost(const vector<ShortestPathData>& InPathL
 			TransferWaitTimeCost += UserInput.WaitTimeCost / (2 * TransferTimeData.DispatchesPerHour);
 		}
 
+		Path.Transfer.OVTT = (UserInput.WaitTimeCost / (2 * InitialDispatchesPerHour)) + (UserInput.TransferTimeCost * TransferTime) + TransferWaitTimeCost;
+
 		double CustomerCost = 0;
 		CustomerCost += Path.TownBusIVTT;
 		CustomerCost += Path.BusIVTT;
 		CustomerCost += Path.TrainIVTT;
-		CustomerCost += UserInput.WaitTimeCost / (2 * InitialDispatchesPerHour);
-		CustomerCost += UserInput.TransferTimeCost * TransferTime;
-		CustomerCost += TransferWaitTimeCost;
+		CustomerCost += Path.Transfer.OVTT;
 		CustomerCost *= static_cast<double>(Path.TrafficVolumeForPath);
 
 		OutCostSum += CustomerCost;
