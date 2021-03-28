@@ -141,13 +141,18 @@ void FitnessCalculator::SetPassageAssignmentForMNLModel(vector<ShortestPathData>
 
 float FitnessCalculator::CalcCurveNTransportationIVTT(ShortestPathData& PathData)
 {
+	UserInputData UserInput;
 	vector<DistanceData> DistanceDataList;
 	if (auto DataCenterInstance = DataCenter::GetInstance())
+	{
 		DistanceDataList = DataCenterInstance->GetDistanceData();
+		UserInput = DataCenterInstance->GetUserInputData();
+	}
 
 	float ActualDistance = 0.f, DirectDistance = 0.f;
 	for (uint64_t i = 0; i < PathData.Path.size() - 1; ++i)
 	{
+		float TrainTravelTime = 0.f, TownBusTravelTime = 0.f, BusTravelTime = 0.f;
 		NodeData CurNodeData = PathData.Path.at(i);
 		NodeData NextNodeData = PathData.Path.at(i + 1);
 		for (const auto& Link : LinkDataList)
@@ -159,17 +164,21 @@ float FitnessCalculator::CalcCurveNTransportationIVTT(ShortestPathData& PathData
 				float TravelTime = Util::Calculator::CalcIVTT(Link, RouteDataMap, Distance, RouteName);
 				ActualDistance += Distance;
 				if (CurNodeData.Type == NodeType::Station && NextNodeData.Type == NodeType::Station)
-					PathData.TrainIVTT += TravelTime;
+					TrainTravelTime += TravelTime;
 				else if (CurNodeData.Type == NodeType::BusStop || NextNodeData.Type == NodeType::BusStop)
 				{
 					if (RouteName.substr(0, 7) == "TownBus")
-						PathData.TownBusIVTT += TravelTime;
+						TownBusTravelTime += TravelTime;
 					else
-						PathData.BusIVTT += TravelTime;
+						BusTravelTime += TravelTime;
 				}
 				break;
 			}
 		}
+
+		PathData.BusIVTT = UserInput.BusTimeCost * TrainTravelTime;
+		PathData.TownBusIVTT = UserInput.TownBusTimeCost * TownBusTravelTime;
+		PathData.TrainIVTT = UserInput.TrainTimeCost * BusTravelTime;
 
 		for (const auto& Data : DistanceDataList)
 		{
@@ -227,9 +236,9 @@ void FitnessCalculator::CalcCustomerCost(const vector<ShortestPathData>& InPathL
 		}
 
 		double CustomerCost = 0;
-		CustomerCost += UserInput.TownBusTimeCost * Path.TownBusIVTT;
-		CustomerCost += UserInput.BusTimeCost * Path.BusIVTT;
-		CustomerCost += UserInput.TrainTimeCost * Path.TrainIVTT;
+		CustomerCost += Path.TownBusIVTT;
+		CustomerCost += Path.BusIVTT;
+		CustomerCost += Path.TrainIVTT;
 		CustomerCost += UserInput.WaitTimeCost / (2 * InitialDispatchesPerHour);
 		CustomerCost += UserInput.TransferTimeCost * TransferTime;
 		CustomerCost += TransferWaitTimeCost;
