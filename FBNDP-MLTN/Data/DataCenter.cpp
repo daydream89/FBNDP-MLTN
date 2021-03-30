@@ -197,6 +197,10 @@ void DataCenter::SetUserInputData(const FileDataList& InData)
 		{
 			UserInput.TownBusDispatchesPerHour = static_cast<uint64_t>(stoul(Value));
 		}
+		else if (Name == "RouteFixCost")
+		{
+			UserInput.RouteFixCost = static_cast<uint64_t>(stoul(Value));
+		}
 		else if (Name == "PanaltyFactor")
 		{
 			UserInput.PanaltyFactor = stof(Value);

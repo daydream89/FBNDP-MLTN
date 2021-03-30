@@ -268,6 +268,7 @@ double FitnessCalculator::CalcNetworkCost(double SumofCustomerCost)
 				LengthOfTownBusLine = RIter->second.CumDistance;
 
 			double TownBusOperatorCost = static_cast<double>(UserInput.TownBusOperationCost) * static_cast<double>(UserInput.TownBusDispatchesPerHour) * static_cast<double>(LengthOfTownBusLine / 2) * 2;
+			TownBusOperatorCost += static_cast<double>(UserInput.RouteFixCost);
 			TotalCost += TownBusOperatorCost;
 			TotalLengthOfTownBusLine += LengthOfTownBusLine;
 			ResultData.TownBusOperatorCost += TownBusOperatorCost;
