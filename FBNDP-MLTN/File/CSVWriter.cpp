@@ -122,9 +122,9 @@ void CSVWriter::WriteCSVFile(const map<uint64_t, GenerationBestResultData>& InBe
 			Row.append(to_string(ResultPair.first) + ",");
 			Row.append(to_string(ResultPair.second.FitnessData.FitnessValue) + ",");
 			Row.append(to_string(ResultPair.second.FitnessData.ObjectFunctionValue) + ",");
-			Row.append(to_string(ResultPair.second.TotalUserCost) + ",");	// 盲况拎具 窃..
-			Row.append(to_string(ResultPair.second.OperatorCost) + ",");	// 盲况拎具 窃..
-			Row.append(to_string(ResultPair.second.TotalRouteDistance) + ",");	// 盲况拎具 窃..
+			Row.append(to_string(ResultPair.second.FitnessData.TotalCustomerCost) + ",");
+			Row.append(to_string(ResultPair.second.FitnessData.TownBusOperatorCost) + ",");
+			Row.append(to_string(ResultPair.second.FitnessData.TotalRouteDistance) + ",");
 			Row.append("Chromosome" + to_string(ResultPair.second.ChromosomeNumber));
 
 			FileStream.write(Row.c_str(), Row.length());

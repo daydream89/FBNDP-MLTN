@@ -38,8 +38,7 @@ int main(int argc, char* argv[])
 			{
 				FitnessCalculator Fitness(i, 2);
 				FitnessResultData ChromosomeFitnessResult = Fitness.Calculate();
-				InitialPopulation.GetChromosomeRef(i).SetFitnessValue(ChromosomeFitnessResult.FitnessValue);
-				InitialPopulation.GetChromosomeRef(i).SetObjectFunctionValue(ChromosomeFitnessResult.ObjectFunctionValue);
+				InitialPopulation.GetChromosomeRef(i).SetFitnessResult(ChromosomeFitnessResult);
 				printf("Finished Calculate %dth Chromosome.\n", i);
 
 				Writer.WriteCSVFile(GenerationNum+1, i+1, DataCenter->GetShortestPathDataList());
@@ -49,7 +48,7 @@ int main(int argc, char* argv[])
 			if (Util::FindBestChromosome(InitialPopulation, BestChromosomeNum))
 			{
 				Chromosome BestChromosome = InitialPopulation.GetChromosome(BestChromosomeNum);
-				DataCenter->AddBestResultData(GenerationNum + 1, BestChromosome.GetFitnessValue(), BestChromosome.GetObjectFunctionValue(), BestChromosomeNum);
+				DataCenter->AddBestResultData(GenerationNum + 1, BestChromosomeNum, BestChromosome.GetFitnessResult());
 			}
 
 			InitialPopulation.GetNextGeneration();

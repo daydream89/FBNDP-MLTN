@@ -27,11 +27,11 @@ public:
 	vector<pair<NodeData, bool>>& GetChromosomeRef() { return ChromosomeNodeList; }
 	void RemoveSameRoute(void);
 	void RemoveOverlapedRoute(void);
-	void SetFitnessValue(double Fitness) { FitnessValue = Fitness; };
-	double GetFitnessValue(void) { return FitnessValue; };
-	void SetObjectFunctionValue(double InObjectFunctionValue) { ObjectFunctionValue = InObjectFunctionValue; }
-	double GetObjectFunctionValue() { return ObjectFunctionValue; }
 	void SetChromosomeFromRoute(void);
+
+	void SetFitnessResult(const FitnessResultData& InResult) { FitnessResult = InResult; }
+	const FitnessResultData& GetFitnessResult() { return FitnessResult; }
+	double GetFitnessValue() { return FitnessResult.FitnessValue; }
 	
 private:
 	NodeData SelectRailNode();
@@ -49,6 +49,6 @@ private:
 	uint64_t BusRouteNum; //flowchart k
 	vector<ShortestPathData> RouteDataList;
 	vector<pair<NodeData, bool>> ChromosomeNodeList;
-	double FitnessValue = 0;
-	double ObjectFunctionValue = 0;
+
+	FitnessResultData FitnessResult;
 };

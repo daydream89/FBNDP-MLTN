@@ -53,4 +53,6 @@ private:
 	
 	float PassageTimeDiff = 5.f;
 	MNLCoefficientData MNLCoefData;
+
+	FitnessResultData ResultData;
 };

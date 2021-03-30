@@ -32,7 +32,6 @@ FitnessCalculator::FitnessCalculator(int InChromosomeIndex, uint64_t PathNum)
 
 FitnessResultData FitnessCalculator::Calculate()
 {
-	FitnessResultData ResultData;
 	ResultData.ObjectFunctionValue = PassageAssignment();
 	ResultData.FitnessValue = CalcFitness(ResultData.ObjectFunctionValue);
 
@@ -82,6 +81,8 @@ double FitnessCalculator::PassageAssignment()
 				PathData.TownBusData.RouteCostPerPerson = SumofCustomerCost / static_cast<double>(Iter->second);
 		}
 	}
+
+	ResultData.TotalCustomerCost = SumofCustomerCost;
 
 	return CalcNetworkCost(SumofCustomerCost);
 }
@@ -266,10 +267,14 @@ double FitnessCalculator::CalcNetworkCost(double SumofCustomerCost)
 			if (RIter != RoutePair.second.rend())
 				LengthOfTownBusLine = RIter->second.CumDistance;
 
-			TotalCost += static_cast<double>(2 * UserInput.TownBusOperationCost * UserInput.TownBusDispatchesPerHour * (LengthOfTownBusLine / 2));
+			double TownBusOperatorCost = static_cast<double>(UserInput.TownBusOperationCost) * static_cast<double>(UserInput.TownBusDispatchesPerHour) * static_cast<double>(LengthOfTownBusLine / 2) * 2;
+			TotalCost += TownBusOperatorCost;
 			TotalLengthOfTownBusLine += LengthOfTownBusLine;
+			ResultData.TownBusOperatorCost += TownBusOperatorCost;
 		}
 	}
+
+	ResultData.TotalRouteDistance = TotalLengthOfTownBusLine;
 
 	printf("Calculated NetworkCost : %lf\n", TotalCost);
 

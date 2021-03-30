@@ -255,13 +255,12 @@ void DataCenter::AddBestResultData(uint64_t GenerationNum, const GenerationBestR
 		BestResultData.insert(make_pair(GenerationNum, ResultData));
 }
 
-void DataCenter::AddBestResultData(uint64_t GenerationNum, double FitnessValue, double ObjFuncValue, uint64_t ChromosomeNum)
+void DataCenter::AddBestResultData(uint64_t GenerationNum, uint64_t ChromosomeNum, const FitnessResultData& InFitnessResult)
 {
 	if (BestResultData.find(GenerationNum) == BestResultData.end())
 	{
 		GenerationBestResultData Data;
-		Data.FitnessData.FitnessValue = FitnessValue;
-		Data.FitnessData.ObjectFunctionValue = ObjFuncValue;
+		Data.FitnessData = InFitnessResult;
 		Data.ChromosomeNumber = ChromosomeNum;
 		BestResultData.insert(make_pair(GenerationNum, Data));
 	}

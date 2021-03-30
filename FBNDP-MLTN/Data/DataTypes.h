@@ -232,15 +232,15 @@ enum class EWriteFileType
 
 struct FitnessResultData
 {
-	double ObjectFunctionValue;
-	double FitnessValue;
+	double TotalCustomerCost = 0;
+	double TotalRouteDistance = 0;
+	double TownBusOperatorCost = 0;
+	double ObjectFunctionValue = 0;
+	double FitnessValue = 0;
 };
 
 struct GenerationBestResultData
 {
 	FitnessResultData FitnessData;
-	double TotalUserCost;
-	double OperatorCost;
-	double TotalRouteDistance;
-	uint64_t ChromosomeNumber;
+	uint64_t ChromosomeNumber = 0;
 };

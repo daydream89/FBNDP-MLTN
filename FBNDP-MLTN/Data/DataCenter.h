@@ -49,7 +49,7 @@ public:
 	void ClearShortestPathDataList() { ShortestPathDataList.clear(); }
 
 	void AddBestResultData(uint64_t GenerationNum, const GenerationBestResultData& ResultData);
-	void AddBestResultData(uint64_t GenerationNum, double FitnessValue, double ObjFuncValue, uint64_t ChromosomeNum);
+	void AddBestResultData(uint64_t GenerationNum, uint64_t ChromosomeNum, const FitnessResultData& InFitnessResult);
 	const map<uint64_t, GenerationBestResultData>& GetAllBestResultData() { return BestResultData; }
 
 private:
