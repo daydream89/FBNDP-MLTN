@@ -236,7 +236,7 @@ void FitnessCalculator::CalcCustomerCost(vector<ShortestPathData>& InPathList, d
 			TransferWaitTimeCost += UserInput.WaitTimeCost / (2 * TransferTimeData.DispatchesPerHour);
 		}
 
-		Path.Transfer.OVTT = (UserInput.WaitTimeCost / (2 * InitialDispatchesPerHour)) + (UserInput.TransferTimeCost * TransferTime) + TransferWaitTimeCost;
+		Path.Transfer.OVTT = (UserInput.WaitTimeCost / (2 * InitialDispatchesPerHour)) + (UserInput.TransferTimeCost * (TransferTime / 60.f)) + TransferWaitTimeCost;
 
 		double CustomerCost = 0;
 		CustomerCost += Path.TownBusIVTT;
