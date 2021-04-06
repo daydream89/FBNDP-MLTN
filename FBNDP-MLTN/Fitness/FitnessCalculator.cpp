@@ -177,9 +177,9 @@ float FitnessCalculator::CalcCurveNTransportationIVTT(ShortestPathData& PathData
 			}
 		}
 
-		PathData.BusIVTT = UserInput.BusTimeCost * TrainTravelTime;
-		PathData.TownBusIVTT = UserInput.TownBusTimeCost * TownBusTravelTime;
-		PathData.TrainIVTT = UserInput.TrainTimeCost * BusTravelTime;
+		PathData.BusIVTT += UserInput.BusTimeCost * TrainTravelTime;
+		PathData.TownBusIVTT += UserInput.TownBusTimeCost * TownBusTravelTime;
+		PathData.TrainIVTT += UserInput.TrainTimeCost * BusTravelTime;
 
 		for (const auto& Data : DistanceDataList)
 		{
