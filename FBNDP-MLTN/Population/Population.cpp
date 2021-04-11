@@ -5,6 +5,7 @@
 #include <random>
 #include <fstream>
 #include <list>
+#include <set>
 
 Population::Population(uint64_t MemberNum)
 {
@@ -233,6 +234,11 @@ void Population::Crossover(Chromosome P1, Chromosome P2)
 			/* Add FirstNode To F1 */
 			ShortestPath.Path.emplace_back(FirstNode);
 
+			set<uint64_t> P1FoundedNodePosSet;
+			set<uint64_t> P2FoundedNodePosSet;
+			set<uint64_t> TotalFoundedNodePosSet;
+			uint64_t FoundedRouteNum = 0;
+			uint64_t LastFoundedRouteNum = 0;
 			vector<NodeData> FoundedNextNode;
 			do {
 				double MinRouteCost = INFINITY;
@@ -248,22 +254,38 @@ void Population::Crossover(Chromosome P1, Chromosome P2)
 						{
 							FoundedNextNode.emplace_back(NodeIter.first);
 							if (NodeIter.second == true)
-								break;
+							{
+								if ((TotalFoundedNodePosSet.find(P1FoundedNodePos) != TotalFoundedNodePosSet.end() &&
+									LastFoundedRouteNum == FoundedRouteNum)) /*Exist*/
+								{
+									++P1FoundedNodePos;
+									continue;
+								}
+								else
+								{
+									P1FoundedNodePosSet.insert(P1FoundedNodePos);
+									break;
+								}
+							}
 							else
+							{
 								continue;
+							}
 						}
 						if (!FoundShortestPathFlag && NodeFoundFlag) /*Found Including First Node Path, But Not Shortest Path*/
 							break;
 						if (NodeIter.first.Num == FirstNode.Num) //&& P1OverlappedNodeNum.at(P1FoundedNodePos) > 0)
 						{
 							NodeFoundFlag = true;
-							if (MinRouteCost >= PathDataIter.TownBusData.RouteCostPerPerson)
+							if (MinRouteCost > PathDataIter.TownBusData.RouteCostPerPerson)
 							{
 								/*Find Route Include First Node*/
 								MinRouteCost = PathDataIter.TownBusData.RouteCostPerPerson;
 								//ShortestPath = PathDataIter;
 								FoundShortestPathFlag = true;
 								FoundedNextNode.clear();
+								P1FoundedNodePosSet.clear();
+								FoundedRouteNum = 1;
 							}
 						}
 						++P1FoundedNodePos;
@@ -282,22 +304,38 @@ void Population::Crossover(Chromosome P1, Chromosome P2)
 						{
 							FoundedNextNode.emplace_back(NodeIter.first);
 							if (NodeIter.second == true)
-								break;
+							{
+								if ((TotalFoundedNodePosSet.find(P2FoundedNodePos) != TotalFoundedNodePosSet.end() &&
+									LastFoundedRouteNum == FoundedRouteNum)) /*Exist*/
+								{
+									++P2FoundedNodePos;
+									continue;
+								}
+								else
+								{
+									P2FoundedNodePosSet.insert(P2FoundedNodePos);
+									break;
+								}
+							}
 							else
+							{
 								continue;
+							}
 						}
 						if (!FoundShortestPathFlag && NodeFoundFlag) /*Found Including First Node Path, But Not Shortest Path*/
 							break;
 						if (NodeIter.first.Num == FirstNode.Num) //&& P2OverlappedNodeNum.at(P2FoundedNodePos) > 0)
 						{
 							NodeFoundFlag = true;
-							if (MinRouteCost >= PathDataIter.TownBusData.RouteCostPerPerson)
+							if (MinRouteCost > PathDataIter.TownBusData.RouteCostPerPerson)
 							{
 								/*Find Route Include First Node*/
 								MinRouteCost = PathDataIter.TownBusData.RouteCostPerPerson;
 								//ShortestPath = PathDataIter;
 								FoundShortestPathFlag = true;
 								FoundedNextNode.clear();
+								P2FoundedNodePosSet.clear();
+								FoundedRouteNum = 2;
 							}
 						}
 						++P2FoundedNodePos;
@@ -311,6 +349,7 @@ void Population::Crossover(Chromosome P1, Chromosome P2)
 				/* add FoundedNextNode to F1 or F1's Routes Vector */
 				//ShortestPath.Path.emplace_back(FoundedNextNode);
 				ShortestPath.Path.insert(ShortestPath.Path.end(), FoundedNextNode.begin(), FoundedNextNode.end());
+
 				FirstNode = FoundedNextNode.at(FoundedNextNode.size()-1);
 
 				/*If FoundedNextNode is Rail Station, add RoutesData*/
@@ -319,8 +358,30 @@ void Population::Crossover(Chromosome P1, Chromosome P2)
 					NewPathData.emplace_back(ShortestPath);
 					ShortestPath.Path.clear();
 				}
+
+				if (FoundedRouteNum == 1)
+				{
+					for (const auto& NodePosSet : P1FoundedNodePosSet)
+					{
+						TotalFoundedNodePosSet.insert(NodePosSet);
+					}
+					LastFoundedRouteNum = FoundedRouteNum;
+
+				}
+				else if (FoundedRouteNum == 2)
+				{
+					for (const auto& NodePosSet : P2FoundedNodePosSet)
+					{
+						TotalFoundedNodePosSet.insert(NodePosSet);
+					}
+
+					LastFoundedRouteNum = FoundedRouteNum;
+				}
 			} while (FoundedNextNode.at(FoundedNextNode.size()-1).Type != NodeType::Station);
 			++P1CurPosition;
+			P1FoundedNodePosSet.clear();
+			P2FoundedNodePosSet.clear();
+			TotalFoundedNodePosSet.clear();
 		}
 	}
 	Chromosome F1(RailNode, BusNode, TownBusNode, NewPathData);
@@ -388,7 +449,10 @@ void Population::Mutation(Chromosome& MutantCh)
 #endif
 					continue;
 				}
+				//printf("find shortest path from %llu to %llu\n", FoundedRandomNodeNum, BusNodeIter.Num);
+				//printf("ShortestRoute.at(0).size(): %llu\n", ShortestRoute.at(0).Path.size());
 				BetweenTownBusShortestRoutes.insert(make_pair(BusNodeIter.Num, ShortestRoute.at(0)));
+				//printf("BetweenTownBusShortestRoutes size: %llu\n", BetweenTownBusShortestRoutes.size());
 			}
 
 			bool NearestNodeFounded = false;
@@ -397,60 +461,63 @@ void Population::Mutation(Chromosome& MutantCh)
 			uint64_t SecondTownBusNodePos;
 			uint64_t SecondTownBusNodeRouteNum;
 			do {
-				uint64_t NearestTownBusNodeNum = 0;
-				SecondTownBusNodePos = 0;
-				float MinCost = INFINITY;
-				for (const auto& MapIter : BetweenTownBusShortestRoutes)
-				{
-					if (MapIter.second.Cost < MinCost)
-					{
-						NearestTownBusNodeNum = MapIter.first;
-						MinCost = MapIter.second.Cost;
-					}
+				if (BetweenTownBusShortestRoutes.size() == 0) {
+					printf("Mutation fail..\n");
+					return;
 				}
-
-#if DEBUG_MODE
-				printf("Founded Nearest TownBus Node: %llu\n", NearestTownBusNodeNum);
-#endif
-				uint64_t SecondSelectedNodeRouteNum = 0;
-				for (const auto& RouteIter : MutantCh.GetRouteRef())
-				{
-					if (FirstTownBusNodeRouteNum == SecondSelectedNodeRouteNum) /*same route*/
+					uint64_t NearestTownBusNodeNum = 0;
+					SecondTownBusNodePos = 0;
+					float MinCost = INFINITY;
+					for (const auto& MapIter : BetweenTownBusShortestRoutes)
 					{
-						SecondTownBusNodePos += RouteIter.Path.size();
-						++SecondSelectedNodeRouteNum; /*Route b*/
-						continue;
-					}
-					for (const auto& BusNodeIter : RouteIter.Path)
-					{
-						if (BusNodeIter.Num == NearestTownBusNodeNum)
+						if (MapIter.second.Cost < MinCost)
 						{
-#if DEBUG_MODE
-							printf("SecondPos NodeNum: %llu\n", MutantCh.GetChromosomeRef().at(SecondTownBusNodePos).first.Num);
-							printf("SecondPos Route Num: %llu\n", SecondSelectedNodeRouteNum);
-#endif
-							NearestNodePosArray.emplace_back(SecondTownBusNodePos);
-							NearestNodePosMap.insert(make_pair(SecondTownBusNodePos, SecondSelectedNodeRouteNum));
-							NearestNodeFounded = true;
+							NearestTownBusNodeNum = MapIter.first;
+							MinCost = MapIter.second.Cost;
 						}
-						++SecondTownBusNodePos;
 					}
-					++SecondSelectedNodeRouteNum; /*Route b*/
-				}
 
-				if (NearestNodeFounded)
-				{
+#if DEBUG_MODE
+					printf("Founded Nearest TownBus Node: %llu\n", NearestTownBusNodeNum);
+#endif
+					uint64_t SecondSelectedNodeRouteNum = 0;
+					for (const auto& RouteIter : MutantCh.GetRouteRef())
+					{
+						if (FirstTownBusNodeRouteNum == SecondSelectedNodeRouteNum) /*same route*/
+						{
+							SecondTownBusNodePos += RouteIter.Path.size();
+							++SecondSelectedNodeRouteNum; /*Route b*/
+							continue;
+						}
+						for (const auto& BusNodeIter : RouteIter.Path)
+						{
+							if (BusNodeIter.Num == NearestTownBusNodeNum)
+							{
+#if DEBUG_MODE
+								printf("SecondPos NodeNum: %llu\n", MutantCh.GetChromosomeRef().at(SecondTownBusNodePos).first.Num);
+								printf("SecondPos Route Num: %llu\n", SecondSelectedNodeRouteNum);
+#endif
+								NearestNodePosArray.emplace_back(SecondTownBusNodePos);
+								NearestNodePosMap.insert(make_pair(SecondTownBusNodePos, SecondSelectedNodeRouteNum));
+								NearestNodeFounded = true;
+							}
+							++SecondTownBusNodePos;
+						}
+						++SecondSelectedNodeRouteNum; /*Route b*/
+					}
 
-					uniform_int_distribution<int64_t> NearestDis(0, NearestNodePosArray.size() - 1);
-					int64_t RandomNodePos = NearestDis(gen);
-					SecondTownBusNodePos = NearestNodePosArray.at(RandomNodePos);
-					SecondTownBusNodeRouteNum = NearestNodePosMap.at(SecondTownBusNodePos);
-				}
+					if (NearestNodeFounded)
+					{
 
-				if (NearestNodeFounded == false)
-					BetweenTownBusShortestRoutes.erase(NearestTownBusNodeNum);
-			} while (!NearestNodeFounded);
+						uniform_int_distribution<int64_t> NearestDis(0, NearestNodePosArray.size() - 1);
+						int64_t RandomNodePos = NearestDis(gen);
+						SecondTownBusNodePos = NearestNodePosArray.at(RandomNodePos);
+						SecondTownBusNodeRouteNum = NearestNodePosMap.at(SecondTownBusNodePos);
+					}
 
+					if (NearestNodeFounded == false)
+						BetweenTownBusShortestRoutes.erase(NearestTownBusNodeNum);
+				} while (!NearestNodeFounded);
 #if DEBUG_MODE
 			printf("NodeNum(%llu) at NodePos(%llu) swapped NodeNum(%llu) at NodePos(%llu)\n",
 				MutantCh.GetChromosomeRef().at(FirstTownBusNodePos).first.Num, FirstTownBusNodePos,
@@ -488,7 +555,53 @@ void Population::Mutation(Chromosome& MutantCh)
 
 			ConnectExchangedRoute(MutantCh, FirstTownBusNodeRouteNum, FirstNodeRoutePos, FirstTownBusNodePos);
 			ConnectExchangedRoute(MutantCh, SecondTownBusNodeRouteNum, SecondNodeRoutePos, SecondTownBusNodePos);
+
+			/*
+			uint64_t SearchRouteNum = 0;
+			for (const auto& RouteNodeIter : MutantCh.GetRouteRef())
+			{
+				set<uint64_t> NodeNumSet;
+				uint64_t NodePos = 0;
+				for (const auto NodeIter : RouteNodeIter.Path)
+				{
+					if (NodeNumSet.find(NodeIter.Num) != NodeNumSet.end())
+					{
+						printf("Set Founded\n");
+						MutantCh.GetRouteRef().at(SearchRouteNum).Path.erase(MutantCh.GetRouteRef().at(SearchRouteNum).Path.begin() + NodePos);
+						//RouteNodeIter.Path.erase(RouteNodeIter.Path.begin() + NodePos);
+						//break;
+					}
+					else
+					{
+						NodeNumSet.insert(NodeIter.Num);
+						NodePos++;
+					}
+				}
+				SearchRouteNum++;
+
+			}
+			*/
+			for (vector<ShortestPathData>::iterator RouteIter = MutantCh.GetRouteRef().begin(); RouteIter != MutantCh.GetRouteRef().end(); RouteIter++)
+			{
+				set<uint64_t> NodeNumSet;
+				for (vector<NodeData>::iterator NodeIter = RouteIter->Path.begin(); NodeIter != RouteIter->Path.end();)
+				{
+					if (NodeNumSet.find(NodeIter->Num) != NodeNumSet.end())
+					{
+						//printf("Set Founded\n");
+						NodeIter = RouteIter->Path.erase(NodeIter);
+					}
+					else
+					{
+						NodeNumSet.insert(NodeIter->Num);
+						NodeIter++;
+					}
+				}
+			}
+
 			MutantCh.SetChromosomeFromRoute();
+
+
 
 		}
 		else
@@ -499,12 +612,12 @@ void Population::Mutation(Chromosome& MutantCh)
 }
 void Population::ConnectExchangedRoute(Chromosome& MutantCh, uint64_t RouteNum, uint64_t RoutePos, uint64_t ChromosomePos)
 {
+	uint64_t FirstNodeNum = MutantCh.GetRouteRef().at(RouteNum).Path.at(RoutePos).Num;
 	uint64_t TempBeforeChromosomePos = ChromosomePos;
 	if (RoutePos != 0)
 	{
 		NodeData BeforeNode;
 		uint64_t TempNodePos = RoutePos;
-		uint64_t FirstNodeNum = MutantCh.GetRouteRef().at(RouteNum).Path.at(RoutePos).Num;
 		BeforeNode.Num = -1;
 		while (TempNodePos)
 		{
@@ -513,6 +626,7 @@ void Population::ConnectExchangedRoute(Chromosome& MutantCh, uint64_t RouteNum, 
 			if ((FirstNodeNum == MutantCh.GetRouteRef().at(RouteNum).Path.at(TempNodePos).Num))
 			{
 				MutantCh.GetRouteRef().at(RouteNum).Path.erase(MutantCh.GetRouteRef().at(RouteNum).Path.begin() + TempNodePos);
+				RoutePos--;
 			}
 			else if ((MutantCh.GetRouteRef().at(RouteNum).Path.at(TempNodePos).Type == NodeType::BusStop) &&
 				(MutantCh.GetChromosomeRef().at(TempBeforeChromosomePos).second == true) &&
@@ -543,7 +657,8 @@ void Population::ConnectExchangedRoute(Chromosome& MutantCh, uint64_t RouteNum, 
 				//RoutePos -= (RoutePos - TempNodePos);
 				//FirstTownBusNodePos -= (RoutePos - TempNodePos);
 				MutantCh.GetRouteRef().at(RouteNum).Path.insert(MutantCh.GetRouteRef().at(RouteNum).Path.begin() + TempNodePos,
-					ShortestRoute.at(0).Path.begin(), ShortestRoute.at(0).Path.end());
+					BeforeNodeRoute.begin(), BeforeNodeRoute.end());
+					//ShortestRoute.at(0).Path.begin(), ShortestRoute.at(0).Path.end());
 				RoutePos += (ShortestRoute.at(0).Path.size() - (RoutePos - TempNodePos + 1));
 			}
 			else
@@ -557,12 +672,30 @@ void Population::ConnectExchangedRoute(Chromosome& MutantCh, uint64_t RouteNum, 
 	NodeData NextNode;
 	uint64_t TempNodePos = RoutePos;
 	uint64_t TempAfterChromosomePos = ChromosomePos;
-	uint64_t FirstNodeNum = MutantCh.GetRouteRef().at(RouteNum).Path.at(RoutePos).Num;
+	/*
+	uint64_t TempAfterChromosomePos2 = 0;
+	for (int i = 0; i < RouteNum; ++i)
+	{
+		TempAfterChromosomePos2 += MutantCh.GetRouteRef().at(i).Path.size();
+	}
+	for (const auto& NodeIter : MutantCh.GetRouteRef().at(RouteNum).Path)
+	{
+		if (NodeIter.Num == FirstNodeNum) {
+			break;
+		}
+		else {
+		TempAfterChromosomePos2++;
+		}
+	}
+	if (TempAfterChromosomePos != TempAfterChromosomePos2)
+		printf("Test\n");
+	*/
 	NextNode.Num = -1;
-	while (TempNodePos < MutantCh.GetRouteRef().at(RouteNum).Path.size() - 1)
+	while (TempNodePos < MutantCh.GetRouteRef().at(RouteNum).Path.size() -1)
 	{
 		++TempNodePos;
 		++TempAfterChromosomePos;
+		//++TempAfterChromosomePos2;
 		if ((FirstNodeNum == MutantCh.GetRouteRef().at(RouteNum).Path.at(TempNodePos).Num))
 		{
 			MutantCh.GetRouteRef().at(RouteNum).Path.erase(MutantCh.GetRouteRef().at(RouteNum).Path.begin() + TempNodePos);
@@ -573,6 +706,9 @@ void Population::ConnectExchangedRoute(Chromosome& MutantCh, uint64_t RouteNum, 
 			NextNode = MutantCh.GetRouteRef().at(RouteNum).Path.at(TempNodePos);
 			break;
 		}
+	}
+	if (NextNode.Num == -1) {
+		NextNode = MutantCh.GetRouteRef().at(RouteNum).Path.at(TempNodePos);
 	}
 	bool IsNextNodeRail = false;
 	for (const auto& RailNodeIter : RailNode)
@@ -590,7 +726,7 @@ void Population::ConnectExchangedRoute(Chromosome& MutantCh, uint64_t RouteNum, 
 		PathFinderData ShortestPathData(InputGraph, FirstNodeNum, NextNode.Num, EPathFinderCostType::Length, 1);
 		if (Util::PathFinder::FindShortestPath(ShortestPathData, ShortestRoute) != 0)
 		{
-			vector<NodeData> BeforeNodeRoute = ShortestRoute.at(0).Path;
+			vector<NodeData> AfterNodeRoute = ShortestRoute.at(0).Path;
 			/*remove from TempNodePos to RoutePos*/
 			/*
 			vector<NodeData> CorrectRoute = MutantCh.GetRouteRef().at(RouteNum).Path;
