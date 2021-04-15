@@ -444,9 +444,6 @@ void FitnessCalculator::SetLinkDataList(const vector<ShortestPathData>& InPathDa
 		uint64_t StartNodeNum = TownBusRoute.at(0).first.Num;
 		for (size_t i = 0; i < TownBusRoute.size() - 1; ++i)
 		{
-			if (!TownBusRoute.at(i + 1).second)
-				continue;
-
 			uint64_t NextNodeNum = TownBusRoute.at(i + 1).first.Num;
 			for (const auto& FullLink : InFullLinkDataList)
 			{
@@ -455,6 +452,9 @@ void FitnessCalculator::SetLinkDataList(const vector<ShortestPathData>& InPathDa
 				if (FullLink.FromNodeNum == NextNodeNum && FullLink.ToNodeNum == TownBusRoute.at(i).first.Num)
 					LinkListToReverseIntegrated.push_back(FullLink);
 			}
+
+			if (!TownBusRoute.at(i + 1).second)
+				continue;
 
 			if (LinkListToIntegrated.size() != 0)
 			{
