@@ -36,6 +36,7 @@ private:
 	void AddGraphDataToRouteDataMap(vector<ShortestPathData>& InOutPathDataList);
 	void AddRouteDataMapToGraphData(const RouteMap& RouteDataMap, const vector<NodeData>& FullGraphData);
 	void AddRouteDataMapToLinkData(const RouteMap& RouteDataMap, const vector<LinkData>& FullLinkData);
+	void AddTrafficVolumeByTownBusRoute(const vector<string>& RouteNameList, uint64_t TrafficVolume);
 
 	void SetGraphData(const vector<ShortestPathData>& InPathData);
 	void SetLinkDataList(const vector<ShortestPathData>& InPathData, const vector<LinkData>& InFullLinkDataList);
@@ -50,6 +51,8 @@ private:
 	RouteMap RouteDataMap;
 	float TotalLengthOfTownBusLine = 0.f;
 	uint64_t NumberOfPath = 2;
+
+	map<string, uint64_t> NumOfUsersPerTownBusRoute;
 	
 	float PassageTimeDiff = 5.f;
 	MNLCoefficientData MNLCoefData;

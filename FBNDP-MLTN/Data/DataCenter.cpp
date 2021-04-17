@@ -197,17 +197,37 @@ void DataCenter::SetUserInputData(const FileDataList& InData)
 		{
 			UserInput.TownBusDispatchesPerHour = static_cast<uint64_t>(stoul(Value));
 		}
+		else if (Name == "TownBusSeat")
+		{
+			UserInput.TownBusSeat = static_cast<uint64_t>(stoul(Value));
+		}
 		else if (Name == "RouteFixCost")
 		{
 			UserInput.RouteFixCost = static_cast<uint64_t>(stoul(Value));
 		}
 		else if (Name == "PanaltyFactor")
 		{
-			UserInput.PanaltyFactor = stof(Value);
+			UserInput.PanaltyFactor = stod(Value);
 		}
 		else if (Name == "PanaltyFactor2")
 		{
-			UserInput.PanaltyFactor2 = stof(Value);
+			UserInput.PanaltyFactor2 = stod(Value);
+		}
+		else if (Name == "PanaltyFactor3")
+		{
+			UserInput.PanaltyFactor3 = stod(Value);
+		}
+		else if (Name == "PanaltyFactor4")
+		{
+			UserInput.PanaltyFactor4 = stod(Value);
+		}
+		else if (Name == "LoadFactor")
+		{
+			UserInput.LoadFactor = stod(Value);
+		}
+		else if (Name == "MaxRouteLength")
+		{
+			UserInput.MaxRouteLength = stod(Value);
 		}
 		else if (Name == "NumberOfBusesGiven")
 		{

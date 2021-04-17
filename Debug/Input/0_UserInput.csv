@@ -16,6 +16,8 @@ TownBusDispatchesPerHour,12
 RouteFixCost,10000
 PanaltyFactor,0.0001
 PanaltyFactor2,0.001
+PanaltyFactor3,0.001
+PanaltyFactor4,0.001
 NumberOfBusesGiven,110
 OperatingHoursPerDay,10
 TownBusNodesNum,10,1,2,3,4,5,6,7,8,9,10

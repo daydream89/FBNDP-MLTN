@@ -138,6 +138,9 @@ void FitnessCalculator::SetPassageAssignmentForMNLModel(vector<ShortestPathData>
 	float PassageRate = expf(UnityFunctionValue[0]) / SumOfUnityFunctionValue;
 	InOutPathList.at(0).TrafficVolumeForPath = static_cast<uint32_t>(TrafficVolume * PassageRate);
 	InOutPathList.at(1).TrafficVolumeForPath = static_cast<uint32_t>(TrafficVolume) - InOutPathList.at(0).TrafficVolumeForPath;
+
+	AddTrafficVolumeByTownBusRoute(InOutPathList.at(0).PathRouteList, InOutPathList.at(0).TrafficVolumeForPath);
+	AddTrafficVolumeByTownBusRoute(InOutPathList.at(1).PathRouteList, InOutPathList.at(1).TrafficVolumeForPath);
 }
 
 float FitnessCalculator::CalcCurveNTransportationIVTT(ShortestPathData& PathData)
@@ -173,6 +176,15 @@ float FitnessCalculator::CalcCurveNTransportationIVTT(ShortestPathData& PathData
 					else
 						BusTravelTime += TravelTime;
 				}
+
+				bool bExist = false;
+				for (auto PathRouteName : PathData.PathRouteList)
+					if (PathRouteName == RouteName)
+						bExist = true;
+				
+				if (!bExist)
+					PathData.PathRouteList.emplace_back(RouteName);
+				
 				break;
 			}
 		}
@@ -297,9 +309,38 @@ double FitnessCalculator::CalcFitness(double NetworkCost)
 
 	double Value1 = 0.5 * static_cast<double>(UserInput.NumberOfBusesGiven) * static_cast<double>(UserInput.TownBusSpeed) * static_cast<double>(UserInput.TownBusDispatchesPerHour);
 	double Value2 = static_cast<double>(TotalLengthOfTownBusLine);
+	
+	double Value3 = 0;
+	for (const auto& RoutePair : RouteDataMap)
+	{
+		if (RoutePair.first.substr(0, 7) == "TownBus")
+		{
+			auto RIter = RoutePair.second.rbegin();
+			if (RIter != RoutePair.second.rend())
+			{
+				// Value3 += D - Lk < 0 ? D - Lk : 0;
+				if (UserInput.MaxRouteLength - RIter->second.CumDistance < 0)
+					Value3 += UserInput.MaxRouteLength - RIter->second.CumDistance;
+			}
+		}
+	}
+	
+	double Value4 = 0;
+	double ReferenceValue = static_cast<double>(UserInput.TownBusDispatchesPerHour) * static_cast<double>(UserInput.TownBusSeat) * UserInput.LoadFactor;
+	for (const auto& NumOfUsers : NumOfUsersPerTownBusRoute)
+	{
+		if (NumOfUsers.first.substr(0, 7) == "TownBus")
+		{
+			// Value4 += fCp - Pk < 0 ? fCp - Pk : 0;
+			if (ReferenceValue - static_cast<double>(NumOfUsers.second) < 0)
+				Value4 += ReferenceValue - static_cast<double>(NumOfUsers.second);
+		}
+	}
 
 	double Fitness = 1 / (UserInput.PanaltyFactor * NetworkCost);
 	Fitness += static_cast<double>(UserInput.OperatingHoursPerDay) * (UserInput.PanaltyFactor2 * (Value1 - Value2));
+	Fitness += (Value3 * UserInput.PanaltyFactor3);
+	Fitness += (Value4 * UserInput.PanaltyFactor4);
 
 	printf("Calculated Fitness : %lf\n", Fitness);
 
@@ -423,6 +464,21 @@ void FitnessCalculator::AddRouteDataMapToLinkData(const RouteMap& RouteDataMap, 
 					break;
 				}
 			}
+		}
+	}
+}
+
+void FitnessCalculator::AddTrafficVolumeByTownBusRoute(const vector<string>& RouteNameList, uint64_t TrafficVolume)
+{
+	for (const auto& RouteName : RouteNameList)
+	{
+		if (RouteName.substr(0, 7) == "TownBus")
+		{
+			auto FoundIter = NumOfUsersPerTownBusRoute.find(RouteName);
+			if (FoundIter != NumOfUsersPerTownBusRoute.end())
+				FoundIter->second += TrafficVolume;
+			else
+				NumOfUsersPerTownBusRoute.insert(make_pair(RouteName, TrafficVolume));
 		}
 	}
 }

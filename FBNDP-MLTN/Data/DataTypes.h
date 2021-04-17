@@ -116,9 +116,14 @@ struct UserInputData
 	float TownBusSpeed = 30.f;				// 마을버스 운영 속도 (km/h)
 	float TownBusOperationCost = 1600.f;	// 마을버스 운영 비용 (원/대*km)
 	uint64_t TownBusDispatchesPerHour = 12;	// 마을버스 배차 횟수 (회/hour)
+	uint64_t TownBusSeat = 30;				// 마을버스 좌석 수
 	uint64_t RouteFixCost = 10000;			// 마을버스 노선의 고정 비용
-	double PanaltyFactor = 0.0001f;			// 적합도 함수에서 사용하는 값
-	double PanaltyFactor2 = 0.001f;			// 적합도 함수에서 사용하는 값
+	double PanaltyFactor = 0.0001;			// 적합도 함수에서 사용하는 값
+	double PanaltyFactor2 = 0.001;			// 적합도 함수에서 사용하는 값
+	double PanaltyFactor3 = 0.001;			// 적합도 함수에서 사용하는 값
+	double PanaltyFactor4 = 0.001;			// 적합도 함수에서 사용하는 값
+	double LoadFactor = 1.2;				// 적합도 함수에서 사용하는 값
+	double MaxRouteLength = 3;				// 최대 노선 길이
 	uint64_t NumberOfBusesGiven = 110;		// 주어진 버스 대수
 	float OperatingHoursPerDay = 10.f;		// 하루 운영 시간
 	vector<uint64_t> TownBusNodesNum;		// 마을 버스가 정차하는 노드들
@@ -209,6 +214,7 @@ struct TownBusRouteData
 	string RouteName = "";
 	vector<pair<NodeData, bool>> TownBusStopCheck;
 	double RouteCostPerPerson = 0.f;
+	uint64_t NumOfPassengers = 0;
 };
 struct ShortestPathData
 {
@@ -222,6 +228,7 @@ struct ShortestPathData
 	float TownBusIVTT = 0.f;
 	OVTTData Transfer;
 	uint32_t TrafficVolumeForPath = 0;
+	vector<string> PathRouteList;
 };
 
 enum class EWriteFileType
