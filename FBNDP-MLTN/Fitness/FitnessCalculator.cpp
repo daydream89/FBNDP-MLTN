@@ -257,6 +257,11 @@ double FitnessCalculator::CalcNetworkCost(double SumofCustomerCost)
 		UserInput = DataCenterInstance->GetUserInputData();
 	}
 
+	int32_t NumberOfTownBusLine = 0;
+	for (const auto& RoutePair : RouteDataMap)
+		if (RoutePair.first.substr(0, 7) == "TownBus")
+			NumberOfTownBusLine++;
+
 	double TotalCost = SumofCustomerCost;
 	for (const auto& RoutePair : RouteDataMap)
 	{
@@ -268,7 +273,7 @@ double FitnessCalculator::CalcNetworkCost(double SumofCustomerCost)
 				LengthOfTownBusLine = RIter->second.CumDistance;
 
 			double TownBusOperatorCost = static_cast<double>(UserInput.TownBusOperationCost) * static_cast<double>(UserInput.TownBusDispatchesPerHour) * static_cast<double>(LengthOfTownBusLine / 2) * 2;
-			TownBusOperatorCost += static_cast<double>(UserInput.RouteFixCost);
+			TownBusOperatorCost += (static_cast<double>(UserInput.RouteFixCost) * static_cast<double>(NumberOfTownBusLine));
 			TotalCost += TownBusOperatorCost;
 			TotalLengthOfTownBusLine += LengthOfTownBusLine;
 			ResultData.TownBusOperatorCost += TownBusOperatorCost;
