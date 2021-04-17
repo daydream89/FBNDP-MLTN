@@ -295,8 +295,8 @@ double FitnessCalculator::CalcFitness(double NetworkCost)
 		UserInput = DataCenterInstance->GetUserInputData();
 	}
 
-	double Value1 = 0.5f * static_cast<double>(UserInput.NumberOfBusesGiven) * static_cast<double>(UserInput.TownBusSpeed);
-	double Value2 = static_cast<double>(UserInput.TownBusDispatchesPerHour) * static_cast<double>(TotalLengthOfTownBusLine);
+	double Value1 = 0.5 * static_cast<double>(UserInput.NumberOfBusesGiven) * static_cast<double>(UserInput.TownBusSpeed) * static_cast<double>(UserInput.TownBusDispatchesPerHour);
+	double Value2 = static_cast<double>(TotalLengthOfTownBusLine);
 
 	double Fitness = 1 / (UserInput.PanaltyFactor * NetworkCost);
 	Fitness += static_cast<double>(UserInput.OperatingHoursPerDay) * (UserInput.PanaltyFactor2 * (Value1 - Value2));
