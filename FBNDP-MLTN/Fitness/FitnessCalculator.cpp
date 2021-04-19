@@ -270,27 +270,23 @@ double FitnessCalculator::CalcNetworkCost(double SumofCustomerCost)
 	}
 
 	int32_t NumberOfTownBusLine = 0;
-	for (const auto& RoutePair : RouteDataMap)
-		if (RoutePair.first.substr(0, 7) == "TownBus")
-			NumberOfTownBusLine++;
-
 	double TotalCost = SumofCustomerCost;
 	for (const auto& RoutePair : RouteDataMap)
 	{
 		if (RoutePair.first.substr(0, 7) == "TownBus")	// todo. TownBus 스트링 따로 빼서 지정할 수 있도록 할 것.
 		{
-			float LengthOfTownBusLine = 0.f;
+			NumberOfTownBusLine++;
+
 			auto RIter = RoutePair.second.rbegin();
 			if (RIter != RoutePair.second.rend())
-				LengthOfTownBusLine = RIter->second.CumDistance;
-
-			double TownBusOperatorCost = static_cast<double>(UserInput.TownBusOperationCost) * static_cast<double>(UserInput.TownBusDispatchesPerHour) * static_cast<double>(LengthOfTownBusLine / 2) * 2;
-			TownBusOperatorCost += (static_cast<double>(UserInput.RouteFixCost) * static_cast<double>(NumberOfTownBusLine));
-			TotalCost += TownBusOperatorCost;
-			TotalLengthOfTownBusLine += LengthOfTownBusLine;
-			ResultData.TownBusOperatorCost += TownBusOperatorCost;
+				TotalLengthOfTownBusLine += RIter->second.CumDistance;
 		}
 	}
+
+	double TownBusOperatorCost = static_cast<double>(UserInput.TownBusOperationCost) * static_cast<double>(UserInput.TownBusDispatchesPerHour) * static_cast<double>(TotalLengthOfTownBusLine / 2) * 2;
+	TownBusOperatorCost += (static_cast<double>(UserInput.RouteFixCost) * static_cast<double>(NumberOfTownBusLine));
+	TotalCost += TownBusOperatorCost;
+	ResultData.TownBusOperatorCost += TownBusOperatorCost;
 
 	ResultData.TotalRouteDistance = TotalLengthOfTownBusLine;
 
