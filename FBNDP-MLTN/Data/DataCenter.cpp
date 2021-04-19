@@ -19,6 +19,7 @@ void DataCenter::SetNodeData(const FileDataList& InData)
 		// todo. convert enum class to string & compare string
 		Data.Type = NodeType::NodeTypeMax;
 		string TypeString = RowData.at(6);
+		transform(TypeString.begin(), TypeString.end(), TypeString.begin(), tolower);
 		if (TypeString.compare("busstop") == 0)
 			Data.Type = NodeType::BusStop;
 		else if (TypeString.compare("station") == 0)
@@ -57,6 +58,7 @@ void DataCenter::SetRouteData(const FileDataList& InData)
 		}
 
 		string Name = RowData.at(0);
+		transform(Name.begin(), Name.end(), Name.begin(), tolower);
 		uint64_t Order = static_cast<uint64_t>(stoul(RowData.at(1)));
 
 		RouteData Data;
@@ -87,6 +89,7 @@ void DataCenter::SetOperatingData(const FileDataList& InData)
 		}
 
 		string Name = RowData.at(0);
+		transform(Name.begin(), Name.end(), Name.begin(), tolower);
 		if (OperatingDataMap.find(Name) == OperatingDataMap.end())
 		{
 			OperatingData Data;
@@ -139,128 +142,130 @@ void DataCenter::SetUserInputData(const FileDataList& InData)
 			continue;
 
 		string Name = RowData.at(0);
+		transform(Name.begin(), Name.end(), Name.begin(), tolower);
 		string Value = RowData.at(1);
+		transform(Value.begin(), Value.end(), Value.begin(), tolower);
 
-		if (Name == "PassageTimeDiff")
+		if (Name == "passagetimediff")
 		{
 			UserInput.PassageTimeDiff = stof(Value);
 		}
-		else if (Name == "IVTTCoefficient")
+		else if (Name == "ivttcoefficient")
 		{
 			UserInput.MNLCoefficient.IVTTCoef = stof(Value);
 		}
-		else if (Name == "OVTTCoefficient")
+		else if (Name == "ovttcoefficient")
 		{
 			UserInput.MNLCoefficient.OVTTCoef = stof(Value);
 		}
-		else if (Name == "CTPICoefficient")
+		else if (Name == "ctpicoefficient")
 		{
 			UserInput.MNLCoefficient.CTPICoef = stof(Value);
 		}
-		else if (Name == "RELICoefficient")
+		else if (Name == "relicoefficient")
 		{
 			UserInput.MNLCoefficient.RELICoef = stof(Value);
 		}
-		else if (Name == "CIRCCoefficient")
+		else if (Name == "circcoefficient")
 		{
 			UserInput.MNLCoefficient.CIRCCoef = stof(Value);
 		}
-		else if (Name == "TownBusTimeCost")
+		else if (Name == "townbustimecost")
 		{
 			UserInput.TownBusTimeCost = stof(Value);
 		}
-		else if (Name == "BusTimeCost")
+		else if (Name == "bustimecost")
 		{
 			UserInput.BusTimeCost = stof(Value);
 		}
-		else if (Name == "TrainTimeCost")
+		else if (Name == "traintimecost")
 		{
 			UserInput.TrainTimeCost = stof(Value);
 		}
-		else if (Name == "WaitTimeCost")
+		else if (Name == "waittimecost")
 		{
 			UserInput.WaitTimeCost = stof(Value);
 		}
-		else if (Name == "TransferTimeCost")
+		else if (Name == "transfertimecost")
 		{
 			UserInput.TransferTimeCost = stof(Value);
 		}
-		else if (Name == "TownBusSpeed")
+		else if (Name == "townbusspeed")
 		{
 			UserInput.TownBusSpeed = stof(Value);
 		}
-		else if (Name == "TownBusOperationCost")
+		else if (Name == "townbusoperationcost")
 		{
 			UserInput.TownBusOperationCost = stof(Value);
 		}
-		else if (Name == "TownBusDispatchesPerHour")
+		else if (Name == "townbusdispatchesperhour")
 		{
 			UserInput.TownBusDispatchesPerHour = static_cast<uint64_t>(stoul(Value));
 		}
-		else if (Name == "TownBusSeat")
+		else if (Name == "townbusseat")
 		{
 			UserInput.TownBusSeat = static_cast<uint64_t>(stoul(Value));
 		}
-		else if (Name == "RouteFixCost")
+		else if (Name == "toutefixcost")
 		{
 			UserInput.RouteFixCost = static_cast<uint64_t>(stoul(Value));
 		}
-		else if (Name == "PanaltyFactor")
+		else if (Name == "panaltyfactor")
 		{
 			UserInput.PanaltyFactor = stod(Value);
 		}
-		else if (Name == "PanaltyFactor2")
+		else if (Name == "panaltyfactor2")
 		{
 			UserInput.PanaltyFactor2 = stod(Value);
 		}
-		else if (Name == "PanaltyFactor3")
+		else if (Name == "panaltyfactor3")
 		{
 			UserInput.PanaltyFactor3 = stod(Value);
 		}
-		else if (Name == "PanaltyFactor4")
+		else if (Name == "panaltyfactor4")
 		{
 			UserInput.PanaltyFactor4 = stod(Value);
 		}
-		else if (Name == "LoadFactor")
+		else if (Name == "loadfactor")
 		{
 			UserInput.LoadFactor = stod(Value);
 		}
-		else if (Name == "MaxRouteLength")
+		else if (Name == "maxroutelength")
 		{
 			UserInput.MaxRouteLength = stod(Value);
 		}
-		else if (Name == "NumberOfBusesGiven")
+		else if (Name == "numberofbusesgiven")
 		{
 			UserInput.NumberOfBusesGiven = static_cast<uint64_t>(stoul(Value));
 		}
-		else if (Name == "OperatingHoursPerDay")
+		else if (Name == "operatinghoursperday")
 		{
 			UserInput.OperatingHoursPerDay = stof(Value);
 		}
-		else if (Name == "TownBusNodesNum")
+		else if (Name == "townbusnodesnum")
 		{
 			for (uint64_t i = 0; i < stoull(Value); ++i)
 			{
 				UserInput.TownBusNodesNum.emplace_back(stoull(RowData.at(i + 2)));
 			}
 		}
-		else if (Name == "NoCrossoverNum")
+		else if (Name == "nocrossovernum")
 		{
 			UserInput.NoCrossoverNum = static_cast<uint64_t>(stoul(Value));
 		}
-		else if (Name == "PopulationNum")
+		else if (Name == "populationnum")
 		{
 			UserInput.PopulationNum = static_cast<uint64_t>(stoul(Value));
 		}
-		else if (Name == "MaxGeneration")
+		else if (Name == "maxgeneration")
 		{
 			UserInput.MaxGeneration = static_cast<uint64_t>(stoul(Value));
 		}
-		else if (Name == "CrossoverPercent")
+		else if (Name == "crossoverpercent")
 		{
 			UserInput.CrossoverPercent = static_cast<uint64_t>(stoul(Value));
 		}
-		else if (Name == "MutationPercent")
+		else if (Name == "mutationpercent")
 		{
 			UserInput.MutationPercent = static_cast<uint64_t>(stoul(Value));
 		}

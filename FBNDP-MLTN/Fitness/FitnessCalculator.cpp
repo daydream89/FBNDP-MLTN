@@ -171,7 +171,7 @@ float FitnessCalculator::CalcCurveNTransportationIVTT(ShortestPathData& PathData
 					TrainTravelTime += TravelTime;
 				else if (CurNodeData.Type == NodeType::BusStop || NextNodeData.Type == NodeType::BusStop)
 				{
-					if (RouteName.substr(0, 7) == "TownBus")
+					if (RouteName.substr(0, 7) == TownBusStr)
 						TownBusTravelTime += TravelTime;
 					else
 						BusTravelTime += TravelTime;
@@ -227,7 +227,7 @@ void FitnessCalculator::CalcCustomerCost(vector<ShortestPathData>& InPathList, d
 				string RouteName = "";
 				float Dist = 0.f;
 				Util::Calculator::CalcIVTT(Link, RouteDataMap, Dist, RouteName);
-				if (RouteName.substr(0, 7) == "TownBus")
+				if (RouteName.substr(0, 7) == TownBusStr)
 					InitialDispatchesPerHour = static_cast<float>(UserInput.TownBusDispatchesPerHour);
 				else
 				{
@@ -273,7 +273,7 @@ double FitnessCalculator::CalcNetworkCost(double SumofCustomerCost)
 	double TotalCost = SumofCustomerCost;
 	for (const auto& RoutePair : RouteDataMap)
 	{
-		if (RoutePair.first.substr(0, 7) == "TownBus")	// todo. TownBus 스트링 따로 빼서 지정할 수 있도록 할 것.
+		if (RoutePair.first.substr(0, 7) == TownBusStr)
 		{
 			NumberOfTownBusLine++;
 
@@ -309,7 +309,7 @@ double FitnessCalculator::CalcFitness(double NetworkCost)
 	double Value3 = 0;
 	for (const auto& RoutePair : RouteDataMap)
 	{
-		if (RoutePair.first.substr(0, 7) == "TownBus")
+		if (RoutePair.first.substr(0, 7) == TownBusStr)
 		{
 			auto RIter = RoutePair.second.rbegin();
 			if (RIter != RoutePair.second.rend())
@@ -325,7 +325,7 @@ double FitnessCalculator::CalcFitness(double NetworkCost)
 	double ReferenceValue = static_cast<double>(UserInput.TownBusDispatchesPerHour) * static_cast<double>(UserInput.TownBusSeat) * UserInput.LoadFactor;
 	for (const auto& NumOfUsers : NumOfUsersPerTownBusRoute)
 	{
-		if (NumOfUsers.first.substr(0, 7) == "TownBus")
+		if (NumOfUsers.first.substr(0, 7) == TownBusStr)
 		{
 			// Value4 += fCp - Pk < 0 ? fCp - Pk : 0;
 			if (ReferenceValue - static_cast<double>(NumOfUsers.second) < 0)
@@ -406,7 +406,7 @@ void FitnessCalculator::AddGraphDataToRouteDataMap(vector<ShortestPathData>& InO
 			NewRouteMap.insert(make_pair(++Order, Route));
 		}
 
-		string RouteName = "TownBus";
+		string RouteName = TownBusStr;
 		RouteName.append(to_string(RouteCount++));
 
 		RouteDataMap.insert(make_pair(RouteName, NewRouteMap));
@@ -472,7 +472,7 @@ void FitnessCalculator::AddTrafficVolumeByTownBusRoute(const vector<string>& Rou
 {
 	for (const auto& RouteName : RouteNameList)
 	{
-		if (RouteName.substr(0, 7) == "TownBus")
+		if (RouteName.substr(0, 7) == TownBusStr)
 		{
 			auto FoundIter = NumOfUsersPerTownBusRoute.find(RouteName);
 			if (FoundIter != NumOfUsersPerTownBusRoute.end())

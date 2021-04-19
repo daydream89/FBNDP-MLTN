@@ -3,8 +3,11 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <algorithm>
 
 using namespace std;
+
+static const string TownBusStr = "townbus";
 
 enum class NodeType
 {

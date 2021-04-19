@@ -300,7 +300,7 @@ float Util::Calculator::CalcIVTT(const LinkData& InLink, const RouteMap& InRoute
 		auto FoundData = OperatingDataMap.find(RouteName);
 		if (FoundData != OperatingDataMap.end())
 			IVTT /= FoundData->second.Speed;
-		else if (RouteName.substr(0, 7) == "TownBus")
+		else if (RouteName.substr(0, 7) == TownBusStr)
 			IVTT /= DataCenterInst->GetUserInputData().TownBusSpeed;
 		else
 			IVTT /= InLink.Speed;
@@ -323,7 +323,7 @@ OVTTData Util::Calculator::CalcOVTTData(const vector<NodeData>& InPath, const Ro
 	{
 		string RouteName = "";
 		PathFinderPrivate::GetRouteNameFromNodesNum(InRouteMap, InPath.at(0).Num, InPath.at(1).Num, RouteName);
-		if (RouteName.substr(0, 7) == "TownBus")
+		if (RouteName.substr(0, 7) == TownBusStr)
 			ReturnData.InitialDispatchesPerHour = static_cast<float>(DataCenterInst->GetUserInputData().TownBusDispatchesPerHour);
 		else
 		{
@@ -353,7 +353,7 @@ OVTTData Util::Calculator::CalcOVTTData(const vector<NodeData>& InPath, const Ro
 		if (PreRouteName != CurRouteName)	// route changed!
 		{
 			uint64_t Dispatch = 0;
-			if (CurRouteName.substr(0, 7) == "TownBus")
+			if (CurRouteName.substr(0, 7) == TownBusStr)
 				Dispatch = DataCenterInst->GetUserInputData().TownBusDispatchesPerHour;
 			else
 			{
