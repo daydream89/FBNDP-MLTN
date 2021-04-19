@@ -245,6 +245,9 @@ struct FitnessResultData
 	double TownBusOperatorCost = 0;
 	double ObjectFunctionValue = 0;
 	double FitnessValue = 0;
+	double P1Value = 0;
+	double P2Value = 0;
+	double P3Value = 0;
 };
 
 struct GenerationBestResultData

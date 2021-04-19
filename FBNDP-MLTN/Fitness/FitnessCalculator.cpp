@@ -337,10 +337,14 @@ double FitnessCalculator::CalcFitness(double NetworkCost)
 		}
 	}
 
+	ResultData.P1Value = static_cast<double>(UserInput.OperatingHoursPerDay) * (UserInput.PanaltyFactor2 * (Value1 - Value2));
+	ResultData.P2Value = Value3 * UserInput.PanaltyFactor3;
+	ResultData.P3Value = Value4 * UserInput.PanaltyFactor4;
+
 	double Fitness = 1 / (UserInput.PanaltyFactor * NetworkCost);
-	Fitness += static_cast<double>(UserInput.OperatingHoursPerDay) * (UserInput.PanaltyFactor2 * (Value1 - Value2));
-	Fitness += (Value3 * UserInput.PanaltyFactor3);
-	Fitness += (Value4 * UserInput.PanaltyFactor4);
+	Fitness += ResultData.P1Value;
+	Fitness += ResultData.P2Value;
+	Fitness += ResultData.P3Value;
 
 	printf("Calculated Fitness : %lf\n", Fitness);
 

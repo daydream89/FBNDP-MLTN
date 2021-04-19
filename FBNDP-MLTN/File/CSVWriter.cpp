@@ -113,7 +113,7 @@ void CSVWriter::WriteCSVFile(const map<uint64_t, GenerationBestResultData>& InBe
 	if (FileStream.is_open())
 	{
 		string NewLine = "\n";
-		string IndexRow = "GenerationNumber,Fitness,ObjectFunctionValue,TotalUserCost,OperatorCost,TotalRouteDistance,ChromosomeName\n";
+		string IndexRow = "GenerationNumber,Fitness,P1,P2,P3,ObjectFunctionValue,TotalUserCost,OperatorCost,TotalRouteDistance,ChromosomeName\n";
 		FileStream.write(IndexRow.c_str(), IndexRow.length());
 
 		for (const auto& ResultPair : InBestResultData)
@@ -121,6 +121,9 @@ void CSVWriter::WriteCSVFile(const map<uint64_t, GenerationBestResultData>& InBe
 			string Row = "";
 			Row.append(to_string(ResultPair.first) + ",");
 			Row.append(to_string(ResultPair.second.FitnessData.FitnessValue) + ",");
+			Row.append(to_string(ResultPair.second.FitnessData.P1Value) + ",");
+			Row.append(to_string(ResultPair.second.FitnessData.P2Value) + ",");
+			Row.append(to_string(ResultPair.second.FitnessData.P3Value) + ",");
 			Row.append(to_string(ResultPair.second.FitnessData.ObjectFunctionValue) + ",");
 			Row.append(to_string(ResultPair.second.FitnessData.TotalCustomerCost) + ",");
 			Row.append(to_string(ResultPair.second.FitnessData.TownBusOperatorCost) + ",");
