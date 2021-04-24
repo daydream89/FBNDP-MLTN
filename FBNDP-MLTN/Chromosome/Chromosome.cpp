@@ -1,4 +1,5 @@
 #include "Chromosome.h"
+#include "../Data/DataCenter.h"
 #include "../util/Utils.h"
 #include <random>
 #include <map>
@@ -16,6 +17,8 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 	CopiedBusNode.assign(TownBusNode.begin(), TownBusNode.end());
 	for (const auto& CheckRailNode : RailNode)
 		RailStationSelected[CheckRailNode.Num] = false;
+	if (auto DataCenterInstance = DataCenter::GetInstance())
+		UserInputMaxRouteLength = DataCenterInstance->GetUserInputData().MaxRouteLength / 2;
 
 	while (CopiedBusNode.size() > 0) 
 	{
@@ -23,6 +26,11 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 		SelectedBusNodeData SelectedBus = SelectBusNode(SelectedRailNode);
 		if (!bAllRailStationHaveRoute)
 		{
+			if (SelectedBus.BusRouteData.Cost > UserInputMaxRouteLength)
+			{
+				printf("Current Route's Length is longer than User Input max Route Length\n");
+				continue;
+			}
 			if (bAllRailStationHaveRoute == false)
 			{
 				bool StationCheckFlag = true;
@@ -81,17 +89,33 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 			/* SelectedBus.BusRouteData.Cost vs Shortest Cost include exist route */
 			if ((FoundedShortestRoute.Cost < SelectedBus.BusRouteData.Cost) && FoundedShortestRoute.Cost != 0)// || FoundedShortestRoute.Cost >= INFINITY) /* Find Lesat Cost Path */
 			{
+				bool MaxLengthCheckFlag = false;
 				for (auto &RouteIter : RouteDataList)
 				{
 					if (RouteIter.Path.begin()->Num == ExistRoute.Path.begin()->Num)
 					{
+						if (RouteIter.Cost + FoundedShortestRoute.Cost > UserInputMaxRouteLength)
+						{
+							printf("Route %llu - %llu -%llu is too long\n", FoundedShortestRoute.Path.front().Num,
+								FoundedShortestRoute.Path.back().Num, RouteIter.Path.back().Num);
+							MaxLengthCheckFlag = true;
+							break;
+						}
 						RouteIter.Path.insert(RouteIter.Path.begin(), FoundedShortestRoute.Path.begin(), FoundedShortestRoute.Path.end()-1);
 						RouteIter.Cost += FoundedShortestRoute.Cost;
 					}
 				}
+				if (MaxLengthCheckFlag)
+					continue;
 			}
 			else
 			{
+				if (SelectedBus.BusRouteData.Cost > UserInputMaxRouteLength)
+				{
+					printf("Route from %llu to %llu is too long(Length: %llf)\n", SelectedBus.BusRouteData.Path.front().Num,
+						SelectedBus.BusRouteData.Path.back().Num, SelectedBus.BusRouteData.Cost);
+					continue;
+				}
 				++BusRouteNum; //k = k+1
 				ShortestPathData RoutePathData;
 				RoutePathData.Path.assign(SelectedBus.BusRouteData.Path.begin(), SelectedBus.BusRouteData.Path.end());

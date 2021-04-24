@@ -13,6 +13,12 @@ Population::Population(uint64_t MemberNum)
 	SetNodes();
 	if (auto DataCenterInstance = DataCenter::GetInstance())
 	{
+		UserInputMaxRouteLength = DataCenterInstance->GetUserInputData().MaxRouteLength / 2;
+		if (CheckMaxRouteLengthLimit() == false)
+		{
+			printf("Some Route longer than User Input Max Length\n");
+			exit(-1);
+		}
 		for (uint64_t i = 0; i < MemberNum; ++i)
 		{
 			ChromosomeArray.emplace_back(Chromosome(RailNode, BusNode, TownBusNode));
@@ -22,6 +28,35 @@ Population::Population(uint64_t MemberNum)
 	assert(GetCurrentChromosomeNum() == MemberNum);
 	printf("All Initial Population Created\n");
 //	PrintCurrentPopulationData();
+}
+bool Population::CheckMaxRouteLengthLimit()
+{
+	vector<NodeData> InputGraph;
+	InputGraph.assign(BusNode.begin(), BusNode.end());
+	InputGraph.insert(InputGraph.end(), RailNode.begin(), RailNode.end());
+	float MaxRouteLength = 0.0f;
+	
+	for (const auto& TownBusNodeIter : TownBusNode)
+	{
+		for (const auto& RailNodeIter : RailNode)
+		{
+			vector<ShortestPathData> ShortestRoute;
+			PathFinderData ShortestPathData(InputGraph, TownBusNodeIter.Num, RailNodeIter.Num, EPathFinderCostType::Length, 1);
+			if (Util::PathFinder::FindShortestPath(ShortestPathData, ShortestRoute) == 0)
+			{
+				printf("No Route from BusNode(%llu) to RailNode(%llu)\n", TownBusNodeIter.Num, RailNodeIter.Num);
+				continue;
+			}
+			MaxRouteLength = max(MaxRouteLength, ShortestRoute.at(0).Cost);
+		}
+	}
+	printf("in %s(), Max Route Length: %f\n", __func__, MaxRouteLength);
+
+	printf("in %s(), UserInput Max Route Length/2: %f\n", __func__, UserInputMaxRouteLength);
+	if (MaxRouteLength <= UserInputMaxRouteLength)
+		return true;
+	else
+		return false;
 }
 void Population::GetNextGeneration()
 {

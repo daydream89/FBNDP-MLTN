@@ -20,6 +20,9 @@ public:
 	{
 		return ChromosomeArray.at(ChromosomeNum).GetChromosomeRef();
 	}
+	const float GetUserInputMaxRouteLength() const { return UserInputMaxRouteLength; }
+
+	bool CheckMaxRouteLengthLimit();
 
 	void GetNextGeneration(void);
 	//pair<Chromosome, Chromosome> GetSelectedChromosomePair(int n) { return SelectionCompair.at(n); }
@@ -40,6 +43,7 @@ private:
 	vector<NodeData> BusNode;
 	vector<NodeData> TownBusNode;
 	vector<NodeData> RailNode;
+	float UserInputMaxRouteLength;
 
 	vector<uint64_t> GetOverlappedNodeNum(Chromosome Parent);
 	void ConnectExchangedRoute(Chromosome& MutantCh, uint64_t RouteNum, uint64_t RoutePos, uint64_t ChromosomePos);

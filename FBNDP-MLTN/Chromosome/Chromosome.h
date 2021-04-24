@@ -40,6 +40,7 @@ private:
 	vector<NodeData> BusNode;	//flowchart B
 	vector<NodeData> TownBusNode;	//flowchart B
 	vector<NodeData> RailNode;	//Rail Station Nodes
+	float UserInputMaxRouteLength;
 
 	map<uint64_t, bool> RailStationSelected;
 	bool bAllRailStationHaveRoute;
