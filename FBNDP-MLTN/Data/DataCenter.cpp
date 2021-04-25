@@ -206,7 +206,7 @@ void DataCenter::SetUserInputData(const FileDataList& InData)
 		{
 			UserInput.TownBusSeat = static_cast<uint64_t>(stoul(Value));
 		}
-		else if (Name == "toutefixcost")
+		else if (Name == "routefixcost")
 		{
 			UserInput.RouteFixCost = static_cast<uint64_t>(stoul(Value));
 		}
