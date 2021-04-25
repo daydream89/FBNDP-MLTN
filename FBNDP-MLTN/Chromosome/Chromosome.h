@@ -27,6 +27,7 @@ public:
 	vector<pair<NodeData, bool>>& GetChromosomeRef() { return ChromosomeNodeList; }
 	void RemoveSameRoute(void);
 	void RemoveOverlapedRoute(void);
+	void ConnectDisconnectedNodes(void);
 	void SetChromosomeFromRoute(void);
 
 	void SetFitnessResult(const FitnessResultData& InResult) { FitnessResult = InResult; }
@@ -40,7 +41,7 @@ private:
 	vector<NodeData> BusNode;	//flowchart B
 	vector<NodeData> TownBusNode;	//flowchart B
 	vector<NodeData> RailNode;	//Rail Station Nodes
-	float UserInputMaxRouteLength;
+	double UserInputMaxRouteLength;
 
 	map<uint64_t, bool> RailStationSelected;
 	bool bAllRailStationHaveRoute;

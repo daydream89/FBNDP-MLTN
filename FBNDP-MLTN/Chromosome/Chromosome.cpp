@@ -3,6 +3,7 @@
 #include "../util/Utils.h"
 #include <random>
 #include <map>
+#include <set>
 #include <cassert>
 #include <math.h>
 
@@ -112,7 +113,7 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 			{
 				if (SelectedBus.BusRouteData.Cost > UserInputMaxRouteLength)
 				{
-					printf("Route from %llu to %llu is too long(Length: %llf)\n", SelectedBus.BusRouteData.Path.front().Num,
+					printf("Route from %llu to %llu is too long(Length: %f)\n", SelectedBus.BusRouteData.Path.front().Num,
 						SelectedBus.BusRouteData.Path.back().Num, SelectedBus.BusRouteData.Cost);
 					continue;
 				}
@@ -155,8 +156,34 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 	RouteDataList.assign(NewPath.begin(), NewPath.end());
 
 	RemoveOverlapedRoute();
-	
+	ConnectDisconnectedNodes();
 	SetChromosomeFromRoute();
+}
+void Chromosome::ConnectDisconnectedNodes(void)
+{
+	vector<NodeData> InputGraph;
+	InputGraph.assign(BusNode.begin(), BusNode.end());
+	InputGraph.insert(InputGraph.end(), RailNode.begin(), RailNode.end());
+
+	for (auto& RouteIter : RouteDataList) {
+		for (uint64_t NodePos = 0; NodePos < RouteIter.Path.size() - 1; ++NodePos)
+		{
+			if (NodePos == (RouteIter.Path.size() - 1))
+				break;
+
+			vector<ShortestPathData> ShortestRoute;
+			PathFinderData ShortestPathData(InputGraph, RouteIter.Path.at(NodePos).Num, RouteIter.Path.at(NodePos+1).Num, EPathFinderCostType::Length, 1);
+			if (Util::PathFinder::FindShortestPath(ShortestPathData, ShortestRoute) == 0)
+			{
+				printf("No Route from Node %llu to %llu\n", RouteIter.Path.at(NodePos).Num, RouteIter.Path.at(NodePos+1).Num);
+			}
+			if (ShortestRoute.at(0).Path.size() > 2)
+			{
+				RouteIter.Path.erase(RouteIter.Path.begin() + NodePos, RouteIter.Path.begin() + NodePos + 2);
+				RouteIter.Path.insert(RouteIter.Path.begin() + NodePos, ShortestRoute.at(0).Path.begin(), ShortestRoute.at(0).Path.end());
+			}
+		}
+	}
 }
 
 void Chromosome::SetChromosomeFromRoute(void)
@@ -164,6 +191,7 @@ void Chromosome::SetChromosomeFromRoute(void)
 	ChromosomeNodeList.clear();
 	for (auto& RouteIter : RouteDataList)
 	{
+		set<uint64_t> CheckDuplicatedNode;
 		RouteIter.TownBusData.TownBusStopCheck.clear();
 
 		for (const auto& PathNodes : RouteIter.Path)
@@ -175,7 +203,15 @@ void Chromosome::SetChromosomeFromRoute(void)
 				{
 					if (TBNodesIter.Num == PathNodes.Num)
 					{
-						IsTownBusStop = true;
+						if (CheckDuplicatedNode.find(PathNodes.Num) == CheckDuplicatedNode.end()) /* Not Exist in Set */
+						{
+							CheckDuplicatedNode.insert(PathNodes.Num);
+							IsTownBusStop = true;
+						}
+						else
+						{
+							IsTownBusStop = false;
+						}
 						break;
 					}
 				}

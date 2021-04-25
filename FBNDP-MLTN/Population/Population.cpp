@@ -16,7 +16,8 @@ Population::Population(uint64_t MemberNum)
 		UserInputMaxRouteLength = DataCenterInstance->GetUserInputData().MaxRouteLength / 2;
 		if (CheckMaxRouteLengthLimit() == false)
 		{
-			printf("Some Route longer than User Input Max Length\n");
+			printf("Some Route longer than User Input Max Length - Program Ends\n");
+			getchar();
 			exit(-1);
 		}
 		for (uint64_t i = 0; i < MemberNum; ++i)
@@ -31,28 +32,41 @@ Population::Population(uint64_t MemberNum)
 }
 bool Population::CheckMaxRouteLengthLimit()
 {
-	vector<NodeData> InputGraph;
-	InputGraph.assign(BusNode.begin(), BusNode.end());
-	InputGraph.insert(InputGraph.end(), RailNode.begin(), RailNode.end());
 	float MaxRouteLength = 0.0f;
 	
 	for (const auto& TownBusNodeIter : TownBusNode)
 	{
-		for (const auto& RailNodeIter : RailNode)
+		float ShortestRouteLength = INFINITY;
+		for (vector<NodeData>::iterator RailNodeIter = RailNode.begin(); RailNodeIter != RailNode.end(); RailNodeIter++)
 		{
+			vector<NodeData> InputGraph;
+			InputGraph.assign(BusNode.begin(), BusNode.end());
+			InputGraph.emplace_back(*RailNodeIter);
 			vector<ShortestPathData> ShortestRoute;
-			PathFinderData ShortestPathData(InputGraph, TownBusNodeIter.Num, RailNodeIter.Num, EPathFinderCostType::Length, 1);
+			PathFinderData ShortestPathData(InputGraph, TownBusNodeIter.Num, RailNodeIter->Num, EPathFinderCostType::Length, 1);
 			if (Util::PathFinder::FindShortestPath(ShortestPathData, ShortestRoute) == 0)
 			{
-				printf("No Route from BusNode(%llu) to RailNode(%llu)\n", TownBusNodeIter.Num, RailNodeIter.Num);
+				printf("No Route from BusNode(%llu) to RailNode(%llu)\n", TownBusNodeIter.Num, RailNodeIter->Num);
 				continue;
 			}
-			MaxRouteLength = max(MaxRouteLength, ShortestRoute.at(0).Cost);
+			if (ShortestRouteLength > ShortestRoute.at(0).Cost)
+			{
+				ShortestRouteLength = ShortestRoute.at(0).Cost;
+				/*
+				for (const auto& RouteNodeIter : ShortestRoute.at(0).Path)
+				{
+					printf("%llu ", RouteNodeIter.Num);
+				}
+				printf(" Current Shortest route(length: %f)\n", ShortestRoute.at(0).Cost);
+				*/
+			}
+		}
+		if (MaxRouteLength < ShortestRouteLength)
+		{
+			MaxRouteLength = ShortestRouteLength;
 		}
 	}
-	printf("in %s(), Max Route Length: %f\n", __func__, MaxRouteLength);
-
-	printf("in %s(), UserInput Max Route Length/2: %f\n", __func__, UserInputMaxRouteLength);
+	printf(" Current MaxRouteLegnth: %f\n\n", MaxRouteLength);
 	if (MaxRouteLength <= UserInputMaxRouteLength)
 		return true;
 	else
