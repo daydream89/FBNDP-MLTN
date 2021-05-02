@@ -420,6 +420,15 @@ float Util::Converter::ConvertMinuteToHour(float Minute)
 	return Minute / 60.f;
 }
 
+int64_t Util::Converter::ConvertDoubleToIntegerRoundUp(double Value)
+{
+	auto IntValue = static_cast<int64_t>(Value);
+	if (static_cast<double>(IntValue) < Value)
+		IntValue++;
+
+	return IntValue;
+}
+
 #include "../Chromosome/Chromosome.h"
 #include "../Population/Population.h"
 bool Util::FindBestChromosome(const Population& InPopulation, uint64_t& OutChromosomeNumber)

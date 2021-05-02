@@ -35,6 +35,7 @@ namespace Util
 	namespace Converter
 	{
 		float ConvertMinuteToHour(float Minute);
+		int64_t ConvertDoubleToIntegerRoundUp(double Value);
 	}
 
 	bool FindBestChromosome(const Population& InPopulation, uint64_t& OutChromosomeNumber);
