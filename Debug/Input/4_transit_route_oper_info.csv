@@ -1,3 +1,4 @@
 Route,Dispatch,oper_speed
-metro1,6,40
-Bus100,4,30
+metro1,6,35
+Bus100,10,30
+Bus200,10,30

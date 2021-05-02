@@ -283,7 +283,11 @@ double FitnessCalculator::CalcNetworkCost(double SumofCustomerCost)
 		}
 	}
 
-	double TownBusOperatorCost = static_cast<double>(UserInput.TownBusOperationCost) * static_cast<double>(UserInput.TownBusDispatchesPerHour) * static_cast<double>(TotalLengthOfTownBusLine / 2) * 2;
+	double NumberOfBuses = UserInput.TownBusDispatchesPerHour * TotalLengthOfTownBusLine / UserInput.TownBusSpeed;
+	NumberOfBuses = static_cast<double>(Util::Converter::ConvertDoubleToIntegerRoundUp(NumberOfBuses));
+	ResultData.NumberOfBuses = NumberOfBuses;
+
+	double TownBusOperatorCost = static_cast<double>(UserInput.TownBusOperationCost) * NumberOfBuses * static_cast<double>(TotalLengthOfTownBusLine / 2) * 2;
 	TownBusOperatorCost += (static_cast<double>(UserInput.RouteFixCost) * static_cast<double>(NumberOfTownBusLine));
 	TotalCost += TownBusOperatorCost;
 	ResultData.TownBusOperatorCost += TownBusOperatorCost;
@@ -303,9 +307,6 @@ double FitnessCalculator::CalcFitness(double NetworkCost)
 		UserInput = DataCenterInstance->GetUserInputData();
 	}
 
-	double Value1 = 0.5 * (1 / static_cast<double>(UserInput.TownBusDispatchesPerHour)) * static_cast<double>(UserInput.NumberOfBusesGiven) * static_cast<double>(UserInput.TownBusSpeed);
-	double Value2 = static_cast<double>(TotalLengthOfTownBusLine);
-	
 	double Value3 = 0;
 	for (const auto& RoutePair : RouteDataMap)
 	{
@@ -333,12 +334,10 @@ double FitnessCalculator::CalcFitness(double NetworkCost)
 		}
 	}
 
-	ResultData.P1Value = static_cast<double>(UserInput.OperatingHoursPerDay) * (UserInput.PanaltyFactor2 * (Value1 - Value2));
 	ResultData.P2Value = Value3 * UserInput.PanaltyFactor3;
 	ResultData.P3Value = Value4 * UserInput.PanaltyFactor4;
 
 	double Fitness = 1 / (UserInput.PanaltyFactor * NetworkCost);
-	Fitness += ResultData.P1Value;
 	Fitness += ResultData.P2Value;
 	Fitness += ResultData.P3Value;
 
