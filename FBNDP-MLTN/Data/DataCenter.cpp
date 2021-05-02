@@ -234,6 +234,10 @@ void DataCenter::SetUserInputData(const FileDataList& InData)
 		{
 			UserInput.MaxRouteLength = stod(Value);
 		}
+		else if (Name == "numberofbusesgiven")
+		{
+			UserInput.NumberOfBusesGiven = static_cast<uint64_t>(stoul(Value));
+		}
 		else if (Name == "operatinghoursperday")
 		{
 			UserInput.OperatingHoursPerDay = stof(Value);

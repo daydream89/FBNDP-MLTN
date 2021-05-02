@@ -28,4 +28,7 @@ NoCrossoverNum,4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 PopulationNum,30,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 MaxGeneration,30,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 CrossoverPercent,90,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-MutationPercent,0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+MutationPercent,100,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+uint64_t MaxFitnessUnchangedGeneration,3
+uint64_t ExchangeChromosomeNum,4
+uint64_t MaxMutationOccurNum,3
