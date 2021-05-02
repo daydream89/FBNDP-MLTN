@@ -277,6 +277,10 @@ void DataCenter::SetUserInputData(const FileDataList& InData)
 		{
 			UserInput.ExchangeChromosomeNum = static_cast<uint64_t>(stoul(Value));
 		}
+		else if (Name == "maxmutationoccurnum")
+		{
+			UserInput.MaxMutationOccurNum = static_cast<uint64_t>(stoul(Value));
+		}
 	}
 }
 

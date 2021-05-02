@@ -138,6 +138,7 @@ struct
 	uint64_t MutationPercent = 1;			// 변이 확률 
 	uint64_t MaxFitnessUnchangedGeneration = 3; //최고 적합도가 유지될 수 있는 세대 수(그 이상이면 초기집단생성으로 만든 유전자로 하위 유전자를 교체)
 	uint64_t ExchangeChromosomeNum = 4;		// 초기집단생성 유전자로 교체할 하위 유전자의 수
+	uint64_t MaxMutationOccurNum = 3;		// Mutation 발생시 변이가 발생할수 있는 최대 횟수
 };
 
 typedef vector<vector<string>> FileDataList;

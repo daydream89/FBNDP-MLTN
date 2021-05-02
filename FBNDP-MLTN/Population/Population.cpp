@@ -91,7 +91,8 @@ void Population::GetNextGeneration()
 
 		for (uint64_t i = DataCenterInstance->GetUserInputData().NoCrossoverNum; i < ChildrenChromosomeArray.size(); ++i)
 		{
-			Mutation(ChildrenChromosomeArray.at(i));
+			//Mutation(ChildrenChromosomeArray.at(i));
+			Mutation2(ChildrenChromosomeArray.at(i));
 		}
 
 		/*Print Parent Chromosomes and make F1 to Parents, F1 must be cleared*/
@@ -664,6 +665,123 @@ void Population::Mutation(Chromosome& MutantCh)
 		}
 	}
 }
+
+void Population::Mutation2(Chromosome& MutantCh)
+{
+	random_device rd;
+	mt19937 gen(rd());
+	uniform_int_distribution<uint64_t> dis(0, 100);
+	uint64_t RandomNum = dis(gen);
+	if (auto* DataCenter = DataCenter::GetInstance())
+	{
+		UserInputData UserInput;
+		UserInput = DataCenter->GetUserInputData();
+		if (RandomNum <= UserInput.MutationPercent)
+		{
+			uint64_t MaxMutationOccurNum = DataCenter->GetUserInputData().MaxMutationOccurNum;
+			uniform_int_distribution<uint64_t> MutationOccurDis(0, MaxMutationOccurNum);
+			uint64_t MutationOccurNum = MutationOccurDis(gen);
+
+			for (uint64_t MutationOccured = 0; MutationOccured < MutationOccurNum; ++MutationOccured)
+			{
+				map<uint64_t, double> RouteCostPerPersonMap;
+
+				uint64_t i = 0;
+				/*Make RouteCostPerPerson Map*/
+				for (vector<ShortestPathData>::const_iterator RouteIter = MutantCh.GetRouteRef().begin();
+					RouteIter != MutantCh.GetRouteRef().end(); ++RouteIter)
+				{
+					RouteCostPerPersonMap.insert(make_pair(i, RouteIter->TownBusData.RouteCostPerPerson));
+					++i;
+				}
+
+				double BreakTestMinCost = 0.0f;
+				bool BreakTestFlag = false;
+				for (const auto& MapIter : RouteCostPerPersonMap)
+				{
+					if (MapIter.second > BreakTestMinCost)
+					{
+						BreakTestFlag = true;
+						BreakTestMinCost = MapIter.second;
+					}
+				}
+				if (BreakTestFlag == false)
+					break;
+
+				bool RouteMapFlag = false;
+				while (RouteCostPerPersonMap.empty() == false)
+				{
+					double MaxRouteCostPerPerson = 0.0f;
+					uint64_t MaxCostPerPersonRouteNum = -1;
+					for (const auto& MapIter : RouteCostPerPersonMap)
+					{
+						if (MapIter.second > MaxRouteCostPerPerson)
+						{
+							MaxCostPerPersonRouteNum = MapIter.first;
+							MaxRouteCostPerPerson = MapIter.second;
+						}
+					}
+
+					if (MaxCostPerPersonRouteNum == -1)
+						break;
+
+
+					NodeData RouteStartNode = MutantCh.GetRouteRef().at(MaxCostPerPersonRouteNum).Path.front();
+
+					float ShortestRouteCost = INFINITY;
+					vector<NodeData> ShortestMutationRoute;
+					for (const auto& TownBusNodeIter : TownBusNode)
+					{
+						if (TownBusNodeIter.Num == RouteStartNode.Num)
+							continue;
+						vector<NodeData> InputGraph;
+						vector<ShortestPathData> ShortestRoute;
+						InputGraph.assign(BusNode.begin(), BusNode.end());
+						PathFinderData ShortestPathData(InputGraph, TownBusNodeIter.Num, RouteStartNode.Num, EPathFinderCostType::Length, 1);
+						if (Util::PathFinder::FindShortestPath(ShortestPathData, ShortestRoute) != 0)
+						{
+							if (ShortestRouteCost > ShortestRoute.at(0).Cost)
+							{
+								ShortestRouteCost = ShortestRoute.at(0).Cost;
+								ShortestMutationRoute.clear();
+								ShortestMutationRoute.assign(ShortestRoute.at(0).Path.begin(), ShortestRoute.at(0).Path.end() - 1);
+							}
+						}
+					}
+					if (ShortestMutationRoute.empty() == false)
+					{
+						bool AlreadyExistFlag = false;
+						for (const auto& RouteNodeIter : MutantCh.GetRouteRef().at(MaxCostPerPersonRouteNum).Path)
+						{
+							for (const auto& ShortestMutationNodeIter : ShortestMutationRoute)
+							{
+								if (RouteNodeIter.Num == ShortestMutationNodeIter.Num)
+								{
+									/*Alread exist Townbus Node*/
+									AlreadyExistFlag = true;
+								}
+							}
+						}
+						if (AlreadyExistFlag == true)
+						{
+							RouteCostPerPersonMap.erase(MaxCostPerPersonRouteNum);
+							continue;
+						}
+						MutantCh.GetRouteRef().at(MaxCostPerPersonRouteNum).Path.insert(
+							MutantCh.GetRouteRef().at(MaxCostPerPersonRouteNum).Path.begin(),
+							ShortestMutationRoute.begin(), ShortestMutationRoute.end());
+						break;
+					}
+				}
+			}
+		}
+		else
+		{
+			/* No Mutation*/
+		}
+	}
+}
+
 void Population::ConnectExchangedRoute(Chromosome& MutantCh, uint64_t RouteNum, uint64_t RoutePos, uint64_t ChromosomePos)
 {
 	uint64_t FirstNodeNum = MutantCh.GetRouteRef().at(RouteNum).Path.at(RoutePos).Num;
