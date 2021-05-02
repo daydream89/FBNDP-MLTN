@@ -30,6 +30,11 @@ Population::Population(uint64_t MemberNum)
 	printf("All Initial Population Created\n");
 //	PrintCurrentPopulationData();
 }
+void Population::AddInitialChromosome(uint64_t AddChromosomeNum)
+{
+	for (uint64_t i = 0; i < AddChromosomeNum; ++i)
+		ChromosomeArray.emplace_back(Chromosome(RailNode, BusNode, TownBusNode));
+}
 bool Population::CheckMaxRouteLengthLimit()
 {
 	float MaxRouteLength = 0.0f;

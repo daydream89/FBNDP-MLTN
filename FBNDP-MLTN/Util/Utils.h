@@ -38,4 +38,5 @@ namespace Util
 	}
 
 	bool FindBestChromosome(const Population& InPopulation, uint64_t& OutChromosomeNumber);
+	bool FindWorstChromosome(const Population& InPopulation, uint64_t& OutChromosomeNumber);
 }

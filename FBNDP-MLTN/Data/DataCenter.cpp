@@ -269,6 +269,14 @@ void DataCenter::SetUserInputData(const FileDataList& InData)
 		{
 			UserInput.MutationPercent = static_cast<uint64_t>(stoul(Value));
 		}
+		else if (Name == "maxfitnessunchangedgeneration")
+		{
+			UserInput.MaxFitnessUnchangedGeneration = static_cast<uint64_t>(stoul(Value));
+		}
+		else if (Name == "exchangechromosomenum")
+		{
+			UserInput.ExchangeChromosomeNum = static_cast<uint64_t>(stoul(Value));
+		}
 	}
 }
 

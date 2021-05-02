@@ -95,7 +95,7 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 				{
 					if (RouteIter.Path.begin()->Num == ExistRoute.Path.begin()->Num)
 					{
-						if (RouteIter.Cost + FoundedShortestRoute.Cost > UserInputMaxRouteLength)
+						if ((static_cast<double>(RouteIter.Cost) + static_cast<double>(FoundedShortestRoute.Cost)) > UserInputMaxRouteLength)
 						{
 							printf("Route %llu - %llu -%llu is too long\n", FoundedShortestRoute.Path.front().Num,
 								FoundedShortestRoute.Path.back().Num, RouteIter.Path.back().Num);

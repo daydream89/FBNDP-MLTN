@@ -9,6 +9,7 @@ class Population
 {
 public:
 	Population(uint64_t MemberNum);
+	void AddInitialChromosome(uint64_t AddChromosomeNum);
 	uint64_t GetCurrentChromosomeNum() const { return ChromosomeArray.size(); }
 	Chromosome GetChromosome(uint64_t ChromosomeNum) const { return ChromosomeArray.at(ChromosomeNum); }
 	Chromosome& GetChromosomeRef(uint64_t ChromosomeNum) { return ChromosomeArray.at(ChromosomeNum); }
@@ -19,6 +20,10 @@ public:
 	vector<pair<NodeData,bool>>& GetChromosomeDataRef(uint64_t ChromosomeNum)	/*ChromosomeNum번째의 ChromosomeData를 얻음*/
 	{
 		return ChromosomeArray.at(ChromosomeNum).GetChromosomeRef();
+	}
+	void RemoveChromosomeArrayAt(uint64_t ArrayNum)
+	{
+		ChromosomeArray.erase(ChromosomeArray.begin() + ArrayNum);
 	}
 	//const double GetUserInputMaxRouteLength() const { return UserInputMaxRouteLength; }
 

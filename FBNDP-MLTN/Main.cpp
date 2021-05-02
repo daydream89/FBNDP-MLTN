@@ -5,6 +5,7 @@
 #include "Fitness/FitnessCalculator.h"
 #include "Population/Population.h"
 #include "Util/Utils.h"
+#include <stdio.h>
 
 using namespace std;
 
@@ -29,6 +30,8 @@ int main(int argc, char* argv[])
 		Population InitialPopulation(PopulationNum);
 
 		uint64_t MaxGeneration = DataCenter->GetUserInputData().MaxGeneration;
+		double BestFitnessResult = 0;
+		uint64_t KeepedFitnessGen = 0;
 		for (uint64_t GenerationNum = 0 ; GenerationNum < MaxGeneration; ++GenerationNum)
 		{
 			printf("\n\n%llust Generation Data\n", GenerationNum + 1);
@@ -49,6 +52,29 @@ int main(int argc, char* argv[])
 			{
 				Chromosome BestChromosome = InitialPopulation.GetChromosome(BestChromosomeNum);
 				DataCenter->AddBestResultData(GenerationNum + 1, BestChromosomeNum, BestChromosome.GetFitnessResult());
+
+				if (BestFitnessResult < BestChromosome.GetFitnessValue())
+				{
+					BestFitnessResult = BestChromosome.GetFitnessValue();
+					KeepedFitnessGen = 0;
+				}
+				else
+				{
+					KeepedFitnessGen++;
+					if (KeepedFitnessGen >= DataCenter->GetUserInputData().MaxFitnessUnchangedGeneration) {
+						uint64_t ExchangingChromosomeNum = DataCenter->GetUserInputData().ExchangeChromosomeNum;
+						for (uint64_t RemoveCount = 0; RemoveCount < ExchangingChromosomeNum; ++RemoveCount)
+						{
+							uint64_t WorstChromosomeNum = -1;
+							if (Util::FindWorstChromosome(InitialPopulation, WorstChromosomeNum))
+							{
+								InitialPopulation.RemoveChromosomeArrayAt(WorstChromosomeNum);
+							}
+						}
+						InitialPopulation.AddInitialChromosome(ExchangingChromosomeNum);
+						KeepedFitnessGen = 0;
+					}
+				}
 			}
 
 			InitialPopulation.GetNextGeneration();

@@ -107,7 +107,8 @@ struct DistanceData
 };
 
 // 프로그램 구동에 필요한 추가 데이터 모음
-struct UserInputData
+struct 
+	UserInputData
 {
 	float PassageTimeDiff = 5.f;			// 적합도 계산 시의 통행 시간 차이
 	MNLCoefficientData MNLCoefficient;		// MNL Model에서 사용하는 계수 모음
@@ -135,6 +136,8 @@ struct UserInputData
 	uint64_t MaxGeneration = 10;			// 유전 세대 수
 	uint64_t CrossoverPercent = 80;			// 교차 확률 
 	uint64_t MutationPercent = 1;			// 변이 확률 
+	uint64_t MaxFitnessUnchangedGeneration = 3; //최고 적합도가 유지될 수 있는 세대 수(그 이상이면 초기집단생성으로 만든 유전자로 하위 유전자를 교체)
+	uint64_t ExchangeChromosomeNum = 4;		// 초기집단생성 유전자로 교체할 하위 유전자의 수
 };
 
 typedef vector<vector<string>> FileDataList;
