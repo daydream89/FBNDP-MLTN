@@ -332,7 +332,7 @@ void Population::Crossover(Chromosome P1, Chromosome P2)
 						if (NodeIter.first.Num == FirstNode.Num) //&& P1OverlappedNodeNum.at(P1FoundedNodePos) > 0)
 						{
 							NodeFoundFlag = true;
-							if (MinRouteCost > PathDataIter.TownBusData.RouteCostPerPerson)
+							if (MinRouteCost >= PathDataIter.TownBusData.RouteCostPerPerson)
 							{
 								/*Find Route Include First Node*/
 								MinRouteCost = PathDataIter.TownBusData.RouteCostPerPerson;
@@ -382,7 +382,7 @@ void Population::Crossover(Chromosome P1, Chromosome P2)
 						if (NodeIter.first.Num == FirstNode.Num) //&& P2OverlappedNodeNum.at(P2FoundedNodePos) > 0)
 						{
 							NodeFoundFlag = true;
-							if (MinRouteCost > PathDataIter.TownBusData.RouteCostPerPerson)
+							if (MinRouteCost >= PathDataIter.TownBusData.RouteCostPerPerson)
 							{
 								/*Find Route Include First Node*/
 								MinRouteCost = PathDataIter.TownBusData.RouteCostPerPerson;
@@ -404,6 +404,9 @@ void Population::Crossover(Chromosome P1, Chromosome P2)
 				/* add FoundedNextNode to F1 or F1's Routes Vector */
 				//ShortestPath.Path.emplace_back(FoundedNextNode);
 				ShortestPath.Path.insert(ShortestPath.Path.end(), FoundedNextNode.begin(), FoundedNextNode.end());
+
+				if (FoundedRouteNum == 0)
+					break;
 
 				FirstNode = FoundedNextNode.at(FoundedNextNode.size()-1);
 
