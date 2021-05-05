@@ -77,7 +77,8 @@ double FitnessCalculator::PassageAssignment()
 		for (auto& PathData : DataCenterInstance->GetChromosomeRoutesDataRef(ChromosomeIndex))
 		{
 			auto Iter = RouteCostMap.find(PathData.TownBusData.RouteName);
-			if (Iter != RouteCostMap.end())
+			PathData.TownBusData.RouteCostPerPerson = 0;
+			if (Iter != RouteCostMap.end() && Iter->second != 0)
 				PathData.TownBusData.RouteCostPerPerson = SumofCustomerCost / static_cast<double>(Iter->second);
 		}
 	}
