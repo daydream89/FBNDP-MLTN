@@ -10,8 +10,9 @@
 
 namespace PathFinderPrivate
 {
-	void GetRouteNameFromNodesNum(const RouteMap& InRouteDataMap, uint64_t InFromNodeNum, uint64_t InToNodeNum, string& OutRouteName)
+	void GetRouteNameFromNodesNum(const RouteMap& InRouteDataMap, uint64_t InFromNodeNum, uint64_t InToNodeNum, const string& InCurRouteName, string& OutNextRouteName)
 	{
+		vector<string> RouteNameCandidate;
 		for (auto RoutePair : InRouteDataMap)
 		{
 			for (const auto& RouteOrderPair : RoutePair.second)
@@ -22,10 +23,19 @@ namespace PathFinderPrivate
 
 				if (RouteOrderPair.second.Node == InFromNodeNum && NextOrderPair->second.Node == InToNodeNum)
 				{
-					OutRouteName = RoutePair.first;
+					if (RoutePair.first == InCurRouteName)
+					{
+						OutNextRouteName = RoutePair.first;
+						return;
+					}
+
+					RouteNameCandidate.push_back(RoutePair.first);
 				}
 			}
 		}
+
+		if (0 < RouteNameCandidate.size())
+			OutNextRouteName = RouteNameCandidate.at(0);
 	}
 
 	typedef pair<float, uint64_t> CostNodeNumPair;
@@ -322,7 +332,7 @@ OVTTData Util::Calculator::CalcOVTTData(const vector<NodeData>& InPath, const Ro
 	if (2 <= InPath.size())	// add first wait time
 	{
 		string RouteName = "";
-		PathFinderPrivate::GetRouteNameFromNodesNum(InRouteMap, InPath.at(0).Num, InPath.at(1).Num, RouteName);
+		PathFinderPrivate::GetRouteNameFromNodesNum(InRouteMap, InPath.at(0).Num, InPath.at(1).Num, RouteName, RouteName);
 		if (RouteName.substr(0, 7) == TownBusStr)
 			ReturnData.InitialDispatchesPerHour = static_cast<float>(DataCenterInst->GetUserInputData().TownBusDispatchesPerHour);
 		else
@@ -341,12 +351,12 @@ OVTTData Util::Calculator::CalcOVTTData(const vector<NodeData>& InPath, const Ro
 
 	string PreRouteName = "";
 	string CurRouteName = "";
-	PathFinderPrivate::GetRouteNameFromNodesNum(InRouteMap, InPath.at(0).Num, InPath.at(1).Num, PreRouteName);
+	PathFinderPrivate::GetRouteNameFromNodesNum(InRouteMap, InPath.at(0).Num, InPath.at(1).Num, PreRouteName, PreRouteName);
 	for (int i = 1; i < InPath.size() - 1; ++i)
 	{
 		uint64_t CurNodeNum = InPath.at(i).Num;
 		uint64_t NextNodeNum = InPath.at(i + 1).Num;
-		PathFinderPrivate::GetRouteNameFromNodesNum(InRouteMap, CurNodeNum, NextNodeNum, CurRouteName);
+		PathFinderPrivate::GetRouteNameFromNodesNum(InRouteMap, CurNodeNum, NextNodeNum, PreRouteName, CurRouteName);
 		if (PreRouteName == "")
 			PreRouteName = CurRouteName;
 
@@ -375,7 +385,7 @@ OVTTData Util::Calculator::CalcOVTTData(const vector<NodeData>& InPath, const Ro
 	return ReturnData;
 }
 
-void Util::Calculator::CalcNumOfPassengerPerRoute(vector<ShortestPathData>& InPath, const RouteMap& InRouteMap, map<string, uint32_t>& OutRouteCost)
+void Util::Calculator::CalcNumOfPassengerPerRoute(vector<ShortestPathData>& InPath, const RouteMap& InRouteMap, map<string, RouteCostData>& OutRouteCost)
 {
 	for (const auto& PathData : InPath)
 	{
@@ -383,28 +393,32 @@ void Util::Calculator::CalcNumOfPassengerPerRoute(vector<ShortestPathData>& InPa
 		if (Path.size() < 2)
 			continue;
 
+		string CurRouteName = "";
 		map<string, uint32_t> RouteCostMap;
 		for (int i = 0; i < Path.size() - 1; ++i)
 		{
-			string RouteName = "";
+			string NextRouteName = "";
 			uint64_t CurNodeNum = Path.at(i).Num;
 			uint64_t NextNodeNum = Path.at(i + 1).Num;
-			PathFinderPrivate::GetRouteNameFromNodesNum(InRouteMap, CurNodeNum, NextNodeNum, RouteName);
-			if (RouteName.empty())
+			PathFinderPrivate::GetRouteNameFromNodesNum(InRouteMap, CurNodeNum, NextNodeNum, CurRouteName, NextRouteName);
+			if (NextRouteName.empty())
 				continue;
 
-			if (RouteCostMap.find(RouteName) == RouteCostMap.end())
-				RouteCostMap.insert(make_pair(RouteName, PathData.TrafficVolumeForPath));
+			CurRouteName = NextRouteName;
+			if (RouteCostMap.find(CurRouteName) == RouteCostMap.end())
+				RouteCostMap.insert(make_pair(CurRouteName, PathData.TrafficVolumeForPath));
 		}
 
 		for (const auto& RouteCostPair : RouteCostMap)
 		{
 			auto FoundRoute = OutRouteCost.find(RouteCostPair.first);
 			if (FoundRoute != OutRouteCost.end())
-				FoundRoute->second += RouteCostPair.second;
+				FoundRoute->second.NumberOfUsers += RouteCostPair.second;
 			else
 			{
-				OutRouteCost.insert(RouteCostPair);
+				RouteCostData Data;
+				Data.NumberOfUsers = RouteCostPair.second;
+				OutRouteCost.insert(make_pair(RouteCostPair.first, Data));
 			}
 		}
 	}

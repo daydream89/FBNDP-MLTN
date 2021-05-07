@@ -215,6 +215,12 @@ struct OVTTData
 	}
 };
 
+struct RouteCostData
+{
+	uint32_t NumberOfUsers = 0;
+	double CostPerRoute = 0;
+};
+
 struct TownBusRouteData
 {
 	string RouteName = "";

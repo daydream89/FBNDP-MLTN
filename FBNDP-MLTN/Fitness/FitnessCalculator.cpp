@@ -45,7 +45,7 @@ double FitnessCalculator::PassageAssignment()
 	if (auto DataCenterInstance = DataCenter::GetInstance())
 		TrafficVolumeDataList = DataCenterInstance->GetTrafficVolumeData();
 
-	map<string, uint32_t> RouteCostMap;
+	map<string, RouteCostData> RouteCostMap;
 	double SumofCustomerCost = 0.f;
 	for (const TrafficVolumeData& ODData : TrafficVolumeDataList)
 	{
@@ -63,7 +63,7 @@ double FitnessCalculator::PassageAssignment()
 
 		SetPassageAssignmentForMNLModel(ShortestPathList, ODData.TrafficVolume);
 		
-		CalcCustomerCost(ShortestPathList, SumofCustomerCost);
+		CalcCustomerCost(ShortestPathList, SumofCustomerCost, RouteCostMap);
 
 		Util::Calculator::CalcNumOfPassengerPerRoute(ShortestPathList, RouteDataMap, RouteCostMap);
 
@@ -78,8 +78,8 @@ double FitnessCalculator::PassageAssignment()
 		{
 			auto Iter = RouteCostMap.find(PathData.TownBusData.RouteName);
 			PathData.TownBusData.RouteCostPerPerson = 0;
-			if (Iter != RouteCostMap.end() && Iter->second != 0)
-				PathData.TownBusData.RouteCostPerPerson = SumofCustomerCost / static_cast<double>(Iter->second);
+			if (Iter != RouteCostMap.end() && Iter->second.NumberOfUsers != 0)
+				PathData.TownBusData.RouteCostPerPerson = Iter->second.CostPerRoute / static_cast<double>(Iter->second.NumberOfUsers);
 		}
 	}
 
@@ -207,7 +207,7 @@ float FitnessCalculator::CalcCurveNTransportationIVTT(ShortestPathData& PathData
 	return ActualDistance / DirectDistance;
 }
 
-void FitnessCalculator::CalcCustomerCost(vector<ShortestPathData>& InPathList, double& OutCostSum)
+void FitnessCalculator::CalcCustomerCost(vector<ShortestPathData>& InPathList, double& OutCostSum, map<string, RouteCostData>& OutRouteCostMap)
 {
 	UserInputData UserInput;
 	map<string, OperatingData> OperatingDataMap;
@@ -227,7 +227,7 @@ void FitnessCalculator::CalcCustomerCost(vector<ShortestPathData>& InPathList, d
 			{
 				string RouteName = "";
 				float Dist = 0.f;
-				Util::Calculator::CalcIVTT(Link, RouteDataMap, Dist, RouteName);
+				float Cost = Util::Calculator::CalcIVTT(Link, RouteDataMap, Dist, RouteName);
 				if (RouteName.substr(0, 7) == TownBusStr)
 					InitialDispatchesPerHour = static_cast<float>(UserInput.TownBusDispatchesPerHour);
 				else
@@ -235,6 +235,18 @@ void FitnessCalculator::CalcCustomerCost(vector<ShortestPathData>& InPathList, d
 					auto Iter = OperatingDataMap.find(RouteName);
 					if (Iter != OperatingDataMap.end())
 						InitialDispatchesPerHour = static_cast<float>(Iter->second.Dispatch);
+				}
+
+				auto Found = OutRouteCostMap.find(RouteName);
+				if (Found != OutRouteCostMap.end())
+				{
+					Found->second.CostPerRoute += Cost;
+				}
+				else
+				{
+					RouteCostData Data;
+					Data.CostPerRoute = Cost;
+					OutRouteCostMap.insert(make_pair(RouteName, Data));
 				}
 				
 				break;
