@@ -127,6 +127,8 @@ struct
 	double PanaltyFactor3 = 0.001;			// 적합도 함수에서 사용하는 값
 	double PanaltyFactor4 = 0.001;			// 적합도 함수에서 사용하는 값
 	double LoadFactor = 1.2;				// 적합도 함수에서 사용하는 값
+	double OperatorCostOption1 = 1;			// 목적 함수에서 사용하는 값
+	double OperatorCostOption2 = 0;			// 목적 함수에서 사용하는 값
 	double MaxRouteLength = 3;				// 최대 노선 길이
 	float OperatingHoursPerDay = 10.f;		// 하루 운영 시간
 	vector<uint64_t> TownBusNodesNum;		// 마을 버스가 정차하는 노드들
@@ -256,6 +258,7 @@ struct FitnessResultData
 	double TotalRouteDistance = 0;
 	double TownBusOperatorCost = 0;
 	double NumberOfBuses = 0;
+	uint64_t NumberOfTownBusRoutes = 0;
 	double ObjectFunctionValue = 0;
 	double FitnessValue = 0;
 	double P1Value = 0;

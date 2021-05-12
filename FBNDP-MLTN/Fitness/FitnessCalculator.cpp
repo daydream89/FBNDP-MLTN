@@ -283,6 +283,7 @@ double FitnessCalculator::CalcNetworkCost(double SumofCustomerCost)
 	}
 
 	int32_t NumberOfTownBusLine = 0;
+	double NumberOfBusesSum = 0;
 	double TotalCost = SumofCustomerCost;
 	for (const auto& RoutePair : RouteDataMap)
 	{
@@ -292,16 +293,25 @@ double FitnessCalculator::CalcNetworkCost(double SumofCustomerCost)
 
 			auto RIter = RoutePair.second.rbegin();
 			if (RIter != RoutePair.second.rend())
+			{
 				TotalLengthOfTownBusLine += RIter->second.CumDistance;
+				double NumberOfBuses = (UserInput.TownBusDispatchesPerHour * RIter->second.CumDistance) / UserInput.TownBusSpeed;
+				NumberOfBusesSum += Util::Converter::ConvertDoubleToIntegerRoundUp(NumberOfBuses);
+			}
 		}
 	}
 
-	double NumberOfBuses = UserInput.TownBusDispatchesPerHour * TotalLengthOfTownBusLine / UserInput.TownBusSpeed;
-	NumberOfBuses = static_cast<double>(Util::Converter::ConvertDoubleToIntegerRoundUp(NumberOfBuses));
-	ResultData.NumberOfBuses = NumberOfBuses;
+	//double NumberOfBuses = UserInput.TownBusDispatchesPerHour * TotalLengthOfTownBusLine / UserInput.TownBusSpeed;
+	//NumberOfBuses = static_cast<double>(Util::Converter::ConvertDoubleToIntegerRoundUp(NumberOfBuses));
+	ResultData.NumberOfBuses = NumberOfBusesSum;
+	ResultData.NumberOfTownBusRoutes = NumberOfTownBusLine;
 
-	double TownBusOperatorCost = static_cast<double>(UserInput.TownBusOperationCost) * NumberOfBuses * static_cast<double>(TotalLengthOfTownBusLine / 2) * 2;
-	TownBusOperatorCost += (static_cast<double>(UserInput.RouteFixCost) * static_cast<double>(NumberOfTownBusLine));
+	//double TownBusOperatorCost = static_cast<double>(UserInput.TownBusOperationCost) * NumberOfBuses * static_cast<double>(TotalLengthOfTownBusLine / 2) * 2;
+	//TownBusOperatorCost += (static_cast<double>(UserInput.RouteFixCost) * static_cast<double>(NumberOfTownBusLine));
+	double TownBusOperatorCost1 = static_cast<double>(UserInput.TownBusOperationCost) * static_cast<double>(UserInput.OperatingHoursPerDay) * static_cast<double>(UserInput.TownBusSpeed) * NumberOfBusesSum;
+	double TownBusOperatorCost2 = static_cast<double>(UserInput.TownBusOperationCost) * static_cast<double>(UserInput.TownBusDispatchesPerHour) * static_cast<double>(TotalLengthOfTownBusLine);
+	double TownBusOperatorCost = (UserInput.OperatorCostOption1 * TownBusOperatorCost1) + (UserInput.OperatorCostOption2 * TownBusOperatorCost2);
+
 	TotalCost += TownBusOperatorCost;
 	ResultData.TownBusOperatorCost += TownBusOperatorCost;
 

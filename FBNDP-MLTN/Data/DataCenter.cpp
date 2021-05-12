@@ -230,6 +230,14 @@ void DataCenter::SetUserInputData(const FileDataList& InData)
 		{
 			UserInput.LoadFactor = stod(Value);
 		}
+		else if (Name == "operatorcostoption1")
+		{
+			UserInput.OperatorCostOption1 = stod(Value);
+		}
+		else if (Name == "operatorcostoption2")
+		{
+			UserInput.OperatorCostOption2 = stod(Value);
+		}
 		else if (Name == "maxroutelength")
 		{
 			UserInput.MaxRouteLength = stod(Value);
