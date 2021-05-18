@@ -146,7 +146,14 @@ void DataCenter::SetUserInputData(const FileDataList& InData)
 		string Value = RowData.at(1);
 		transform(Value.begin(), Value.end(), Value.begin(), tolower);
 
-		if (Name == "passagetimediff")
+		if (Name == "programmode")
+		{
+			if (Value == "GA" || Value == "GenericAlgorithm")
+				UserInput.ProgramMode = eProgramMode::GenericAlgorithm;
+			else if (Value == "FC" || Value == "FitnessCalculator")
+				UserInput.ProgramMode = eProgramMode::FitnessCalculator;
+		}
+		else if (Name == "passagetimediff")
 		{
 			UserInput.PassageTimeDiff = stof(Value);
 		}
@@ -284,6 +291,13 @@ void DataCenter::SetUserInputData(const FileDataList& InData)
 		else if (Name == "maxmutationoccurnum")
 		{
 			UserInput.MaxMutationOccurNum = static_cast<uint64_t>(stoul(Value));
+		}
+		else if (Name == "townbusroutes")
+		{
+			for (uint64_t i = 0; i < stoull(Value); ++i)
+			{
+				UserInput.TownBusRoutes.emplace_back(stoull(RowData.at(i + 2)));
+			}
 		}
 	}
 }

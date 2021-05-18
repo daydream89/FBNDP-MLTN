@@ -25,62 +25,81 @@ int main(int argc, char* argv[])
 		DataCenter->SetDistanceData(Reader.GetFileData("./Input/6_Direct_distance.csv"));
 		DataCenter->SetUserInputData(Reader.GetFileData("./Input/0_UserInput.csv"));
 
-		// Generate initial population
-		uint64_t PopulationNum = DataCenter->GetUserInputData().PopulationNum;
-		Population InitialPopulation(PopulationNum);
-
-		uint64_t MaxGeneration = DataCenter->GetUserInputData().MaxGeneration;
-		double BestFitnessResult = 0;
-		uint64_t KeepedFitnessGen = 0;
-		for (uint64_t GenerationNum = 0 ; GenerationNum < MaxGeneration; ++GenerationNum)
+		auto UserInput = DataCenter->GetUserInputData();
+		if (UserInput.ProgramMode == eProgramMode::FitnessCalculator)
 		{
-			printf("\n\n%llust Generation Data\n", GenerationNum + 1);
-			Writer.WriteCSVFile(GenerationNum+1, DataCenter->GetAllChromosomeRoutesDataRef());
-			// Calculate fitness
-			for (int i = 0; i < PopulationNum; ++i)
+			// 적합도 계산만 하는 모드.
+			FitnessCalculator Fitness(0, 2);
+			FitnessResultData ChromosomeFitnessResult = Fitness.Calculate();
+
+			Writer.WriteCSVFile(0, 0, DataCenter->GetShortestPathDataList());
+		}
+		else if (UserInput.ProgramMode == eProgramMode::GenericAlgorithm)
+		{
+			// Generate initial population
+			uint64_t PopulationNum = DataCenter->GetUserInputData().PopulationNum;
+			Population InitialPopulation(PopulationNum);
+
+			uint64_t MaxGeneration = DataCenter->GetUserInputData().MaxGeneration;
+			double BestFitnessResult = 0;
+			uint64_t KeepedFitnessGen = 0;
+			for (uint64_t GenerationNum = 0; GenerationNum < MaxGeneration; ++GenerationNum)
 			{
-				FitnessCalculator Fitness(i, 2);
-				FitnessResultData ChromosomeFitnessResult = Fitness.Calculate();
-				InitialPopulation.GetChromosomeRef(i).SetFitnessResult(ChromosomeFitnessResult);
-				printf("Finished Calculate %dth Chromosome.\n", i);
-
-				Writer.WriteCSVFile(GenerationNum+1, i+1, DataCenter->GetShortestPathDataList());
-			}
-
-			uint64_t BestChromosomeNum = -1;
-			if (Util::FindBestChromosome(InitialPopulation, BestChromosomeNum))
-			{
-				Chromosome BestChromosome = InitialPopulation.GetChromosome(BestChromosomeNum);
-				DataCenter->AddBestResultData(GenerationNum + 1, BestChromosomeNum, BestChromosome.GetFitnessResult());
-
-				if (BestFitnessResult < BestChromosome.GetFitnessValue())
+				printf("\n\n%llust Generation Data\n", GenerationNum + 1);
+				Writer.WriteCSVFile(GenerationNum + 1, DataCenter->GetAllChromosomeRoutesDataRef());
+				// Calculate fitness
+				for (int i = 0; i < PopulationNum; ++i)
 				{
-					BestFitnessResult = BestChromosome.GetFitnessValue();
-					KeepedFitnessGen = 0;
+					FitnessCalculator Fitness(i, 2);
+					FitnessResultData ChromosomeFitnessResult = Fitness.Calculate();
+					InitialPopulation.GetChromosomeRef(i).SetFitnessResult(ChromosomeFitnessResult);
+					printf("Finished Calculate %dth Chromosome.\n", i);
+
+					Writer.WriteCSVFile(GenerationNum + 1, i + 1, DataCenter->GetShortestPathDataList());
 				}
-				else
+
+				uint64_t BestChromosomeNum = -1;
+				if (Util::FindBestChromosome(InitialPopulation, BestChromosomeNum))
 				{
-					KeepedFitnessGen++;
-					if (KeepedFitnessGen >= DataCenter->GetUserInputData().MaxFitnessUnchangedGeneration) {
-						uint64_t ExchangingChromosomeNum = DataCenter->GetUserInputData().ExchangeChromosomeNum;
-						for (uint64_t RemoveCount = 0; RemoveCount < ExchangingChromosomeNum; ++RemoveCount)
-						{
-							uint64_t WorstChromosomeNum = -1;
-							if (Util::FindWorstChromosome(InitialPopulation, WorstChromosomeNum))
-							{
-								InitialPopulation.RemoveChromosomeArrayAt(WorstChromosomeNum);
-							}
-						}
-						InitialPopulation.AddInitialChromosome(ExchangingChromosomeNum);
+					Chromosome BestChromosome = InitialPopulation.GetChromosome(BestChromosomeNum);
+					DataCenter->AddBestResultData(GenerationNum + 1, BestChromosomeNum, BestChromosome.GetFitnessResult());
+
+					if (BestFitnessResult < BestChromosome.GetFitnessValue())
+					{
+						BestFitnessResult = BestChromosome.GetFitnessValue();
 						KeepedFitnessGen = 0;
 					}
+					else
+					{
+						KeepedFitnessGen++;
+						if (KeepedFitnessGen >= DataCenter->GetUserInputData().MaxFitnessUnchangedGeneration) {
+							uint64_t ExchangingChromosomeNum = DataCenter->GetUserInputData().ExchangeChromosomeNum;
+							for (uint64_t RemoveCount = 0; RemoveCount < ExchangingChromosomeNum; ++RemoveCount)
+							{
+								uint64_t WorstChromosomeNum = -1;
+								if (Util::FindWorstChromosome(InitialPopulation, WorstChromosomeNum))
+								{
+									InitialPopulation.RemoveChromosomeArrayAt(WorstChromosomeNum);
+								}
+							}
+							InitialPopulation.AddInitialChromosome(ExchangingChromosomeNum);
+							KeepedFitnessGen = 0;
+						}
+					}
 				}
+
+				InitialPopulation.GetNextGeneration();
 			}
 
-			InitialPopulation.GetNextGeneration();
+			Writer.WriteCSVFile(DataCenter->GetAllBestResultData());
 		}
+		else
+		{
+			printf("\nCalculation Failed! Please Check ProgramMode in UserInput.csv\n Press any key.\n");
+			getchar();
 
-		Writer.WriteCSVFile(DataCenter->GetAllBestResultData());
+			return 0;
+		}
 	}
 
 	printf("\nCalculation Finished! Press any key.\n");
