@@ -148,6 +148,7 @@ struct
 	uint64_t ExchangeChromosomeNum = 4;		// 초기집단생성 유전자로 교체할 하위 유전자의 수
 	uint64_t MaxMutationOccurNum = 3;		// Mutation 발생시 변이가 발생할수 있는 최대 횟수
 	vector<uint64_t> TownBusRoutes;			// GenericAlgorithm을 통하지 않고 적합도 계산만 하는 경우의 Path
+	uint64_t PopulationGenerationMethod = 0;// 초기집단 생성의 방법(0 이면 기존, 1이면 새로운 방식) 
 };
 
 typedef vector<vector<string>> FileDataList;

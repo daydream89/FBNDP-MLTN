@@ -13,12 +13,15 @@ Population::Population(uint64_t MemberNum)
 	SetNodes();
 	if (auto DataCenterInstance = DataCenter::GetInstance())
 	{
-		UserInputMaxRouteLength = DataCenterInstance->GetUserInputData().MaxRouteLength / 2;
-		if (CheckMaxRouteLengthLimit() == false)
+		if (DataCenterInstance->GetUserInputData().PopulationGenerationMethod == 1)
 		{
-			printf("Some Route longer than User Input Max Length - Program Ends\n");
-			getchar();
-			exit(-1);
+			UserInputMaxRouteLength = DataCenterInstance->GetUserInputData().MaxRouteLength / 2;
+			if (CheckMaxRouteLengthLimit() == false)
+			{
+				printf("Some Route longer than User Input Max Length - Program Ends\n");
+				getchar();
+				exit(-1);
+			}
 		}
 		for (uint64_t i = 0; i < MemberNum; ++i)
 		{

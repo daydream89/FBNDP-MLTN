@@ -18,104 +18,44 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 	CopiedBusNode.assign(TownBusNode.begin(), TownBusNode.end());
 	for (const auto& CheckRailNode : RailNode)
 		RailStationSelected[CheckRailNode.Num] = false;
-	if (auto DataCenterInstance = DataCenter::GetInstance())
-		UserInputMaxRouteLength = DataCenterInstance->GetUserInputData().MaxRouteLength / 2;
-
-	while (CopiedBusNode.size() > 0) 
-	{
-		NodeData SelectedRailNode = SelectRailNode();
-		SelectedBusNodeData SelectedBus = SelectBusNode(SelectedRailNode);
-		if (!bAllRailStationHaveRoute)
-		{
-			if (SelectedBus.BusRouteData.Cost > UserInputMaxRouteLength)
-			{
-				printf("Current Route's Length is longer than User Input max Route Length\n");
-				continue;
-			}
-			if (bAllRailStationHaveRoute == false)
-			{
-				bool StationCheckFlag = true;
-				if (RailStationSelected.find(SelectedRailNode.Num)->second == false)
-					RailStationSelected[SelectedRailNode.Num] = true;
-				for (const auto& StationSelectedCheck : RailStationSelected)
-				{
-					if (StationSelectedCheck.second == false)
-					{
-						StationCheckFlag = false;
-						break;
-					}
-				}
-				if (StationCheckFlag)
-					bAllRailStationHaveRoute = true;
-			}
-			++BusRouteNum; //k = k+1
-			ShortestPathData RoutePathData;
-			RoutePathData.Path.assign(SelectedBus.BusRouteData.Path.begin(), SelectedBus.BusRouteData.Path.end());
-			RoutePathData.Cost = SelectedBus.BusRouteData.Cost;
-			RouteDataList.emplace_back(RoutePathData);
-		}
+	if (auto DataCenterInstance = DataCenter::GetInstance()) {
+		if (DataCenterInstance->GetUserInputData().PopulationGenerationMethod == 1)
+			UserInputMaxRouteLength = DataCenterInstance->GetUserInputData().MaxRouteLength / 2;
 		else
+			UserInputMaxRouteLength = INFINITY;
+
+		while (CopiedBusNode.size() > 0)
 		{
-			ShortestPathData FoundedShortestRoute;
-			ShortestPathData ExistRoute;
-			for (auto RouteDataIter : RouteDataList)
+			NodeData SelectedRailNode = SelectRailNode();
+			SelectedBusNodeData SelectedBus = SelectBusNode(SelectedRailNode);
+			if (!bAllRailStationHaveRoute)
 			{
-				static float MinRouteLength = INFINITY;
-#if DEBUG_MODE
-				printf("Rail Node Num: %llu\n", RouteDataIter.Path.at(RouteDataIter.Path.size() - 1).Num);
-#endif
-				if (RouteDataIter.Path.at(RouteDataIter.Path.size() - 1).Num == SelectedRailNode.Num) //Current Selected Rail Node Routes...
+				if (DataCenterInstance->GetUserInputData().PopulationGenerationMethod == 1)
 				{
-					float RouteLength = 0;
-					vector<NodeData> InputGraph;
-					vector<ShortestPathData> ShortestRoute;
-					InputGraph.assign(CopiedBusNode.begin(), CopiedBusNode.end());
-					//InputGraph.assign(CopiedBusNode.begin(), CopiedBusNode.end());
-					InputGraph.emplace_back(RouteDataIter.Path.at(0));
-					PathFinderData ShortestPathData(InputGraph, SelectedBus.SelectedBusNode.Num, RouteDataIter.Path.begin()->Num, EPathFinderCostType::Length, 1);
-					if (Util::PathFinder::FindShortestPath(ShortestPathData, ShortestRoute) != 0)
+					if (DataCenterInstance->GetUserInputData().PopulationGenerationMethod == 1)
 					{
-						RouteLength = ShortestRoute.at(0).Cost;
-						if (RouteLength <= MinRouteLength)
+						if (SelectedBus.BusRouteData.Cost > UserInputMaxRouteLength)
 						{
-							MinRouteLength = RouteLength;
-							FoundedShortestRoute.Path.clear();
-							FoundedShortestRoute.Path.assign(ShortestRoute.begin()->Path.begin(), ShortestRoute.begin()->Path.end());
-							FoundedShortestRoute.Cost = RouteLength;
-							ExistRoute = RouteDataIter;
+							printf("Current Route's Length is longer than User Input max Route Length\n");
+							continue;
 						}
 					}
 				}
-			}
-			/* SelectedBus.BusRouteData.Cost vs Shortest Cost include exist route */
-			if ((FoundedShortestRoute.Cost < SelectedBus.BusRouteData.Cost) && FoundedShortestRoute.Cost != 0)// || FoundedShortestRoute.Cost >= INFINITY) /* Find Lesat Cost Path */
-			{
-				bool MaxLengthCheckFlag = false;
-				for (auto &RouteIter : RouteDataList)
+				if (bAllRailStationHaveRoute == false)
 				{
-					if (RouteIter.Path.begin()->Num == ExistRoute.Path.begin()->Num)
+					bool StationCheckFlag = true;
+					if (RailStationSelected.find(SelectedRailNode.Num)->second == false)
+						RailStationSelected[SelectedRailNode.Num] = true;
+					for (const auto& StationSelectedCheck : RailStationSelected)
 					{
-						if ((static_cast<double>(RouteIter.Cost) + static_cast<double>(FoundedShortestRoute.Cost)) > UserInputMaxRouteLength)
+						if (StationSelectedCheck.second == false)
 						{
-							printf("Route %llu - %llu -%llu is too long\n", FoundedShortestRoute.Path.front().Num,
-								FoundedShortestRoute.Path.back().Num, RouteIter.Path.back().Num);
-							MaxLengthCheckFlag = true;
+							StationCheckFlag = false;
 							break;
 						}
-						RouteIter.Path.insert(RouteIter.Path.begin(), FoundedShortestRoute.Path.begin(), FoundedShortestRoute.Path.end()-1);
-						RouteIter.Cost += FoundedShortestRoute.Cost;
 					}
-				}
-				if (MaxLengthCheckFlag)
-					continue;
-			}
-			else
-			{
-				if (SelectedBus.BusRouteData.Cost > UserInputMaxRouteLength)
-				{
-					printf("Route from %llu to %llu is too long(Length: %f)\n", SelectedBus.BusRouteData.Path.front().Num,
-						SelectedBus.BusRouteData.Path.back().Num, SelectedBus.BusRouteData.Cost);
-					continue;
+					if (StationCheckFlag)
+						bAllRailStationHaveRoute = true;
 				}
 				++BusRouteNum; //k = k+1
 				ShortestPathData RoutePathData;
@@ -123,22 +63,99 @@ Chromosome::Chromosome(const vector<NodeData>& RailNode, const vector<NodeData>&
 				RoutePathData.Cost = SelectedBus.BusRouteData.Cost;
 				RouteDataList.emplace_back(RoutePathData);
 			}
-
-		}
-
-		/*Delete Selecte Bus Nodes*/
-		bool break_flag = false;
-		uint64_t SelectedBusNodeNum = SelectedBus.BusRouteData.Path.at(0).Num;
-		for (vector<NodeData>::const_iterator NodeIter = CopiedBusNode.begin(); NodeIter != CopiedBusNode.end();) //B' = \i
-		{
-			if (NodeIter->Num == SelectedBusNodeNum)
-			{
-				CopiedBusNode.erase(NodeIter);
-				break;
-			}
 			else
 			{
-				++NodeIter;
+				ShortestPathData FoundedShortestRoute;
+				ShortestPathData ExistRoute;
+				float MinRouteLength = INFINITY;
+				for (auto RouteDataIter : RouteDataList)
+				{
+#if DEBUG_MODE
+					printf("Rail Node Num: %llu\n", RouteDataIter.Path.at(RouteDataIter.Path.size() - 1).Num);
+#endif
+					if (RouteDataIter.Path.at(RouteDataIter.Path.size() - 1).Num == SelectedRailNode.Num) //Current Selected Rail Node Routes...
+					{
+						float RouteLength = 0;
+						vector<NodeData> InputGraph;
+						vector<ShortestPathData> ShortestRoute;
+						InputGraph.assign(CopiedBusNode.begin(), CopiedBusNode.end());
+						//InputGraph.assign(CopiedBusNode.begin(), CopiedBusNode.end());
+						InputGraph.emplace_back(RouteDataIter.Path.at(0));
+						PathFinderData ShortestPathData(InputGraph, SelectedBus.SelectedBusNode.Num, RouteDataIter.Path.begin()->Num, EPathFinderCostType::Length, 1);
+						if (Util::PathFinder::FindShortestPath(ShortestPathData, ShortestRoute) != 0)
+						{
+							RouteLength = ShortestRoute.at(0).Cost;
+							if (RouteLength <= MinRouteLength)
+							{
+								MinRouteLength = RouteLength;
+								FoundedShortestRoute.Path.clear();
+								FoundedShortestRoute.Path.assign(ShortestRoute.begin()->Path.begin(), ShortestRoute.begin()->Path.end());
+								FoundedShortestRoute.Cost = RouteLength;
+								ExistRoute = RouteDataIter;
+							}
+						}
+					}
+				}
+				/* SelectedBus.BusRouteData.Cost vs Shortest Cost include exist route */
+				if ((FoundedShortestRoute.Cost < SelectedBus.BusRouteData.Cost) && FoundedShortestRoute.Cost != 0)// || FoundedShortestRoute.Cost >= INFINITY) /* Find Lesat Cost Path */
+				{
+					bool MaxLengthCheckFlag = false;
+					for (auto& RouteIter : RouteDataList)
+					{
+						if (RouteIter.Path.begin()->Num == ExistRoute.Path.begin()->Num)
+						{
+							if (DataCenterInstance->GetUserInputData().PopulationGenerationMethod == 1)
+							{
+								if ((static_cast<double>(RouteIter.Cost) + static_cast<double>(FoundedShortestRoute.Cost)) > UserInputMaxRouteLength)
+								{
+									printf("Route %llu - %llu -%llu is too long(%f)\n", FoundedShortestRoute.Path.front().Num,
+										FoundedShortestRoute.Path.back().Num, RouteIter.Path.back().Num,
+										(static_cast<double>(RouteIter.Cost) + static_cast<double>(FoundedShortestRoute.Cost)));
+									MaxLengthCheckFlag = true;
+									break;
+								}
+							}
+							RouteIter.Path.insert(RouteIter.Path.begin(), FoundedShortestRoute.Path.begin(), FoundedShortestRoute.Path.end() - 1);
+							RouteIter.Cost += FoundedShortestRoute.Cost;
+						}
+					}
+					if (MaxLengthCheckFlag)
+						continue;
+				}
+				else
+				{
+					if (DataCenterInstance->GetUserInputData().PopulationGenerationMethod == 1)
+					{
+						if (SelectedBus.BusRouteData.Cost > UserInputMaxRouteLength)
+						{
+							printf("Route from %llu to %llu is too long(Length: %f)\n", SelectedBus.BusRouteData.Path.front().Num,
+								SelectedBus.BusRouteData.Path.back().Num, SelectedBus.BusRouteData.Cost);
+							continue;
+						}
+					}
+					++BusRouteNum; //k = k+1
+					ShortestPathData RoutePathData;
+					RoutePathData.Path.assign(SelectedBus.BusRouteData.Path.begin(), SelectedBus.BusRouteData.Path.end());
+					RoutePathData.Cost = SelectedBus.BusRouteData.Cost;
+					RouteDataList.emplace_back(RoutePathData);
+				}
+
+			}
+
+			/*Delete Selecte Bus Nodes*/
+			bool break_flag = false;
+			uint64_t SelectedBusNodeNum = SelectedBus.BusRouteData.Path.at(0).Num;
+			for (vector<NodeData>::const_iterator NodeIter = CopiedBusNode.begin(); NodeIter != CopiedBusNode.end();) //B' = \i
+			{
+				if (NodeIter->Num == SelectedBusNodeNum)
+				{
+					CopiedBusNode.erase(NodeIter);
+					break;
+				}
+				else
+				{
+					++NodeIter;
+				}
 			}
 		}
 	}

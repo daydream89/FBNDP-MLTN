@@ -299,6 +299,10 @@ void DataCenter::SetUserInputData(const FileDataList& InData)
 				UserInput.TownBusRoutes.emplace_back(stoull(RowData.at(i + 2)));
 			}
 		}
+		else if (Name == "populationgenerationmethod")
+		{
+			UserInput.PopulationGenerationMethod = static_cast<uint64_t>(stoul(Value));
+		}
 	}
 }
 
