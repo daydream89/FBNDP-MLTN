@@ -18,6 +18,7 @@ class FitnessCalculator
 {
 public:
 	FitnessCalculator(int InChromosomeIndex, uint64_t PathNum);
+	FitnessCalculator(const vector<uint64_t>& InPathList, const vector<uint64_t>& InBusStopList);
 
 	FitnessResultData Calculate();	// returns result of Fitness Function
 

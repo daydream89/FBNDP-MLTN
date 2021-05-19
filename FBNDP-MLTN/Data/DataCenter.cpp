@@ -148,9 +148,9 @@ void DataCenter::SetUserInputData(const FileDataList& InData)
 
 		if (Name == "programmode")
 		{
-			if (Value == "GA" || Value == "GenericAlgorithm")
+			if (Value == "ga" || Value == "genericalgorithm")
 				UserInput.ProgramMode = eProgramMode::GenericAlgorithm;
-			else if (Value == "FC" || Value == "FitnessCalculator")
+			else if (Value == "fc" || Value == "fitnesscalculator")
 				UserInput.ProgramMode = eProgramMode::FitnessCalculator;
 		}
 		else if (Name == "passagetimediff")
@@ -294,9 +294,9 @@ void DataCenter::SetUserInputData(const FileDataList& InData)
 		}
 		else if (Name == "townbusroutes")
 		{
-			for (uint64_t i = 0; i < stoull(Value); ++i)
+			for (uint64_t i = 0; i < RowData.size() - 1; ++i)
 			{
-				UserInput.TownBusRoutes.emplace_back(stoull(RowData.at(i + 2)));
+				UserInput.TownBusRoutes.emplace_back(stoull(RowData.at(i + 1)));
 			}
 		}
 		else if (Name == "populationgenerationmethod")

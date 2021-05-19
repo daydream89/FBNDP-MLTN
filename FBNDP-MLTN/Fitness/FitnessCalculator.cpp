@@ -30,6 +30,68 @@ FitnessCalculator::FitnessCalculator(int InChromosomeIndex, uint64_t PathNum)
 	}
 }
 
+FitnessCalculator::FitnessCalculator(const vector<uint64_t>& InPathList, const vector<uint64_t>& InBusStopList)
+{
+	vector<ShortestPathData> PathDataList;
+	if (auto DataCenterInstance = DataCenter::GetInstance())
+	{
+		int i = 0;
+		// Make ShortestPathData.Path
+		while (i < InPathList.size())
+		{
+			ShortestPathData PathData;
+			for (; i < InPathList.size(); ++i)
+			{
+				auto Node = Util::PathFinder::GetNodeData(InPathList.at(i), DataCenterInstance->GetNodeData());
+				if (Node.Type == NodeType::Station)
+				{
+					PathData.Path.emplace_back(Node);
+					PathDataList.emplace_back(PathData);
+					++i;
+					break;
+				}
+				else
+					PathData.Path.emplace_back(Node);
+			}
+		}
+
+		// Make ShortestPathData.TownBusData.TownBusStopCheck
+		for (auto& PathData : PathDataList)
+		{
+			for (auto& Node : PathData.Path)
+			{
+				bool bBusStop = false;
+				if (Node.Type == NodeType::Station)
+					bBusStop = true;
+				else
+				{
+					for (auto& BusStop : InBusStopList)
+					{
+						if (BusStop == Node.Num)
+						{
+							bBusStop = true;
+							break;
+						}
+					}
+				}
+
+				PathData.TownBusData.TownBusStopCheck.emplace_back(make_pair(Node, bBusStop));
+			}
+		}
+		DataCenterInstance->AddTownBusRouteData(PathDataList);
+
+		SetGraphData(PathDataList);
+		SetLinkDataList(PathDataList, DataCenterInstance->GetLinkData());
+
+		RouteDataMap = DataCenterInstance->GetRouteData();
+		AddLinkDataFromDefaultRouteData(RouteDataMap, DataCenterInstance->GetOperatingData());
+		AddGraphDataToRouteDataMap(PathDataList);
+
+		AddRouteDataMapToGraphData(DataCenterInstance->GetRouteData(), DataCenterInstance->GetNodeData());
+		AddRouteDataMapToLinkData(RouteDataMap, DataCenterInstance->GetLinkData());
+	}
+}
+
 FitnessResultData FitnessCalculator::Calculate()
 {
 	ResultData.ObjectFunctionValue = PassageAssignment();

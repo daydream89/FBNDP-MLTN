@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
 		if (UserInput.ProgramMode == eProgramMode::FitnessCalculator)
 		{
 			// 적합도 계산만 하는 모드.
-			FitnessCalculator Fitness(0, 2);
+			FitnessCalculator Fitness(UserInput.TownBusRoutes, UserInput.TownBusNodesNum);
 			FitnessResultData ChromosomeFitnessResult = Fitness.Calculate();
 
 			Writer.WriteCSVFile(0, 0, DataCenter->GetShortestPathDataList());
